@@ -3,11 +3,25 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "turbo build",
     "dev": "turbo dev",
+    "dev:humayro": "turbo dev --filter=humayro",
+    "dev:parking-avto": "turbo dev --filter=parking-avto",
+    "dev:stadion24": "turbo dev --filter=stadion24",
+    "dev:wending": "turbo dev --filter=wending",
+    "build": "turbo build",
+    "build:humayro": "turbo build --filter=humayro",
+    "build:parking-avto": "turbo build --filter=parking-avto",
+    "build:stadion24": "turbo build --filter=stadion24",
+    "build:wending": "turbo build --filter=wending",
     "lint": "turbo lint",
-    "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "lint:humayro": "turbo lint --filter=humayro",
+    "lint:parking-avto": "turbo lint --filter=parking-avto",
+    "lint:stadion24": "turbo lint --filter=stadion24",
+    "typecheck": "turbo typecheck",
+    "typecheck:humayro": "turbo typecheck --filter=humayro",
+    "typecheck:parking-avto": "turbo typecheck --filter=parking-avto",
+    "typecheck:stadion24": "turbo typecheck --filter=stadion24",
+    "typecheck:wending": "turbo typecheck --filter=wending"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
