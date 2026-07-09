@@ -1,4 +1,4 @@
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@workspace/ui/components/animate-ui/primitives/buttons/button";
 
 export default function Page() {
   return (

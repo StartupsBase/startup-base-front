@@ -29,10 +29,14 @@
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.18",
-    "typescript": "^5"
+    "typescript": "^5",
+    "nx": "23.0.1"
   },
   "packageManager": "pnpm@10.33.4",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
   }
 }
