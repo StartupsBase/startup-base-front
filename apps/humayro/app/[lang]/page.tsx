@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation"
 
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { getTranslation } from "@/i18n/server"
 import { isLanguage } from "@/i18n/config"
-import { Button } from "@workspace/ui/components/animate-ui/primitives/buttons/button"
+import { getTranslation } from "@/i18n/server"
+import { Button } from "@workspace/ui/components/button"
 
 export default async function Page({
   params,

@@ -12,18 +12,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@hugeicons/core-free-icons": "^4.2.2",
     "@hugeicons/react": "^1.1.9",
     "@workspace/ui": "workspace:*",
+    "axios": "^1.18.1",
     "i18next": "^26.3.6",
+    "js-cookie": "^3.0.8",
     "next": "16.2.6",
-    "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-i18next": "^17.0.9"
+    "react-hook-form": "^7.81.0",
+    "react-i18next": "^17.0.9",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

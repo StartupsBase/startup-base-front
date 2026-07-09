@@ -1,18 +1,16 @@
-import { Figtree, Geist_Mono } from "next/font/google"
+import { Inter } from "next/font/google"
 import { notFound } from "next/navigation"
 
-import "@workspace/ui/globals.css"
-import "../theme.css"
 import { I18nProvider } from "@/components/i18n-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { isLanguage, languages } from "@/i18n/config"
+import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
+import "../theme.css"
 
-const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-sans",
 })
 
 export function generateStaticParams() {
@@ -36,7 +34,7 @@ export default async function RootLayout({
     <html
       lang={lang}
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", figtree.variable)}
+      className={cn("antialiased", inter.variable, "font-sans")}
     >
       <body>
         <ThemeProvider>

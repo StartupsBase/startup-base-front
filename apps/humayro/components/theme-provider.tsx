@@ -1,41 +1,61 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
-function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      {...props}
-    >
-      <ThemeHotkey />
-      {children}
-    </NextThemesProvider>
-  )
+type Theme = "light" | "dark"
+
+const storageKey = "humayro-theme"
+
+function getSystemTheme(): Theme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
 }
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
+function getStoredTheme(): Theme | null {
+  const theme = window.localStorage.getItem(storageKey)
 
-  return (
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
-  )
+  return theme === "light" || theme === "dark" ? theme : null
 }
 
-function ThemeHotkey() {
-  const { resolvedTheme, setTheme } = useTheme()
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("dark", theme === "dark")
+  document.documentElement.style.colorScheme = theme
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const themeRef = React.useRef<Theme>("light")
+
+  const setTheme = React.useCallback((nextTheme: Theme) => {
+    window.localStorage.setItem(storageKey, nextTheme)
+    applyTheme(nextTheme)
+    themeRef.current = nextTheme
+  }, [])
+
+  React.useEffect(() => {
+    const initialTheme = getStoredTheme() ?? getSystemTheme()
+
+    applyTheme(initialTheme)
+    themeRef.current = initialTheme
+  }, [])
+
+  React.useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+
+    function onSystemThemeChange() {
+      if (getStoredTheme()) {
+        return
+      }
+
+      const nextTheme = getSystemTheme()
+      applyTheme(nextTheme)
+      themeRef.current = nextTheme
+    }
+
+    media.addEventListener("change", onSystemThemeChange)
+
+    return () => {
+      media.removeEventListener("change", onSystemThemeChange)
+    }
+  }, [])
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -55,7 +75,7 @@ function ThemeHotkey() {
         return
       }
 
-      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+      setTheme(themeRef.current === "dark" ? "light" : "dark")
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -63,9 +83,22 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [resolvedTheme, setTheme])
+  }, [setTheme])
 
-  return null
+  return children
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  return (
+    target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT"
+  )
 }
 
 export { ThemeProvider }
