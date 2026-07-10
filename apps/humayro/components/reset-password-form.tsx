@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 import { useResetPassword } from "@/lib/api"
 import { clearAuthToken } from "@/lib/auth-client"
 import { Input } from "@/components/input"
+import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 
@@ -50,6 +51,8 @@ export function ResetPasswordForm({
       confirmPassword: "",
     },
   })
+  const newPassword = form.watch("newPassword")
+  const confirmPassword = form.watch("confirmPassword")
 
   async function onSubmit({ phone, code, newPassword }: FormValues) {
     try {
@@ -93,7 +96,7 @@ export function ResetPasswordForm({
       ) : null}
       <label className="block space-y-2">
         <span className="text-sm font-medium">{t("passwordRecovery.newPasswordLabel")}</span>
-        <Input type="password" autoComplete="new-password" {...form.register("newPassword")} />
+        <PasswordInput valid={newPassword.length >= 6} autoComplete="new-password" {...form.register("newPassword")} />
       </label>
       {form.formState.errors.newPassword?.message ? (
         <p className="text-sm text-destructive">
@@ -102,7 +105,7 @@ export function ResetPasswordForm({
       ) : null}
       <label className="block space-y-2">
         <span className="text-sm font-medium">{t("passwordRecovery.confirmPasswordLabel")}</span>
-        <Input type="password" autoComplete="new-password" {...form.register("confirmPassword")} />
+        <PasswordInput valid={confirmPassword.length >= 6 && confirmPassword === newPassword} autoComplete="new-password" {...form.register("confirmPassword")} />
       </label>
       {form.formState.errors.confirmPassword?.message ? (
         <p className="text-sm text-destructive">

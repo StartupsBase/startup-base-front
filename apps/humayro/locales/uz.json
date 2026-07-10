@@ -170,6 +170,34 @@
       "selected": "Tanlangan manzil",
       "locating": "Manzil aniqlanmoqda...",
       "useAddress": "Ushbu manzilni ishlatish"
+    },
+    "category": {
+      "title": "Kategoriyalar",
+      "backToOrganizations": "Tashkilotlarga qaytish",
+      "new": "Kategoriya qo'shish",
+      "edit": "Kategoriyani tahrirlash",
+      "createDescription": "Kategoriya ma'lumotlarini to'ldiring.",
+      "name": "Kategoriya nomi",
+      "description": "Tavsif",
+      "sizeType": "O'lcham turi",
+      "letter": "Harflar",
+      "number": "Raqamlar",
+      "parent": "Asosiy kategoriya",
+      "root": "Asosiy kategoriya yo'q",
+      "image": "Kategoriya rasmi",
+      "status": "Holati",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "create": "Kategoriya yaratish",
+      "save": "Kategoriyani saqlash",
+      "delete": "Kategoriyani o'chirish",
+      "deleteConfirm": "Kategoriya va uning rasmi o'chirilsinmi?",
+      "loading": "Kategoriyalar yuklanmoqda...",
+      "loadFailed": "Kategoriyalarni yuklab bo'lmadi.",
+      "search": "Kategoriyalarni qidirish...",
+      "empty": "Kategoriyalar topilmadi.",
+      "deleteFailed": "Kategoriyani o'chirib bo'lmadi.",
+      "imageReferenceMissing": "Bu kategoriya rasmining attachment IDsi mavjud emas. Kategoriyani o'chirishdan oldin rasm attachment IDsi backenddan qaytishi kerak."
     }
   }
 }

@@ -12,6 +12,7 @@ import { useRegister } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
+import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 
@@ -56,6 +57,8 @@ export function RegisterForm({ language }: { language: string }) {
       confirmPassword: "",
     },
   })
+  const password = form.watch("password")
+  const confirmPassword = form.watch("confirmPassword")
 
   async function onSubmit(values: FormValues) {
     try {
@@ -116,10 +119,10 @@ export function RegisterForm({ language }: { language: string }) {
         </select>
       </Field>
       <Field label={t("register.password")} error={form.formState.errors.password?.message}>
-        <Input type="password" autoComplete="new-password" {...form.register("password")} />
+        <PasswordInput valid={password.length >= 6} autoComplete="new-password" {...form.register("password")} />
       </Field>
       <Field label={t("register.confirmPassword")} error={form.formState.errors.confirmPassword?.message}>
-        <Input type="password" autoComplete="new-password" {...form.register("confirmPassword")} />
+        <PasswordInput valid={confirmPassword.length >= 6 && confirmPassword === password} autoComplete="new-password" {...form.register("confirmPassword")} />
       </Field>
       {form.formState.errors.root?.message ? (
         <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">

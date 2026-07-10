@@ -11,6 +11,7 @@ import { useGetAll5 as useOrganizations } from "@/lib/api/generated/admin-organi
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
+import { PasswordInput } from "@/components/forms/password-input"
 
 const schema = z.object({
   firstname: z.string().min(1), lastname: z.string().min(1), email: z.string().email(),
@@ -26,6 +27,7 @@ export function UserCreateForm({ onComplete }: { onComplete: () => void }) {
   const organizations = useOrganizations()
   const queryClient = useQueryClient()
   const form = useForm<Inputs, unknown, Values>({ resolver: zodResolver(schema), defaultValues: { firstname: "", lastname: "", email: "", password: "", phone: "+998", age: 0, gender: "MALE" } })
+  const password = form.watch("password")
   async function submit(values: Values) {
     await createUser.mutateAsync({ data: values })
     await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
@@ -34,7 +36,7 @@ export function UserCreateForm({ onComplete }: { onComplete: () => void }) {
   return <form className="grid gap-3" onSubmit={form.handleSubmit(submit)}>
     <div className="grid grid-cols-2 gap-3"><Input placeholder="First name" {...form.register("firstname")} /><Input placeholder="Last name" {...form.register("lastname")} /></div>
     <Input type="email" placeholder="Email" {...form.register("email")} />
-    <Input type="password" placeholder="Password" {...form.register("password")} />
+    <PasswordInput valid={password.length >= 6} placeholder="Password" {...form.register("password")} />
     <Controller control={form.control} name="phone" render={({ field }) => <PhoneInput value={field.value} onChange={field.onChange} />} />
     <div className="grid grid-cols-2 gap-3"><Input type="number" min="0" placeholder="Age" {...form.register("age")} /><select className="rounded-4xl border border-input bg-input/30 px-3 text-sm" {...form.register("gender")}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
     <select className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm" {...form.register("organizationId")}><option value="">No organization</option>{organizations.data?.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}</select>

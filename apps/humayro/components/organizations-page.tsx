@@ -165,7 +165,17 @@ export function OrganizationsPage({ language }: { language: string }) {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("organization.name")} />
         ),
-        cell: ({ row }) => row.getValue<string>("name") || "—",
+        cell: ({ row }) =>
+          row.original.id === undefined ? (
+            row.getValue<string>("name") || "—"
+          ) : (
+            <Link
+              href={`/${language}/dashboard/organizations/${row.original.id}`}
+              className="font-medium text-primary hover:underline"
+            >
+              {row.getValue<string>("name") || "—"}
+            </Link>
+          ),
       },
       {
         id: "contact",
@@ -209,52 +219,7 @@ export function OrganizationsPage({ language }: { language: string }) {
   }
 
   return (
-    <TooltipProvider>
-      <SidebarProvider>
-        <Sidebar collapsible="icon" variant="inset">
-          <SidebarHeader>
-            <Link
-              href={`/${language}`}
-              aria-label="Humayro"
-              className="flex items-center gap-3 px-2 py-2 font-semibold group-data-[collapsible=icon]:justify-center"
-            >
-              <Logo className="size-8 text-primary transition-all group-data-[collapsible=icon]:size-6" />
-              <span className="group-data-[collapsible=icon]:hidden">Humayro</span>
-            </Link>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>{t("dashboard.navigation")}</SidebarGroupLabel>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={t("dashboard.title")}>
-                    <Link href={`/${language}/dashboard`}>
-                      <HugeiconsIcon icon={Home01Icon} strokeWidth={2} />
-                      <span>{t("dashboard.title")}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive tooltip={t("dashboard.organizations")}>
-                    <Link href={`/${language}/dashboard/organizations`}>
-                      <span>{t("dashboard.organizations")}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <p className="truncate px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-              {userName || meQuery.data?.email || t("dashboard.loadingAccount")}
-            </p>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              {t("dashboard.signOut")}
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
             <header className="flex items-center justify-between border-b border-border pb-6">
               <div>
                 <SidebarTrigger className="mb-3" />
@@ -301,10 +266,7 @@ export function OrganizationsPage({ language }: { language: string }) {
                 />
               )}
             </section>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
+    </div>
   )
 }
 
