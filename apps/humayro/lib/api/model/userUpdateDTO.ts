@@ -13,4 +13,5 @@ export interface UserUpdateDTO {
   phone?: string;
   age?: number;
   gender?: UserUpdateDTOGender;
+  organizationId?: number;
 }

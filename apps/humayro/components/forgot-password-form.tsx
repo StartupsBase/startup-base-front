@@ -2,14 +2,14 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 
 import { useForgotPassword } from "@/lib/api"
-import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 
 type FormValues = { phone: string }
 
@@ -40,11 +40,12 @@ export function ForgotPasswordForm({ language }: { language: string }) {
     <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
       <label className="block space-y-2">
         <span className="text-sm font-medium">{t("passwordRecovery.phoneLabel")}</span>
-        <Input
-          type="tel"
-          autoComplete="tel"
-          placeholder="+998901234567"
-          {...form.register("phone")}
+        <Controller
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <PhoneInput value={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} />
+          )}
         />
       </label>
       {form.formState.errors.phone?.message ? (

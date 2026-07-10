@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
@@ -13,12 +13,14 @@ import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 
 type FormValues = {
   firstname: string
   lastname: string
   email: string
   phone: string
+  gender: "" | "MALE" | "FEMALE"
   password: string
   confirmPassword: string
 }
@@ -34,6 +36,7 @@ export function RegisterForm({ language }: { language: string }) {
       lastname: z.string().min(1, t("register.errors.lastname")),
       email: z.string().email(t("register.errors.email")),
       phone: z.string().regex(/^\+998\d{9}$/, t("register.errors.phone")),
+      gender: z.enum(["", "MALE", "FEMALE"]),
       password: z.string().min(6, t("register.errors.password")),
       confirmPassword: z.string(),
     })
@@ -48,6 +51,7 @@ export function RegisterForm({ language }: { language: string }) {
       lastname: "",
       email: "",
       phone: "+998",
+      gender: "",
       password: "",
       confirmPassword: "",
     },
@@ -62,6 +66,7 @@ export function RegisterForm({ language }: { language: string }) {
           email: values.email,
           phone: values.phone,
           password: values.password,
+          ...(values.gender ? { gender: values.gender } : {}),
         },
       })
 
@@ -92,7 +97,23 @@ export function RegisterForm({ language }: { language: string }) {
         <Input type="email" autoComplete="email" {...form.register("email")} />
       </Field>
       <Field label={t("register.phone")} error={form.formState.errors.phone?.message}>
-        <Input type="tel" autoComplete="tel" placeholder="+998901234567" {...form.register("phone")} />
+        <Controller
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <PhoneInput value={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} />
+          )}
+        />
+      </Field>
+      <Field label={t("register.gender")}>
+        <select
+          className="flex h-11 w-full rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          {...form.register("gender")}
+        >
+          <option value="">{t("register.genderUnspecified")}</option>
+          <option value="MALE">{t("register.male")}</option>
+          <option value="FEMALE">{t("register.female")}</option>
+        </select>
       </Field>
       <Field label={t("register.password")} error={form.formState.errors.password?.message}>
         <Input type="password" autoComplete="new-password" {...form.register("password")} />

@@ -17,5 +17,7 @@ export interface UserDTO {
   age?: number;
   gender?: UserDTOGender;
   photo?: AttachmentDTO;
+  organizationId?: number;
+  organizationName?: string;
   roles?: string[];
 }

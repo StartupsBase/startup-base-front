@@ -14,6 +14,8 @@ export interface ProductDTO {
   description?: string;
   categoryId?: number;
   categoryName?: string;
+  organizationId?: number;
+  organizationName?: string;
   basePrice?: number;
   discountPercent?: number;
   discountedPrice?: number;

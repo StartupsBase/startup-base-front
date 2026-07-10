@@ -1,6 +1,7 @@
 import { M_PLUS_Rounded_1c } from "next/font/google"
 import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
+import "leaflet/dist/leaflet.css"
 
 import { I18nProvider } from "@/components/i18n-provider"
 import { QueryProvider } from "@/components/query-provider"

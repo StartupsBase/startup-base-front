@@ -66,12 +66,18 @@ export function UserDropdown({ language }: { language: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="max-w-52 justify-start truncate">
+        <Button variant="outline" size="sm" className="h-8 max-w-44 justify-start gap-2 px-2 text-xs truncate">
+          {currentUser.photo?.s3Url ? (
+            <img src={currentUser.photo.s3Url} alt="" className="size-5 rounded-full object-cover" />
+          ) : null}
           {name || contact || t("home.account")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className="w-56 shadow-none">
         <DropdownMenuLabel className="space-y-1 px-3 py-2">
+          {currentUser.photo?.s3Url ? (
+            <img src={currentUser.photo.s3Url} alt="" className="mb-2 size-10 rounded-full object-cover" />
+          ) : null}
           <p className="truncate font-medium">{name || t("home.account")}</p>
           {contact ? <p className="truncate text-xs font-normal text-muted-foreground">{contact}</p> : null}
         </DropdownMenuLabel>
@@ -79,7 +85,12 @@ export function UserDropdown({ language }: { language: string }) {
         <DropdownMenuItem asChild>
           <Link href={`/${language}/dashboard`}>{t("home.dashboardAction")}</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={signOut}>{t("home.signOut")}</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={signOut}
+          className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+        >
+          {t("home.signOut")}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

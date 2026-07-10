@@ -15,3 +15,4 @@ export * from './generated/review/review';
 export * from './generated/size/size';
 export * from './generated/user-controller/user-controller';
 export * from './model';
+export * from './generated/admin-organization/admin-organization';

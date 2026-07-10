@@ -5,15 +5,17 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { CategoryUpdateDTOSizeType } from './categoryUpdateDTOSizeType';
 
-export interface CategoryUpdateDTO {
+export interface OrganizationUpdateDTO {
   /** @minLength 1 */
   name: string;
   description?: string;
-  sizeType: CategoryUpdateDTOSizeType;
-  organizationId?: number;
-  parentId?: number;
-  imageId?: number;
+  contactPerson?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  /** @pattern ^[0-9]{9,14}$ */
+  inn?: string;
+  address?: string;
+  logoId?: number;
   active?: boolean;
 }

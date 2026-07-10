@@ -13,6 +13,7 @@ export interface ProductCreateDTO {
   name: string;
   description?: string;
   categoryId: number;
+  organizationId?: number;
   basePrice: number;
   /**
      * @minimum 0

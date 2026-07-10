@@ -26,4 +26,5 @@ export interface UserCreateDTO {
   phone: string;
   age?: number;
   gender?: UserCreateDTOGender;
+  organizationId?: number;
 }

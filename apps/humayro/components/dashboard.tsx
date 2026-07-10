@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
@@ -8,11 +8,24 @@ import { useTranslation } from "react-i18next"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-import { type UserDTO, useGetAll5, useMe1 } from "@/lib/api"
+import { type UserDTO, useDelete, useMe1, useUpdate, useUploadPhoto } from "@/lib/api"
+import { getGetAll6QueryKey, useGetAll6 } from "@/lib/api/generated/admin-user/admin-user"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Logo } from "@/components/logo"
+import { UserCreateForm } from "@/components/user-create-form"
 import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover"
 import {
   DataTable,
   DataTableColumnHeader,
@@ -53,7 +66,7 @@ export function Dashboard({ language }: { language: string }) {
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { retry: false } })
-  const usersQuery = useGetAll5({
+  const usersQuery = useGetAll6({
     query: { enabled: meQuery.isSuccess, retry: false },
   })
 
@@ -80,6 +93,9 @@ export function Dashboard({ language }: { language: string }) {
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
     .join(" ")
+  const canManageOrganizations = meQuery.data?.roles?.some((role) =>
+    role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
+  )
   const columns = useMemo<ColumnDef<UserDTO>[]>(
     () => [
       {
@@ -89,7 +105,18 @@ export function Dashboard({ language }: { language: string }) {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.name")} />
         ),
-        cell: ({ row }) => row.getValue<string>("name") || "—",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            {row.original.photo?.s3Url ? (
+              <img src={row.original.photo.s3Url} alt="" className="size-9 rounded-full object-cover" />
+            ) : (
+              <span className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                {(row.getValue<string>("name") || "?").slice(0, 1)}
+              </span>
+            )}
+            <span>{row.getValue<string>("name") || "—"}</span>
+          </div>
+        ),
       },
       {
         accessorKey: "email",
@@ -113,6 +140,11 @@ export function Dashboard({ language }: { language: string }) {
         ),
         cell: ({ row }) =>
           row.getValue<string>("roles") || t("dashboard.customer"),
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => <UserActions user={row.original} />,
       },
     ],
     [t]
@@ -145,6 +177,17 @@ export function Dashboard({ language }: { language: string }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
+              {canManageOrganizations ? (
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip={t("dashboard.organizations")}>
+                      <Link href={`/${language}/dashboard/organizations`}>
+                        <span>{t("dashboard.organizations")}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              ) : null}
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
@@ -166,6 +209,13 @@ export function Dashboard({ language }: { language: string }) {
               {t("dashboard.title")}
             </h1>
           </div>
+          <Dialog>
+            <DialogTrigger asChild><Button>{t("dashboard.addUser")}</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{t("dashboard.addUser")}</DialogTitle><DialogDescription>{t("dashboard.addUserDescription")}</DialogDescription></DialogHeader>
+              <UserCreateForm onComplete={() => {}} />
+            </DialogContent>
+          </Dialog>
         </header>
 
         <section className="py-8">
@@ -210,5 +260,82 @@ export function Dashboard({ language }: { language: string }) {
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
+  )
+}
+
+function UserActions({ user }: { user: UserDTO }) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const updateUser = useUpdate()
+  const deleteUser = useDelete()
+  const uploadPhoto = useUploadPhoto()
+  const [open, setOpen] = useState(false)
+  const [firstname, setFirstname] = useState(user.firstname ?? "")
+  const [lastname, setLastname] = useState(user.lastname ?? "")
+  const [phone, setPhone] = useState(user.phone ?? "")
+  const [gender, setGender] = useState<"" | "MALE" | "FEMALE">(user.gender ?? "")
+  const [file, setFile] = useState<File | null>(null)
+
+  async function save() {
+    if (user.id === undefined) return
+    await updateUser.mutateAsync({
+      id: user.id,
+      data: { firstname, lastname, phone, ...(gender ? { gender } : {}) },
+    })
+    if (file) {
+      await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
+    }
+    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+    setOpen(false)
+  }
+
+  async function remove() {
+    if (user.id === undefined) return
+    await deleteUser.mutateAsync({ id: user.id })
+    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+  }
+
+  return (
+    <div className="flex justify-end gap-2">
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        {t("dashboard.edit")}
+      </Button>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="destructive" size="sm">{t("dashboard.delete")}</Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-64">
+          <p className="text-sm">{t("dashboard.deleteConfirm")}</p>
+          <Button variant="destructive" size="sm" disabled={deleteUser.isPending} onClick={remove}>
+            {t("dashboard.delete")}
+          </Button>
+        </PopoverContent>
+      </Popover>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.editUser")}</DialogTitle>
+            <DialogDescription>{user.email}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <Input value={firstname} onChange={(event) => setFirstname(event.target.value)} placeholder={t("register.firstname")} />
+            <Input value={lastname} onChange={(event) => setLastname(event.target.value)} placeholder={t("register.lastname")} />
+            <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={t("register.phone")} />
+            <select value={gender} onChange={(event) => setGender(event.target.value as "" | "MALE" | "FEMALE")} className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm">
+              <option value="">{t("register.genderUnspecified")}</option>
+              <option value="MALE">{t("register.male")}</option>
+              <option value="FEMALE">{t("register.female")}</option>
+            </select>
+            <label className="text-sm font-medium">
+              {t("dashboard.profilePhoto")}
+              <Input type="file" accept="image/*" className="mt-2" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+            </label>
+          </div>
+          <DialogFooter>
+            <Button onClick={save} disabled={updateUser.isPending}>{t("dashboard.save")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

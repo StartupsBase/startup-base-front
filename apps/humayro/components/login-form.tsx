@@ -13,6 +13,7 @@ import { useLogin } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
+import { GoogleLoginButton } from "@/components/google-login-button"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
@@ -260,6 +261,12 @@ function LoginForm() {
             ? t("login.submitting")
             : t("login.submit")}
         </Button>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          {t("login.orContinue")}
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <GoogleLoginButton />
         <p className="text-center text-sm text-muted-foreground">
           {t("login.noAccount")} {" "}
           <Link

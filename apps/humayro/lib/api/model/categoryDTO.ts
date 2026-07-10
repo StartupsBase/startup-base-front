@@ -13,6 +13,10 @@ export interface CategoryDTO {
   description?: string;
   sizeType?: CategoryDTOSizeType;
   imageUrl?: string;
+  organizationId?: number;
+  organizationName?: string;
+  parentId?: number;
+  parentName?: string;
   active?: boolean;
   productCount?: number;
 }

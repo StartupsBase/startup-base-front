@@ -4,8 +4,9 @@ import axios from "axios"
 import Cookies from "js-cookie"
 
 import { authTokenCookieName } from "@/lib/auth"
+import { getApiBaseUrl } from "@/lib/api-url"
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "https://swagger.humayro.uz"
+const baseURL = getApiBaseUrl()
 
 const http = axios.create({
   baseURL,
