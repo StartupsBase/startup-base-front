@@ -5,19 +5,11 @@ import { startTransition, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
-  isLanguage,
   languageFlags,
   languageLabels,
   languages,
-  type Language,
+  type Language
 } from "@/i18n/config"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,7 +88,7 @@ function LanguageSwitcher({
                 "dark:hover:bg-accent-dark hover:bg-accent",
                 "transition-colors duration-150",
                 language === lang
-                  ? "dark:text-primary-light bg-primary/10 text-primary dark:bg-primary/20"
+                  ? "dark:text-primary-li ght bg-primary/10 text-primary dark:bg-primary/20"
                   : "dark:text-foreground-dark text-foreground",
                 "dark:focus:bg-accent-dark dark:focus:text-primary-light focus:bg-accent focus:text-primary"
               )}

@@ -7,6 +7,9 @@
       "primaryAction": "Kiyimlarni ko'rish",
       "secondaryAction": "Hisob yaratish",
       "loginAction": "Kirish",
+      "account": "Hisob",
+      "dashboardAction": "Boshqaruv paneli",
+      "signOut": "Chiqish",
       "themeToDark": "Qorong'i mavzuni yoqish",
       "themeToLight": "Yorug' mavzuni yoqish",
       "featureOne": { "title": "Saralangan kolleksiyalar", "description": "O'zingizga mos uslubni toping." },
@@ -91,6 +94,7 @@
     },
     "dashboard": {
       "admin": "Humayro administratori",
+      "navigation": "Navigatsiya",
       "title": "Ro'yxatdan o'tgan foydalanuvchilar",
       "loadingAccount": "Hisob yuklanmoqda...",
       "signOut": "Chiqish",

@@ -107,7 +107,7 @@ function LoginForm() {
   const { t } = useTranslation()
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [method, setMethod] = React.useState<"email" | "phone">("email")
-  const setUser = useAuthStore((state) => state.setUser)
+  const setSession = useAuthStore((state) => state.setSession)
   const loginMutation = useLogin()
 
   const form = useForm<LoginFormInput, unknown, LoginFormValues>({
@@ -141,7 +141,7 @@ function LoginForm() {
       }
 
       saveAuthToken(token)
-      setUser(session.user ?? null)
+      setSession(session.user ?? null, emailOrPhone)
 
       const language = pathname.split("/")[1] ?? "ru"
       const nextPath = new URLSearchParams(window.location.search).get("next")

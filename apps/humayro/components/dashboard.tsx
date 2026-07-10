@@ -1,19 +1,38 @@
 "use client"
 
 import { useEffect, useMemo } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { Home01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 
 import { type UserDTO, useGetAll5, useMe1 } from "@/lib/api"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import { Logo } from "@/components/logo"
 import { Button } from "@workspace/ui/components/button"
 import {
   DataTable,
   DataTableColumnHeader,
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@workspace/ui/components/sidebar"
+import { TooltipProvider } from "@workspace/ui/components/tooltip"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -100,22 +119,52 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <main className="min-h-svh bg-background text-foreground">
-      <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+    <TooltipProvider>
+      <SidebarProvider>
+        <Sidebar collapsible="icon" variant="inset">
+          <SidebarHeader>
+            <Link
+              href={`/${language}`}
+              aria-label="Humayro"
+              className="flex items-center gap-3 px-2 py-2 font-semibold group-data-[collapsible=icon]:justify-center"
+            >
+              <Logo className="size-8 text-primary transition-all group-data-[collapsible=icon]:size-6" />
+              <span className="group-data-[collapsible=icon]:hidden">Humayro</span>
+            </Link>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>{t("dashboard.navigation")}</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive tooltip={t("dashboard.title")}>
+                    <Link href={`/${language}/dashboard`}>
+                      <HugeiconsIcon icon={Home01Icon} strokeWidth={2} />
+                      <span>{t("dashboard.title")}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter>
+            <p className="truncate px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+              {userName || meQuery.data?.email || t("dashboard.loadingAccount")}
+            </p>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              {t("dashboard.signOut")}
+            </Button>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
         <header className="flex items-center justify-between border-b border-border pb-6">
           <div>
+            <SidebarTrigger className="mb-3" />
             <p className="text-sm font-medium text-primary">{t("dashboard.admin")}</p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">
               {t("dashboard.title")}
             </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <p className="hidden text-sm text-muted-foreground sm:block">
-              {userName || meQuery.data?.email || t("dashboard.loadingAccount")}
-            </p>
-            <Button variant="outline" onClick={signOut}>
-              {t("dashboard.signOut")}
-            </Button>
           </div>
         </header>
 
@@ -157,7 +206,9 @@ export function Dashboard({ language }: { language: string }) {
             />
           )}
         </section>
-      </div>
-    </main>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   )
 }

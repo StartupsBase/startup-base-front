@@ -7,6 +7,9 @@
       "primaryAction": "Смотреть одежду",
       "secondaryAction": "Создать аккаунт",
       "loginAction": "Войти",
+      "account": "Аккаунт",
+      "dashboardAction": "Панель управления",
+      "signOut": "Выйти",
       "themeToDark": "Включить тёмную тему",
       "themeToLight": "Включить светлую тему",
       "featureOne": { "title": "Подобранные коллекции", "description": "Находите стиль, который подходит вам." },
@@ -91,6 +94,7 @@
     },
     "dashboard": {
       "admin": "Администратор Humayro",
+      "navigation": "Навигация",
       "title": "Зарегистрированные пользователи",
       "loadingAccount": "Загрузка аккаунта...",
       "signOut": "Выйти",

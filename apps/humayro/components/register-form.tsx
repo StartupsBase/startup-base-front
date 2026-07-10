@@ -27,7 +27,7 @@ export function RegisterForm({ language }: { language: string }) {
   const router = useRouter()
   const { t } = useTranslation()
   const registerMutation = useRegister()
-  const setUser = useAuthStore((state) => state.setUser)
+  const setSession = useAuthStore((state) => state.setSession)
   const schema = z
     .object({
       firstname: z.string().min(1, t("register.errors.firstname")),
@@ -70,7 +70,7 @@ export function RegisterForm({ language }: { language: string }) {
       }
 
       saveAuthToken(session.accessToken)
-      setUser(session.user ?? null)
+      setSession(session.user ?? null, values.email)
       router.replace(`/${language}`)
       router.refresh()
     } catch {

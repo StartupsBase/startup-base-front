@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { Logo } from "@/components/logo"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { LogoBrand } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserDropdown } from "@/components/user-dropdown"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { Button } from "@workspace/ui/components/button"
@@ -20,25 +22,17 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
     <main className="min-h-svh bg-background text-foreground">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
         <header className="flex items-center justify-between">
-          <Link
-            href={`/${lang}`}
-            aria-label="Humayro home"
-            className="flex items-center gap-3 text-lg font-bold tracking-tight"
-          >
-            <Logo className="size-10 text-primary" />
-            <span>Humayro</span>
-          </Link>
+          <LogoBrand />
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher language={lang} />
             <ThemeToggle />
-            <Button asChild variant="ghost">
-              <Link href={`/${lang}/login`}>{t("home.loginAction")}</Link>
-            </Button>
+            <UserDropdown language={lang} />
           </div>
         </header>
 
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
-          <p className="mb-6 text-sm font-semibold uppercase tracking-[0.24em] text-primary">
+          <p className="mb-6 text-sm font-semibold tracking-[0.24em] text-primary uppercase">
             {t("home.eyebrow")}
           </p>
           <h1 className="max-w-5xl text-5xl font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl">
@@ -53,7 +47,9 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="min-w-40">
-              <Link href={`/${lang}/register`}>{t("home.secondaryAction")}</Link>
+              <Link href={`/${lang}/register`}>
+                {t("home.secondaryAction")}
+              </Link>
             </Button>
           </div>
 
