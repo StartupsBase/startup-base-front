@@ -3,11 +3,18 @@
 import * as React from "react"
 
 type Theme = "light" | "dark"
+type ThemeContextValue = {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+}
 
 const storageKey = "humayro-theme"
+const ThemeContext = React.createContext<ThemeContextValue | null>(null)
 
 function getSystemTheme(): Theme {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light"
 }
 
 function getStoredTheme(): Theme | null {
@@ -23,11 +30,13 @@ function applyTheme(theme: Theme) {
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const themeRef = React.useRef<Theme>("light")
+  const [theme, setCurrentTheme] = React.useState<Theme>("light")
 
   const setTheme = React.useCallback((nextTheme: Theme) => {
     window.localStorage.setItem(storageKey, nextTheme)
     applyTheme(nextTheme)
     themeRef.current = nextTheme
+    setCurrentTheme(nextTheme)
   }, [])
 
   React.useEffect(() => {
@@ -35,6 +44,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     applyTheme(initialTheme)
     themeRef.current = initialTheme
+    setCurrentTheme(initialTheme)
   }, [])
 
   React.useEffect(() => {
@@ -48,6 +58,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
       const nextTheme = getSystemTheme()
       applyTheme(nextTheme)
       themeRef.current = nextTheme
+      setCurrentTheme(nextTheme)
     }
 
     media.addEventListener("change", onSystemThemeChange)
@@ -85,7 +96,9 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [setTheme])
 
-  return children
+  const value = React.useMemo(() => ({ theme, setTheme }), [setTheme, theme])
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 function isTypingTarget(target: EventTarget | null) {
@@ -101,4 +114,14 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
-export { ThemeProvider }
+function useTheme() {
+  const context = React.useContext(ThemeContext)
+
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider")
+  }
+
+  return context
+}
+
+export { ThemeProvider, useTheme }

@@ -8,7 +8,8 @@ import {
   isLanguage,
   languageFlags,
   languageLabels,
-  type Language
+  languages,
+  type Language,
 } from "@/i18n/config"
 import {
   Select,
@@ -17,6 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu"
+import { cn } from "@workspace/ui/lib/utils"
+import Image from "next/image"
 
 function getLocalizedPath(pathname: string, language: Language) {
   const segments = pathname.split("/")
@@ -26,7 +36,13 @@ function getLocalizedPath(pathname: string, language: Language) {
   return segments.join("/") || `/${language}`
 }
 
-function LanguageSwitcher({ language }: { language: Language }) {
+function LanguageSwitcher({
+  language,
+  className,
+}: {
+  language: Language
+  className?: string
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const { t } = useTranslation()
@@ -40,7 +56,6 @@ function LanguageSwitcher({ language }: { language: Language }) {
     setIsPending(true)
 
     try {
-     
       startTransition(() => {
         router.replace(getLocalizedPath(pathname, nextLanguage))
         router.refresh()
@@ -51,43 +66,55 @@ function LanguageSwitcher({ language }: { language: Language }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Select
-        value={language}
-        disabled={isPending}
-        onValueChange={(value) => {
-          if (isLanguage(value)) {
-            void switchLanguage(value)
-          }
-        }}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild className={cn("cursor-pointer", className)}>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
+          <div className="flex items-center justify-center overflow-hidden rounded-full">
+            <Image
+              width={40}
+              quality={1000}
+              height={40}
+              src={languageFlags[language]}
+              alt={languageLabels[language]}
+              className="h-full w-full rounded-full object-cover"
+            />
+          </div>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="min-w-32 rounded-md border shadow-lg dark:shadow-xl"
+        align="center"
+        sideOffset={5}
       >
-        <SelectTrigger
-          size="sm"
-          className="min-w-0 gap-2 rounded-full border-border/70 bg-background/80 pr-2.5 pl-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60"
-          aria-label={t("home.languageLabel")}
-          hideIcon
-        >
-          <SelectValue>
-            <span className="inline-flex size-5 items-center justify-center rounded-full bg-muted text-[13px] leading-none">
-              <span aria-hidden="true">{languageFlags[language]}</span>
-            </span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent align="end" className="min-w-44 rounded-3xl p-1">
-          <SelectItem value="ru" className="rounded-2xl py-2.5">
-            <span className="min-w-0">
-              <span className="block leading-none">{languageLabels.ru}</span>
-            </span>
-          </SelectItem>
-          <SelectItem value="uz" className="rounded-2xl py-2.5">
-            <span className="min-w-0">
-              <span className="block leading-none">{languageLabels.uz}</span>
-              
-            </span>
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+        <DropdownMenuGroup>
+          {languages.map((lang) => (
+            <DropdownMenuItem
+              key={lang}
+              className={cn(
+                "flex w-full cursor-pointer items-center justify-start gap-2 rounded-sm outline-none focus:text-primary",
+                "px-3 py-2",
+                "dark:hover:bg-accent-dark hover:bg-accent",
+                "transition-colors duration-150",
+                language === lang
+                  ? "dark:text-primary-light bg-primary/10 text-primary dark:bg-primary/20"
+                  : "dark:text-foreground-dark text-foreground",
+                "dark:focus:bg-accent-dark dark:focus:text-primary-light focus:bg-accent focus:text-primary"
+              )}
+              onClick={() => switchLanguage(lang)}
+            >
+              <Image
+                width={20}
+                height={20}
+                src={languageFlags[lang]}
+                alt={languageLabels[lang]}
+                className="h-5 w-5 rounded-full object-cover"
+              />
+              <p className="text-sm font-medium">{t(languageLabels[lang])}</p>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

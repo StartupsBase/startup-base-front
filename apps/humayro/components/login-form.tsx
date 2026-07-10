@@ -7,16 +7,20 @@ import { useForm, Controller } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
+import { isValidPhoneNumber } from "react-phone-number-input"
 
 import { authTokenCookieName } from "@/lib/auth"
 import { http } from "@/lib/http"
+import { Input } from "@/components/input"
 import { PhoneInput } from "@/components/phone-input"
 import { Button } from "@workspace/ui/components/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs"
 import { cn } from "@workspace/ui/lib/utils"
-
-const inputClassName =
-  "flex h-11 w-full rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50"
 
 const loginSchema = z
   .object({
@@ -55,7 +59,7 @@ const loginSchema = z
         return
       }
 
-      if (value.phone.length !== 9) {
+      if (!isValidPhoneNumber(value.phone)) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["phone"],
@@ -112,7 +116,9 @@ function getTokenFromResponse(data: LoginResponse) {
     return data
   }
 
-  return data.accessToken ?? data.token ?? data.data?.accessToken ?? data.data?.token
+  return (
+    data.accessToken ?? data.token ?? data.data?.accessToken ?? data.data?.token
+  )
 }
 
 function LoginForm() {
@@ -137,9 +143,7 @@ function LoginForm() {
 
     try {
       const emailOrPhone =
-        values.method === "email"
-          ? values.email
-          : `+998${values.phone}`
+        values.method === "email" ? values.email : values.phone
 
       const response = await http.post<LoginResponse>("/auth/login", {
         emailOrPhone,
@@ -182,18 +186,14 @@ function LoginForm() {
         <TabsTrigger value="phone">{t("login.phoneTab")}</TabsTrigger>
       </TabsList>
 
-      <form
-        className="mt-6 space-y-4"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
+      <form className="mt-6 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <TabsContent value="email" className="mt-0 space-y-2">
           <label className="block space-y-2">
             <span className="text-sm font-medium">{t("login.emailLabel")}</span>
-            <input
+            <Input
               type="email"
               autoComplete="email"
               placeholder={t("login.emailPlaceholder")}
-              className={inputClassName}
               {...form.register("email")}
             />
           </label>
@@ -230,12 +230,13 @@ function LoginForm() {
 
         <div className="space-y-2">
           <label className="block space-y-2">
-            <span className="text-sm font-medium">{t("login.passwordLabel")}</span>
-            <input
+            <span className="text-sm font-medium">
+              {t("login.passwordLabel")}
+            </span>
+            <Input
               type="password"
               autoComplete="current-password"
               placeholder={t("login.passwordPlaceholder")}
-              className={inputClassName}
               {...form.register("password")}
             />
           </label>
@@ -245,8 +246,6 @@ function LoginForm() {
             </p>
           ) : null}
         </div>
-
-        <p className="text-muted-foreground text-xs">{t("login.helper")}</p>
 
         {submitError ? (
           <div className="rounded-3xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -259,7 +258,9 @@ function LoginForm() {
           className={cn("w-full", form.formState.isSubmitting && "cursor-wait")}
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? t("login.submitting") : t("login.submit")}
+          {form.formState.isSubmitting
+            ? t("login.submitting")
+            : t("login.submit")}
         </Button>
       </form>
     </Tabs>

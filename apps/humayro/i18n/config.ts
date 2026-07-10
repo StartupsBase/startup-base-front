@@ -1,4 +1,7 @@
 export const languages = ["ru", "uz"] as const
+import { StaticImageData } from "next/image"
+import russianFlag from "../assets/russian-flag.png"
+import uzbekFlag from "../assets/uzbek-flag.png"
 
 export type Language = (typeof languages)[number]
 
@@ -7,7 +10,7 @@ export const defaultLanguage: Language = "ru"
 export const languageCookieName = "NEXT_LOCALE"
 
 export const languageLabels: Record<Language, string> = {
-  ru: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+  ru: "Русский",
   uz: "O'zbek",
 }
 
@@ -16,9 +19,9 @@ export const languageShortLabels: Record<Language, string> = {
   uz: "UZ",
 }
 
-export const languageFlags: Record<Language, string> = {
-  ru: "\ud83c\uddf7\ud83c\uddfa",
-  uz: "\ud83c\uddfa\ud83c\uddff",
+export const languageFlags: Record<Language, StaticImageData> = {
+  ru: russianFlag,
+  uz: uzbekFlag,
 }
 
 export function isLanguage(value: unknown): value is Language {

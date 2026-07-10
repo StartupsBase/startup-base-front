@@ -1,72 +1,37 @@
 "use client"
 
 import * as React from "react"
+import PhoneNumberInput from "react-phone-number-input"
 
+import { Input } from "@/components/input"
 import { cn } from "@workspace/ui/lib/utils"
 
 type PhoneInputProps = Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  "value" | "onChange"
+  React.ComponentProps<typeof PhoneNumberInput>,
+  "className" | "defaultCountry" | "onChange" | "value"
 > & {
-  value: string
+  className?: string
+  value?: string
   onChange: (value: string) => void
 }
 
-function formatPhoneNumber(value: string) {
-  const digits = value.slice(0, 9)
-  const parts = []
-
-  if (digits.length > 0) {
-    parts.push(digits.slice(0, 2))
-  }
-
-  if (digits.length > 2) {
-    parts.push(digits.slice(2, 5))
-  }
-
-  if (digits.length > 5) {
-    parts.push(digits.slice(5, 7))
-  }
-
-  if (digits.length > 7) {
-    parts.push(digits.slice(7, 9))
-  }
-
-  return parts.join(" ")
-}
-
-function PhoneInput({
-  className,
-  value,
-  onChange,
-  ...props
-}: PhoneInputProps) {
+function PhoneInput({ className, onChange, value, ...props }: PhoneInputProps) {
   return (
-    <div
+    <PhoneNumberInput
+      {...props}
+      defaultCountry="UZ"
+      international
+      countryCallingCodeEditable={false}
+      limitMaxLength
+      inputComponent={Input}
+      value={value || undefined}
+      onChange={(phoneNumber) => onChange(phoneNumber ?? "")}
       className={cn(
-        "flex h-11 items-center rounded-4xl border border-input bg-input/30 px-1.5 transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+        "flex h-11 w-full items-center gap-2 rounded-4xl border border-input bg-input/30 px-3 transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+        "[&_.PhoneInputCountry]:mr-1 [&_.PhoneInputCountryIcon--border]:shadow-none [&_.PhoneInputCountrySelectArrow]:opacity-70 [&_.PhoneInputInput]:h-auto [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:px-0 [&_.PhoneInputInput]:focus-visible:ring-0",
         className
       )}
-    >
-      <div className="inline-flex h-8 shrink-0 items-center gap-2 rounded-full bg-background px-3 text-sm font-medium text-foreground shadow-sm">
-        <span aria-hidden="true" className="text-base leading-none">
-          🇺🇿
-        </span>
-        <span>+998</span>
-      </div>
-      <input
-        type="tel"
-        inputMode="numeric"
-        autoComplete="tel-national"
-        className="h-full w-full bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground"
-        value={formatPhoneNumber(value)}
-        onChange={(event) => {
-          const digits = event.target.value.replace(/\D/g, "").slice(0, 9)
-          onChange(digits)
-        }}
-        {...props}
-      />
-    </div>
+    />
   )
 }
 

@@ -1,5 +1,6 @@
-import { Inter } from "next/font/google"
+import { M_PLUS_Rounded_1c } from "next/font/google"
 import { notFound } from "next/navigation"
+import "react-phone-number-input/style.css"
 
 import { I18nProvider } from "@/components/i18n-provider"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -8,9 +9,11 @@ import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
 
-const inter = Inter({
+const mPlusRounded1c = M_PLUS_Rounded_1c({
+  weight: ["400", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 })
 
 export function generateStaticParams() {
@@ -34,7 +37,7 @@ export default async function RootLayout({
     <html
       lang={lang}
       suppressHydrationWarning
-      className={cn("antialiased", inter.variable, "font-sans")}
+      className={cn("antialiased", mPlusRounded1c.variable, "font-sans")}
     >
       <body>
         <ThemeProvider>

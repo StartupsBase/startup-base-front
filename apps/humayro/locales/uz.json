@@ -1,0 +1,54 @@
+{
+  "common": {
+    "home": {
+      "eyebrow": "Muhim narsalar — bir joyda",
+      "title": "Kuningizni aniqlik va ishonch bilan rejalashtiring.",
+      "description": "Humayro vazifalar, rejalar va muhim tafsilotlarni ortiqcha murakkabliksiz doimo qo'lingiz ostida saqlaydi.",
+      "primaryAction": "Boshlash",
+      "secondaryAction": "Batafsil",
+      "loginAction": "Kirish",
+      "previewLabel": "Sizning ish maydoningiz",
+      "statOne": "vazifalarga kirish imkoniyati",
+      "statTwo": "asosiy narsaga e'tibor",
+      "themeToDark": "Qorong'i mavzuni yoqish",
+      "themeToLight": "Yorug' mavzuni yoqish",
+      "featureOne": {
+        "title": "Hammasi nazoratda",
+        "description": "Muhim vazifalar va rejalarni bitta tushunarli joyda jamlang."
+      },
+      "featureTwo": {
+        "title": "Boshlash oson",
+        "description": "Sodda interfeys ilk qadamdan ishga e'tibor qaratishga yordam beradi."
+      },
+      "featureThree": {
+        "title": "Doimo yoningizda",
+        "description": "Muhim narsalarga istalgan vaqtda hamda istalgan qurilmadan qayting."
+      }
+    },
+    "login": {
+      "brand": "Humayro",
+      "title": "Hisobga kirish",
+      "subtitle": "Davom etish uchun email yoki telefon raqamingizni kiriting.",
+      "emailTab": "Email",
+      "phoneTab": "Telefon",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phoneLabel": "Telefon raqami",
+      "phonePlaceholder": "90 123 45 67",
+      "passwordLabel": "Parol",
+      "passwordPlaceholder": "Parolni kiriting",
+      "submit": "Kirish",
+      "submitting": "Kirilmoqda...",
+      "imageAlt": "Kirish sahifasi uchun dekorativ tasvir.",
+      "errors": {
+        "emailRequired": "Email kiriting.",
+        "emailInvalid": "To'g'ri email kiriting.",
+        "phoneRequired": "Telefon raqamini kiriting.",
+        "phoneInvalid": "To'g'ri telefon raqamini kiriting.",
+        "passwordRequired": "Parol kiriting.",
+        "passwordShort": "Parol kamida 6 ta belgidan iborat bo'lsin.",
+        "loginFailed": "Tizimga kirib bo'lmadi. Ma'lumotlarni tekshirib qayta urinib ko'ring."
+      }
+    }
+  }
+}

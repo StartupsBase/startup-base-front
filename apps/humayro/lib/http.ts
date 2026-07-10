@@ -6,7 +6,7 @@ import Cookies from "js-cookie"
 import { authTokenCookieName } from "@/lib/auth"
 
 const baseURL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? ""
+  process.env.NEXT_PUBLIC_API_URL;
 
 const http = axios.create({
   baseURL,
