@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Cookies from "js-cookie"
+import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { z } from "zod"
@@ -9,11 +9,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 import { isValidPhoneNumber } from "react-phone-number-input"
 
-import { authTokenCookieName } from "@/lib/auth"
-import { http } from "@/lib/http"
+import { useLogin } from "@/lib/api"
+import { saveAuthToken } from "@/lib/auth-client"
+import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
-import { PhoneInput } from "@/components/phone-input"
 import { Button } from "@workspace/ui/components/button"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
   Tabs,
   TabsContent,
@@ -89,17 +90,6 @@ const loginSchema = z
 type LoginFormValues = z.infer<typeof loginSchema>
 type LoginFormInput = z.input<typeof loginSchema>
 
-type LoginResponse =
-  | string
-  | {
-      token?: string
-      accessToken?: string
-      data?: {
-        token?: string
-        accessToken?: string
-      }
-    }
-
 function getErrorMessage(
   errorKey: string | undefined,
   t: (key: string) => string
@@ -111,22 +101,14 @@ function getErrorMessage(
   return t(`login.errors.${errorKey}`)
 }
 
-function getTokenFromResponse(data: LoginResponse) {
-  if (typeof data === "string") {
-    return data
-  }
-
-  return (
-    data.accessToken ?? data.token ?? data.data?.accessToken ?? data.data?.token
-  )
-}
-
 function LoginForm() {
   const pathname = usePathname()
   const router = useRouter()
   const { t } = useTranslation()
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [method, setMethod] = React.useState<"email" | "phone">("email")
+  const setUser = useAuthStore((state) => state.setUser)
+  const loginMutation = useLogin()
 
   const form = useForm<LoginFormInput, unknown, LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -145,23 +127,30 @@ function LoginForm() {
       const emailOrPhone =
         values.method === "email" ? values.email : values.phone
 
-      const response = await http.post<LoginResponse>("/auth/login", {
-        emailOrPhone,
-        password: values.password,
+      const session = await loginMutation.mutateAsync({
+        data: {
+          emailOrPhone,
+          password: values.password,
+        },
       })
 
-      const token = getTokenFromResponse(response.data)
+      const token = session.accessToken
 
       if (!token) {
         throw new Error("Missing token")
       }
 
-      Cookies.set(authTokenCookieName, token, {
-        sameSite: "lax",
-        expires: 7,
-      })
+      saveAuthToken(token)
+      setUser(session.user ?? null)
 
-      router.replace(`/${pathname.split("/")[1] ?? "ru"}`)
+      const language = pathname.split("/")[1] ?? "ru"
+      const nextPath = new URLSearchParams(window.location.search).get("next")
+      const destination =
+        nextPath?.startsWith(`/${language}/`) && !nextPath.startsWith("//")
+          ? nextPath
+          : `/${language}/dashboard`
+
+      router.replace(destination)
       router.refresh()
     } catch {
       setSubmitError(t("login.errors.loginFailed"))
@@ -247,6 +236,15 @@ function LoginForm() {
           ) : null}
         </div>
 
+        <div className="flex justify-end">
+          <Link
+            href={`/${pathname.split("/")[1] ?? "ru"}/forgot-password`}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t("login.forgotPassword")}
+          </Link>
+        </div>
+
         {submitError ? (
           <div className="rounded-3xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {submitError}
@@ -255,13 +253,22 @@ function LoginForm() {
 
         <Button
           type="submit"
-          className={cn("w-full", form.formState.isSubmitting && "cursor-wait")}
-          disabled={form.formState.isSubmitting}
+          className={cn("w-full", loginMutation.isPending && "cursor-wait")}
+          disabled={loginMutation.isPending}
         >
-          {form.formState.isSubmitting
+          {loginMutation.isPending
             ? t("login.submitting")
             : t("login.submit")}
         </Button>
+        <p className="text-center text-sm text-muted-foreground">
+          {t("login.noAccount")} {" "}
+          <Link
+            href={`/${pathname.split("/")[1] ?? "ru"}/register`}
+            className="font-medium text-primary hover:underline"
+          >
+            {t("login.createAccount")}
+          </Link>
+        </p>
       </form>
     </Tabs>
   )

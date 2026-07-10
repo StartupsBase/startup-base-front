@@ -5,8 +5,7 @@ import Cookies from "js-cookie"
 
 import { authTokenCookieName } from "@/lib/auth"
 
-const baseURL =
-  process.env.NEXT_PUBLIC_API_URL;
+const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "https://swagger.humayro.uz"
 
 const http = axios.create({
   baseURL,
@@ -29,7 +28,7 @@ http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      Cookies.remove(authTokenCookieName)
+      Cookies.remove(authTokenCookieName, { path: "/" })
     }
 
     return Promise.reject(error)

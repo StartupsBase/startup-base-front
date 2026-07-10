@@ -27,7 +27,8 @@
     "react-hook-form": "^7.81.0",
     "react-i18next": "^17.0.9",
     "react-phone-number-input": "^3.4.17",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

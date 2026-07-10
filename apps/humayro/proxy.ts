@@ -35,6 +35,19 @@ export function proxy(request: NextRequest) {
   )
 
   if (pathnameHasLanguage) {
+    const language = languages.find(
+      (item) => pathname === `/${item}` || pathname.startsWith(`/${item}/`)
+    )
+    const isDashboard = pathname === `/${language}/dashboard`
+
+    if (isDashboard && !request.cookies.get("humayro_access_token")?.value) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/${language}/login`
+      url.searchParams.set("next", pathname)
+
+      return NextResponse.redirect(url)
+    }
+
     return
   }
 

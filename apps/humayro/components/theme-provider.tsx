@@ -78,7 +78,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (typeof event.key !== "string" || event.key.toLowerCase() !== "d") {
         return
       }
 

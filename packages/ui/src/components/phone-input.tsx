@@ -3,7 +3,7 @@
 import * as React from "react"
 import PhoneNumberInput from "react-phone-number-input"
 
-import { Input } from "@/components/input"
+import { Input } from "@workspace/ui/components/input"
 import { cn } from "@workspace/ui/lib/utils"
 
 type PhoneInputProps = Omit<

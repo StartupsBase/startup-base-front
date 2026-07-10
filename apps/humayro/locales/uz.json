@@ -1,29 +1,17 @@
 {
   "common": {
     "home": {
-      "eyebrow": "Muhim narsalar — bir joyda",
-      "title": "Kuningizni aniqlik va ishonch bilan rejalashtiring.",
-      "description": "Humayro vazifalar, rejalar va muhim tafsilotlarni ortiqcha murakkabliksiz doimo qo'lingiz ostida saqlaydi.",
-      "primaryAction": "Boshlash",
-      "secondaryAction": "Batafsil",
+      "eyebrow": "Keyingi sevimli libosingiz",
+      "title": "Sizga mos keladigan kiyimlar.",
+      "description": "Humayro har bir uslub, mavsum va lahza uchun kiyimlarni topish, saralash va tanlashni osonlashtiradi.",
+      "primaryAction": "Kiyimlarni ko'rish",
+      "secondaryAction": "Hisob yaratish",
       "loginAction": "Kirish",
-      "previewLabel": "Sizning ish maydoningiz",
-      "statOne": "vazifalarga kirish imkoniyati",
-      "statTwo": "asosiy narsaga e'tibor",
       "themeToDark": "Qorong'i mavzuni yoqish",
       "themeToLight": "Yorug' mavzuni yoqish",
-      "featureOne": {
-        "title": "Hammasi nazoratda",
-        "description": "Muhim vazifalar va rejalarni bitta tushunarli joyda jamlang."
-      },
-      "featureTwo": {
-        "title": "Boshlash oson",
-        "description": "Sodda interfeys ilk qadamdan ishga e'tibor qaratishga yordam beradi."
-      },
-      "featureThree": {
-        "title": "Doimo yoningizda",
-        "description": "Muhim narsalarga istalgan vaqtda hamda istalgan qurilmadan qayting."
-      }
+      "featureOne": { "title": "Saralangan kolleksiyalar", "description": "O'zingizga mos uslubni toping." },
+      "featureTwo": { "title": "Oson saralash", "description": "Kerakli kiyimlarni tezda tanlang." },
+      "featureThree": { "title": "Har kun uchun uslublar", "description": "Har bir vaziyat uchun liboslar." }
     },
     "login": {
       "brand": "Humayro",
@@ -40,6 +28,9 @@
       "submit": "Kirish",
       "submitting": "Kirilmoqda...",
       "imageAlt": "Kirish sahifasi uchun dekorativ tasvir.",
+      "forgotPassword": "Parolni unutdingizmi?",
+      "noAccount": "Hisobingiz yo'qmi?",
+      "createAccount": "Hisob yaratish",
       "errors": {
         "emailRequired": "Email kiriting.",
         "emailInvalid": "To'g'ri email kiriting.",
@@ -49,6 +40,78 @@
         "passwordShort": "Parol kamida 6 ta belgidan iborat bo'lsin.",
         "loginFailed": "Tizimga kirib bo'lmadi. Ma'lumotlarni tekshirib qayta urinib ko'ring."
       }
+    },
+    "passwordRecovery": {
+      "requestTitle": "Parolni tiklash",
+      "requestDescription": "Telefon raqamingizni kiriting, biz tasdiqlash kodini yuboramiz.",
+      "resetTitle": "Yangi parol yarating",
+      "resetDescription": "Telefoningizga yuborilgan kod va yangi parolni kiriting.",
+      "phoneLabel": "Telefon raqami",
+      "codeLabel": "Tasdiqlash kodi",
+      "newPasswordLabel": "Yangi parol",
+      "confirmPasswordLabel": "Yangi parolni tasdiqlang",
+      "sendCode": "Tasdiqlash kodini yuborish",
+      "sendingCode": "Kod yuborilmoqda...",
+      "resetPassword": "Parolni tiklash",
+      "resettingPassword": "Parol yangilanmoqda...",
+      "rememberedPassword": "Parolni esladingizmi?",
+      "backToLogin": "Kirishga qaytish",
+      "signIn": "Kirish",
+      "errors": {
+        "phone": "To'g'ri +998 telefon raqamini kiriting.",
+        "code": "Tasdiqlash kodini kiriting.",
+        "password": "Parol kamida 6 ta belgidan iborat bo'lsin.",
+        "passwordMatch": "Parollar bir xil emas.",
+        "sendFailed": "Tasdiqlash kodini yuborib bo'lmadi. Qayta urinib ko'ring.",
+        "resetFailed": "Parolni tiklab bo'lmadi. Kodni tekshirib qayta urinib ko'ring."
+      }
+    },
+    "register": {
+      "title": "Hisob yaratish",
+      "subtitle": "Humayro bilan uslubingizga mos kiyimlarni toping.",
+      "firstname": "Ism",
+      "lastname": "Familiya",
+      "email": "Email",
+      "phone": "Telefon raqami",
+      "password": "Parol",
+      "confirmPassword": "Parolni tasdiqlang",
+      "submit": "Hisob yaratish",
+      "submitting": "Hisob yaratilmoqda...",
+      "hasAccount": "Hisobingiz bormi?",
+      "signIn": "Kirish",
+      "errors": {
+        "firstname": "Ismingizni kiriting.",
+        "lastname": "Familiyangizni kiriting.",
+        "email": "To'g'ri email kiriting.",
+        "phone": "To'g'ri +998 telefon raqamini kiriting.",
+        "password": "Parol kamida 6 ta belgidan iborat bo'lsin.",
+        "passwordMatch": "Parollar bir xil emas.",
+        "failed": "Hisob yaratib bo'lmadi. Qayta urinib ko'ring."
+      }
+    },
+    "dashboard": {
+      "admin": "Humayro administratori",
+      "title": "Ro'yxatdan o'tgan foydalanuvchilar",
+      "loadingAccount": "Hisob yuklanmoqda...",
+      "signOut": "Chiqish",
+      "loadingUsers": "Foydalanuvchilar yuklanmoqda...",
+      "search": "Foydalanuvchilarni qidirish...",
+      "empty": "Foydalanuvchilar topilmadi.",
+      "resetFilters": "Filtrlarni tozalash",
+      "columns": "Ustunlar",
+      "rowsPerPage": "Sahifadagi qatorlar",
+      "selectedRows": "{{selected}} / {{total}} qator tanlandi",
+      "page": "{{page}}-sahifa, jami {{total}}",
+      "previous": "Oldingi",
+      "next": "Keyingi",
+      "usersCount": "{{count}} ro'yxatdan o'tgan foydalanuvchi",
+      "name": "Ism",
+      "email": "Email",
+      "phone": "Telefon",
+      "roles": "Rollar",
+      "customer": "Mijoz",
+      "accessDenied": "Hisobingiz ro'yxatdan o'tgan foydalanuvchilarni ko'rish huquqiga ega emas.",
+      "loadFailed": "Ro'yxatdan o'tgan foydalanuvchilarni yuklab bo'lmadi. Qayta urinib ko'ring."
     }
   }
 }
