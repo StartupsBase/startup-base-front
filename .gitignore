@@ -49,3 +49,6 @@ next-env.d.ts
 .nx/cache
 .nx/workspace-data
 .nx/migrate-runs
+
+# Downloaded by apps/humayro/scripts/download-openapi.mjs before Orval runs.
+apps/humayro/lib/api/openapi.json

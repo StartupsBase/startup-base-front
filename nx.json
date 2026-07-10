@@ -2,39 +2,26 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/.env*"
-      ],
-      "outputs": [
-        "{projectRoot}/.next/**",
-        "!{projectRoot}/.next/cache/**"
-      ],
+      "dependsOn": ["^build"],
+      "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+      "outputs": ["{projectRoot}/.next/**", "!{projectRoot}/.next/cache/**"],
       "cache": true
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ],
+      "dependsOn": ["^lint"],
       "cache": true
     },
     "format": {
-      "dependsOn": [
-        "^format"
-      ],
+      "dependsOn": ["^format"],
       "cache": true
     },
     "typecheck": {
-      "dependsOn": [
-        "^typecheck"
-      ],
+      "dependsOn": ["^typecheck"],
       "cache": true
     },
     "dev": {
       "cache": false
     }
-  }
+  },
+  "analytics": true
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
 
 import { I18nProvider } from "@/components/i18n-provider"
+import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
@@ -41,7 +42,9 @@ export default async function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <I18nProvider language={lang}>{children}</I18nProvider>
+          <QueryProvider>
+            <I18nProvider language={lang}>{children}</I18nProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
