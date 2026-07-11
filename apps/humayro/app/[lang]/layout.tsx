@@ -7,10 +7,10 @@ import { I18nProvider } from "@/components/i18n-provider"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TelegramProvider } from "@/components/telegram-provider"
+import { SonnerProvider } from "@/components/sonner-provider"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
-import { Toaster } from "@workspace/ui/components/sonner"
 import "../theme.css"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
@@ -62,8 +62,8 @@ export default async function RootLayout({
               <I18nProvider language={lang}>{children}</I18nProvider>
             </TelegramProvider>
           </QueryProvider>
+          <SonnerProvider />
         </ThemeProvider>
-        <Toaster position="bottom-right" />
       </body>
     </html>
   )

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 
 import { type CategoryDTO, useMe1 } from "@/lib/api"
 import {
@@ -310,41 +311,50 @@ function CategoryForm({
   const editing = category?.id !== undefined
 
   async function submit(values: CategoryFormValues) {
-    let imageId: number | undefined
-    if (values.image) {
-      const attachment = await upload.mutateAsync({
-        data: { file: values.image },
-      })
-      if (attachment.id === undefined)
-        throw new Error("Image upload did not return an attachment ID.")
-      imageId = attachment.id
-    }
+    try {
+      let imageId: number | undefined
+      if (values.image) {
+        const attachment = await upload.mutateAsync({
+          data: { file: values.image },
+        })
+        if (attachment.id === undefined)
+          throw new Error("Image upload did not return an attachment ID.")
+        imageId = attachment.id
+      }
 
-    const data = {
-      name: values.name,
-      ...(values.description ? { description: values.description } : {}),
-      sizeType: values.sizeType,
-      organizationId,
-      ...(values.parentId ? { parentId: Number(values.parentId) } : {}),
-      ...(imageId !== undefined ? { imageId } : {}),
-    }
+      const data = {
+        name: values.name,
+        ...(values.description ? { description: values.description } : {}),
+        sizeType: values.sizeType,
+        organizationId,
+        ...(values.parentId ? { parentId: Number(values.parentId) } : {}),
+        ...(imageId !== undefined ? { imageId } : {}),
+      }
 
-    const savedCategory =
-      editing && category.id !== undefined
-        ? await update.mutateAsync({
-            id: category.id,
-            data: { ...data, active: values.active },
-          })
-        : await create.mutateAsync({ data })
+      const savedCategory =
+        editing && category.id !== undefined
+          ? await update.mutateAsync({
+              id: category.id,
+              data: { ...data, active: values.active },
+            })
+          : await create.mutateAsync({ data })
 
-    if (imageId !== undefined && savedCategory.id !== undefined) {
-      window.localStorage.setItem(
-        imageStorageKey(savedCategory.id),
-        String(imageId)
+      if (imageId !== undefined && savedCategory.id !== undefined) {
+        window.localStorage.setItem(
+          imageStorageKey(savedCategory.id),
+          String(imageId)
+        )
+      }
+      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      toast.success(
+        t(editing ? "notifications.updateSuccess" : "notifications.createSuccess")
+      )
+      onComplete()
+    } catch {
+      toast.error(
+        t(editing ? "notifications.updateFailed" : "notifications.createFailed")
       )
     }
-    await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
-    onComplete()
   }
 
   const pending = create.isPending || update.isPending || upload.isPending
@@ -475,6 +485,7 @@ function CategoryActions({
 
     if (category.imageUrl && imageAttachmentId === undefined) {
       setDeleteError(t("category.imageReferenceMissing"))
+      toast.error(t("notifications.deleteFailed"))
       return
     }
 
@@ -486,8 +497,10 @@ function CategoryActions({
       window.localStorage.removeItem(imageStorageKey(category.id))
       await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      toast.success(t("notifications.deleteSuccess"))
     } catch {
       setDeleteError(t("category.deleteFailed"))
+      toast.error(t("notifications.deleteFailed"))
     }
   }
 

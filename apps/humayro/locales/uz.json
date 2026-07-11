@@ -1,5 +1,13 @@
 {
   "common": {
+    "notifications": {
+      "createSuccess": "Muvaffaqiyatli yaratildi.",
+      "updateSuccess": "O'zgarishlar muvaffaqiyatli saqlandi.",
+      "deleteSuccess": "Muvaffaqiyatli o'chirildi.",
+      "createFailed": "Yaratib bo'lmadi. Qayta urinib ko'ring.",
+      "updateFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
+      "deleteFailed": "O'chirib bo'lmadi. Qayta urinib ko'ring."
+    },
     "home": {
       "eyebrow": "Keyingi sevimli libosingiz",
       "title": "Sizga mos keladigan kiyimlar.",

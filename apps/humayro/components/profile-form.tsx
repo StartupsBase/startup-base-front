@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { isValidPhoneNumber } from "react-phone-number-input"
 import { z } from "zod"
 
@@ -100,8 +101,10 @@ export function ProfileForm() {
         gender: user.gender,
       })
       setSaved(true)
+      toast.success(t("notifications.updateSuccess"))
     } catch {
       setSubmitError(true)
+      toast.error(t("notifications.updateFailed"))
     }
   }
 

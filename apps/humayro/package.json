@@ -30,6 +30,7 @@
     "react-i18next": "^17.0.9",
     "react-leaflet": "^5.0.0",
     "react-phone-number-input": "^3.4.17",
+    "sonner": "^2.0.7",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },

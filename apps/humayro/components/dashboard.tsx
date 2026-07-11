@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
+import { toast } from "sonner"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
@@ -259,21 +260,31 @@ function UserActions({ user }: { user: UserDTO }) {
 
   async function save() {
     if (user.id === undefined) return
-    await updateUser.mutateAsync({
-      id: user.id,
-      data: { firstname, lastname, phone, ...(gender ? { gender } : {}) },
-    })
-    if (file) {
-      await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
+    try {
+      await updateUser.mutateAsync({
+        id: user.id,
+        data: { firstname, lastname, phone, ...(gender ? { gender } : {}) },
+      })
+      if (file) {
+        await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
+      }
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      toast.success(t("notifications.updateSuccess"))
+      setOpen(false)
+    } catch {
+      toast.error(t("notifications.updateFailed"))
     }
-    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
-    setOpen(false)
   }
 
   async function remove() {
     if (user.id === undefined) return
-    await deleteUser.mutateAsync({ id: user.id })
-    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+    try {
+      await deleteUser.mutateAsync({ id: user.id })
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      toast.success(t("notifications.deleteSuccess"))
+    } catch {
+      toast.error(t("notifications.deleteFailed"))
+    }
   }
 
   return (

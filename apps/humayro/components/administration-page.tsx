@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 
 import { useMe1, type ColorDTO, type SizeDTO } from "@/lib/api"
 import {
@@ -110,10 +111,15 @@ function ColorsPanel() {
 
   const deleteColor = React.useCallback(
     async (id: number) => {
-      await remove.mutateAsync({ id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll3QueryKey() })
+      try {
+        await remove.mutateAsync({ id })
+        await queryClient.invalidateQueries({ queryKey: getGetAll3QueryKey() })
+        toast.success(t("notifications.deleteSuccess"))
+      } catch {
+        toast.error(t("notifications.deleteFailed"))
+      }
     },
-    [queryClient, remove]
+    [queryClient, remove, t]
   )
 
   const columns = React.useMemo<ColumnDef<ColorDTO>[]>(
@@ -230,9 +236,15 @@ function ColorForm({
         await update.mutateAsync({ id: color.id, data })
       else await create.mutateAsync({ data })
       await queryClient.invalidateQueries({ queryKey: getGetAll3QueryKey() })
+      toast.success(
+        t(color ? "notifications.updateSuccess" : "notifications.createSuccess")
+      )
       onSaved()
     } catch {
       setError(true)
+      toast.error(
+        t(color ? "notifications.updateFailed" : "notifications.createFailed")
+      )
     }
   }
 
@@ -270,10 +282,15 @@ function SizesPanel() {
 
   const deleteSize = React.useCallback(
     async (id: number) => {
-      await remove.mutateAsync({ id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll1QueryKey() })
+      try {
+        await remove.mutateAsync({ id })
+        await queryClient.invalidateQueries({ queryKey: getGetAll1QueryKey() })
+        toast.success(t("notifications.deleteSuccess"))
+      } catch {
+        toast.error(t("notifications.deleteFailed"))
+      }
     },
-    [queryClient, remove]
+    [queryClient, remove, t]
   )
 
   const sizes = [...(sizesQuery.data ?? [])].sort(
@@ -399,9 +416,15 @@ function SizeForm({ size, onSaved }: { size?: SizeDTO; onSaved: () => void }) {
         await update.mutateAsync({ id: size.id, data })
       else await create.mutateAsync({ data })
       await queryClient.invalidateQueries({ queryKey: getGetAll1QueryKey() })
+      toast.success(
+        t(size ? "notifications.updateSuccess" : "notifications.createSuccess")
+      )
       onSaved()
     } catch {
       setError(true)
+      toast.error(
+        t(size ? "notifications.updateFailed" : "notifications.createFailed")
+      )
     }
   }
 

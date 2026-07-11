@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -354,17 +355,26 @@ function OrganizationForm({
   async function submit(values: OrganizationFormValues) {
     const payload = compactOrganizationPayload(values)
 
-    if (editing && organization.id !== undefined) {
-      await update.mutateAsync({
-        id: organization.id,
-        data: { ...payload, active: values.active },
-      })
-    } else {
-      await create.mutateAsync({ data: payload })
-    }
+    try {
+      if (editing && organization.id !== undefined) {
+        await update.mutateAsync({
+          id: organization.id,
+          data: { ...payload, active: values.active },
+        })
+      } else {
+        await create.mutateAsync({ data: payload })
+      }
 
-    await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
-    onComplete()
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      toast.success(
+        t(editing ? "notifications.updateSuccess" : "notifications.createSuccess")
+      )
+      onComplete()
+    } catch {
+      toast.error(
+        t(editing ? "notifications.updateFailed" : "notifications.createFailed")
+      )
+    }
   }
 
   const pending = create.isPending || update.isPending
@@ -503,8 +513,13 @@ function OrganizationActions({
 
   async function deleteOrganization() {
     if (organization.id === undefined) return
-    await remove.mutateAsync({ id: organization.id })
-    await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+    try {
+      await remove.mutateAsync({ id: organization.id })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      toast.success(t("notifications.deleteSuccess"))
+    } catch {
+      toast.error(t("notifications.deleteFailed"))
+    }
   }
 
   return (
