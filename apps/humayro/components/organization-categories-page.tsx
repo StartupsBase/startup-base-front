@@ -9,8 +9,10 @@ import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { formatPhoneNumberIntl } from "react-phone-number-input"
 
-import { type CategoryDTO, useMe1 } from "@/lib/api"
+import { type CategoryDTO, type UserDTO, useMe1 } from "@/lib/api"
+import { useGetAll6 } from "@/lib/api/generated/admin-user/admin-user"
 import {
   getGetAll5QueryKey,
   useGetById5,
@@ -28,6 +30,7 @@ import {
 } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import { UserCreateForm } from "@/components/user-create-form"
 import { Button } from "@workspace/ui/components/button"
 import {
   Dialog,
@@ -44,6 +47,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs"
 import {
   DataTable,
   DataTableColumnHeader,
@@ -118,7 +127,12 @@ export function OrganizationCategoriesPage({
   const categoriesQuery = useGetAll4(undefined, {
     query: { enabled: canManageCategories, retry: false },
   })
+  const usersQuery = useGetAll6({
+    query: { enabled: canManageCategories, retry: false },
+  })
+  const [activeTab, setActiveTab] = useState<"users" | "categories">("users")
   const [createOpen, setCreateOpen] = useState(false)
+  const [createUserOpen, setCreateUserOpen] = useState(false)
 
   useEffect(() => {
     if (!meQuery.isError) return
@@ -139,6 +153,53 @@ export function OrganizationCategoriesPage({
         (category) => category.organizationId === organizationId
       ),
     [categoriesQuery.data, organizationId]
+  )
+  const users = useMemo(
+    () =>
+      (usersQuery.data ?? []).filter(
+        (user) => user.organizationId === organizationId
+      ),
+    [organizationId, usersQuery.data]
+  )
+  const userColumns = useMemo<ColumnDef<UserDTO>[]>(
+    () => [
+      {
+        id: "name",
+        accessorFn: (user) =>
+          [user.firstname, user.lastname].filter(Boolean).join(" "),
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("dashboard.name")} />
+        ),
+        cell: ({ row }) => row.getValue<string>("name") || "—",
+      },
+      {
+        accessorKey: "email",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("dashboard.email")} />
+        ),
+        cell: ({ row }) => row.getValue<string>("email") || "—",
+      },
+      {
+        accessorKey: "phone",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("dashboard.phone")} />
+        ),
+        cell: ({ row }) => {
+          const phone = row.getValue<string>("phone")
+          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+        },
+      },
+      {
+        id: "roles",
+        accessorFn: (user) => user.roles?.join(", ") ?? "",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("dashboard.roles")} />
+        ),
+        cell: ({ row }) =>
+          row.getValue<string>("roles") || t("dashboard.customer"),
+      },
+    ],
+    [t]
   )
   const columns = useMemo<ColumnDef<CategoryDTO>[]>(
     () => [
@@ -228,17 +289,39 @@ export function OrganizationCategoriesPage({
       >
         {t("category.backToOrganizations")}
       </Link>
-      <header className="mt-4 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(value as "users" | "categories")
+        }
+      >
+      <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <SidebarTrigger className="mb-3" />
           <p className="text-sm font-medium text-primary">
-            {organizationQuery.data?.name ?? t("dashboard.organizations")}
+            {t("dashboard.organizations")}
           </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-            {t("category.title")}
+            {organizationQuery.data?.name ?? t("dashboard.organizations")}
           </h1>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        {activeTab === "users" ? (
+          <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
+            <DialogTrigger asChild>
+              <Button>{t("dashboard.addUser")}</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("dashboard.addUser")}</DialogTitle>
+                <DialogDescription>{t("dashboard.addUserDescription")}</DialogDescription>
+              </DialogHeader>
+              <UserCreateForm
+                organizationId={organizationId}
+                onComplete={() => setCreateUserOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        ) : <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>{t("category.new")}</Button>
           </DialogTrigger>
@@ -255,9 +338,32 @@ export function OrganizationCategoriesPage({
               onComplete={() => setCreateOpen(false)}
             />
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </header>
-      <section className="py-8">
+      <TabsList className="mt-6">
+        <TabsTrigger value="users">{t("organization.users")}</TabsTrigger>
+        <TabsTrigger value="categories">
+          {t("organization.categories")}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="users" className="py-8">
+        {usersQuery.isLoading || organizationQuery.isLoading ? (
+            <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
+          ) : usersQuery.isError || organizationQuery.isError ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">
+              {t("dashboard.loadFailed")}
+            </div>
+          ) : (
+            <DataTable
+              columns={userColumns}
+              data={users}
+              searchColumn="name"
+              searchPlaceholder={t("dashboard.search")}
+              emptyMessage={t("dashboard.empty")}
+            />
+          )}
+      </TabsContent>
+      <TabsContent value="categories" className="py-8">
         {categoriesQuery.isLoading || organizationQuery.isLoading ? (
           <p className="text-muted-foreground">{t("category.loading")}</p>
         ) : categoriesQuery.isError || organizationQuery.isError ? (
@@ -283,7 +389,8 @@ export function OrganizationCategoriesPage({
             }}
           />
         )}
-      </section>
+      </TabsContent>
+      </Tabs>
     </main>
   )
 }

@@ -84,6 +84,7 @@ export function Dashboard({ language }: { language: string }) {
   const usersQuery = useGetAll6({
     query: { enabled: meQuery.isSuccess, retry: false },
   })
+  const [createOpen, setCreateOpen] = useState(false)
 
   useEffect(() => {
     if (meQuery.data) setUser(meQuery.data)
@@ -185,7 +186,7 @@ export function Dashboard({ language }: { language: string }) {
             {t("dashboard.title")}
           </h1>
         </div>
-        <Dialog>
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>{t("dashboard.addUser")}</Button>
           </DialogTrigger>
@@ -196,7 +197,7 @@ export function Dashboard({ language }: { language: string }) {
                 {t("dashboard.addUserDescription")}
               </DialogDescription>
             </DialogHeader>
-            <UserCreateForm onComplete={() => {}} />
+            <UserCreateForm onComplete={() => setCreateOpen(false)} />
           </DialogContent>
         </Dialog>
       </header>

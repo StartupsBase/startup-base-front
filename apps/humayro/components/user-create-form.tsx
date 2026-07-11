@@ -24,16 +24,24 @@ const schema = z.object({
 type Values = z.infer<typeof schema>
 type Inputs = z.input<typeof schema>
 
-export function UserCreateForm({ onComplete }: { onComplete: () => void }) {
+export function UserCreateForm({
+  onComplete,
+  organizationId,
+}: {
+  onComplete: () => void
+  organizationId?: number
+}) {
   const { t } = useTranslation()
   const createUser = useCreate()
   const organizations = useOrganizations()
   const queryClient = useQueryClient()
-  const form = useForm<Inputs, unknown, Values>({ resolver: zodResolver(schema), defaultValues: { firstname: "", lastname: "", email: "", password: "", phone: "+998", age: 0, gender: "MALE" } })
+  const form = useForm<Inputs, unknown, Values>({ resolver: zodResolver(schema), defaultValues: { firstname: "", lastname: "", email: "", password: "", phone: "+998", age: 0, gender: "MALE", organizationId } })
   const password = form.watch("password")
   async function submit(values: Values) {
     try {
-      await createUser.mutateAsync({ data: values })
+      await createUser.mutateAsync({
+        data: organizationId === undefined ? values : { ...values, organizationId },
+      })
       await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
       toast.success(t("notifications.createSuccess"))
       onComplete()
@@ -47,7 +55,7 @@ export function UserCreateForm({ onComplete }: { onComplete: () => void }) {
     <PasswordInput valid={password.length >= 6} placeholder="Password" {...form.register("password")} />
     <Controller control={form.control} name="phone" render={({ field }) => <PhoneInput value={field.value} onChange={field.onChange} />} />
     <div className="grid grid-cols-2 gap-3"><Input type="number" min="0" placeholder="Age" {...form.register("age")} /><select className="rounded-4xl border border-input bg-input/30 px-3 text-sm" {...form.register("gender")}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
-    <select className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm" {...form.register("organizationId")}><option value="">No organization</option>{organizations.data?.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}</select>
+    {organizationId === undefined ? <select className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm" {...form.register("organizationId")}><option value="">No organization</option>{organizations.data?.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}</select> : null}
     <Button type="submit" disabled={createUser.isPending}>{createUser.isPending ? "Creating..." : "Create user"}</Button>
   </form>
 }

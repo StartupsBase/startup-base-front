@@ -225,6 +225,8 @@
       "loadFailed": "Ro'yxatdan o'tgan foydalanuvchilarni yuklab bo'lmadi. Qayta urinib ko'ring."
     },
     "organization": {
+      "users": "Foydalanuvchilar",
+      "categories": "Kategoriyalar",
       "new": "Yangi tashkilot",
       "edit": "Tashkilotni tahrirlash",
       "name": "Tashkilot nomi",
