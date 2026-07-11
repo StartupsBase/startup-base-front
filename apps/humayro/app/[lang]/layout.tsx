@@ -10,6 +10,7 @@ import { TelegramProvider } from "@/components/telegram-provider"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
+import { Toaster } from "@workspace/ui/components/sonner"
 import "../theme.css"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
@@ -62,6 +63,7 @@ export default async function RootLayout({
             </TelegramProvider>
           </QueryProvider>
         </ThemeProvider>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   )
