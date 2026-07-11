@@ -10,6 +10,8 @@ import type { CategoryUpdateDTOSizeType } from './categoryUpdateDTOSizeType';
 export interface CategoryUpdateDTO {
   /** @minLength 1 */
   name: string;
+  nameRu?: string;
+  nameEng?: string;
   description?: string;
   sizeType: CategoryUpdateDTOSizeType;
   organizationId?: number;

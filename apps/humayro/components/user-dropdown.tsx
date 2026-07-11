@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 
 import { useMe1 } from "@/lib/api"
@@ -19,7 +20,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 
 export function UserDropdown({ language }: { language: string }) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const { t } = useTranslation()
   const [enabled, setEnabled] = useState(false)
   const user = useAuthStore((state) => state.user)
@@ -52,8 +53,8 @@ export function UserDropdown({ language }: { language: string }) {
   function signOut() {
     clearAuthToken()
     clear()
-    router.replace(`/${language}`)
-    router.refresh()
+    queryClient.clear()
+    window.location.assign(`/${language}`)
   }
 
   if (!currentUser) {
@@ -63,8 +64,6 @@ export function UserDropdown({ language }: { language: string }) {
       </Button>
     )
   }
-
-  console.log(pathname)
 
   return (
     <DropdownMenu>
@@ -94,7 +93,7 @@ export function UserDropdown({ language }: { language: string }) {
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
-          onClick={signOut}
+          onSelect={signOut}
           className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
         >
           {t("home.signOut")}

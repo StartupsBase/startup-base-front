@@ -10,6 +10,8 @@ import type { CategoryCreateDTOSizeType } from './categoryCreateDTOSizeType';
 export interface CategoryCreateDTO {
   /** @minLength 1 */
   name: string;
+  nameRu?: string;
+  nameEng?: string;
   description?: string;
   sizeType: CategoryCreateDTOSizeType;
   organizationId?: number;
