@@ -14,6 +14,7 @@ import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
 import { GoogleLoginButton } from "@/components/google-login-button"
+import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
@@ -120,6 +121,7 @@ function LoginForm() {
       password: "",
     },
   })
+  const password = form.watch("password") ?? ""
 
   async function onSubmit(values: LoginFormValues) {
     setSubmitError(null)
@@ -223,10 +225,10 @@ function LoginForm() {
             <span className="text-sm font-medium">
               {t("login.passwordLabel")}
             </span>
-            <Input
-              type="password"
+            <PasswordInput
               autoComplete="current-password"
               placeholder={t("login.passwordPlaceholder")}
+              valid={password.length >= 6}
               {...form.register("password")}
             />
           </label>

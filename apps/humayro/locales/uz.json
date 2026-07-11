@@ -1,5 +1,13 @@
 {
   "common": {
+    "notifications": {
+      "createSuccess": "Muvaffaqiyatli yaratildi.",
+      "updateSuccess": "O'zgarishlar muvaffaqiyatli saqlandi.",
+      "deleteSuccess": "Muvaffaqiyatli o'chirildi.",
+      "createFailed": "Yaratib bo'lmadi. Qayta urinib ko'ring.",
+      "updateFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
+      "deleteFailed": "O'chirib bo'lmadi. Qayta urinib ko'ring."
+    },
     "home": {
       "eyebrow": "Keyingi sevimli libosingiz",
       "title": "Sizga mos keladigan kiyimlar.",
@@ -7,6 +15,7 @@
       "primaryAction": "Kiyimlarni ko'rish",
       "secondaryAction": "Hisob yaratish",
       "loginAction": "Kirish",
+      "landingAction": "Bosh sahifa",
       "account": "Hisob",
       "dashboardAction": "Boshqaruv paneli",
       "signOut": "Chiqish",
@@ -15,6 +24,44 @@
       "featureOne": { "title": "Saralangan kolleksiyalar", "description": "O'zingizga mos uslubni toping." },
       "featureTwo": { "title": "Oson saralash", "description": "Kerakli kiyimlarni tezda tanlang." },
       "featureThree": { "title": "Har kun uchun uslublar", "description": "Har bir vaziyat uchun liboslar." }
+    },
+    "profile": {
+      "title": "Profil",
+      "description": "Shaxsiy ma'lumotlaringiz va profil rasmingizni yangilang.",
+      "photo": "Profil rasmi",
+      "firstname": "Ism",
+      "lastname": "Familiya",
+      "email": "Email",
+      "emailHint": "Email manzilini hozircha o'zgartirib bo'lmaydi.",
+      "phone": "Telefon raqami",
+      "age": "Yosh",
+      "gender": "Jins",
+      "genderUnspecified": "Ko'rsatilmagan",
+      "male": "Erkak",
+      "female": "Ayol",
+      "save": "O'zgarishlarni saqlash",
+      "saving": "Saqlanmoqda...",
+      "saved": "Profil muvaffaqiyatli yangilandi.",
+      "loading": "Profil yuklanmoqda...",
+      "loadFailed": "Profilni yuklab bo'lmadi.",
+      "saveFailed": "Profilni yangilab bo'lmadi. Qayta urinib ko'ring.",
+      "crop": {
+        "choosePhoto": "Rasm tanlash",
+        "takePhoto": "Kamera orqali olish",
+        "title": "Profil rasmini tahrirlash",
+        "description": "Rasmni suring, kattalashtiring yoki aylantiring va kerakli qismini tanlang.",
+        "zoom": "Kattalashtirish",
+        "rotation": "Aylantirish",
+        "cancel": "Bekor qilish",
+        "apply": "Rasmni qo'llash",
+        "processing": "Tayyorlanmoqda...",
+        "failed": "Rasmni tayyorlab bo'lmadi. Boshqa rasmni tanlang."
+      },
+      "errors": {
+        "required": "Ushbu maydonni to'ldiring.",
+        "phone": "To'g'ri telefon raqamini kiriting.",
+        "age": "To'g'ri yoshni kiriting."
+      }
     },
     "login": {
       "brand": "Humayro",
@@ -102,6 +149,47 @@
         "failed": "Hisob yaratib bo'lmadi. Qayta urinib ko'ring."
       }
     },
+    "administration": {
+      "title": "Boshqaruv",
+      "description": "Mahsulot ranglari va o'lchamlarini boshqaring.",
+      "loading": "Ma'lumotlar yuklanmoqda...",
+      "loadFailed": "Ma'lumotlarni yuklab bo'lmadi.",
+      "accessDenied": "Bu bo'limga kirish uchun administrator huquqi kerak.",
+      "empty": "Ma'lumotlar mavjud emas.",
+      "name": "Nomi",
+      "actions": "Amallar",
+      "edit": "Tahrirlash",
+      "delete": "O'chirish",
+      "deleteConfirm": "Ushbu elementni o'chirishni xohlaysizmi?",
+      "save": "Saqlash",
+      "saving": "Saqlanmoqda...",
+      "saveFailed": "Ma'lumotni saqlab bo'lmadi. Maydonlarni tekshirib qayta urinib ko'ring.",
+      "colors": {
+        "title": "Ranglar",
+        "search": "Ranglarni qidirish...",
+        "create": "Rang qo'shish",
+        "edit": "Rangni tahrirlash",
+        "hex": "HEX kodi",
+        "picker": {
+          "title": "Rang tanlash",
+          "description": "Tayyor rangni tanlang yoki aniq rang qiymatini kiriting.",
+          "spectrum": "Rang spektri"
+        }
+      },
+      "sizes": {
+        "title": "O'lchamlar",
+        "search": "O'lchamlarni qidirish...",
+        "create": "O'lcham qo'shish",
+        "edit": "O'lchamni tahrirlash",
+        "value": "Qiymati",
+        "type": "Turi",
+        "sortOrder": "Tartib raqami",
+        "types": {
+          "LETTER": "Harfli",
+          "NUMBER": "Raqamli"
+        }
+      }
+    },
     "dashboard": {
       "admin": "Humayro administratori",
       "navigation": "Navigatsiya",
@@ -137,6 +225,8 @@
       "loadFailed": "Ro'yxatdan o'tgan foydalanuvchilarni yuklab bo'lmadi. Qayta urinib ko'ring."
     },
     "organization": {
+      "users": "Foydalanuvchilar",
+      "categories": "Kategoriyalar",
       "new": "Yangi tashkilot",
       "edit": "Tashkilotni tahrirlash",
       "name": "Tashkilot nomi",
@@ -170,6 +260,34 @@
       "selected": "Tanlangan manzil",
       "locating": "Manzil aniqlanmoqda...",
       "useAddress": "Ushbu manzilni ishlatish"
+    },
+    "category": {
+      "title": "Kategoriyalar",
+      "backToOrganizations": "Tashkilotlarga qaytish",
+      "new": "Kategoriya qo'shish",
+      "edit": "Kategoriyani tahrirlash",
+      "createDescription": "Kategoriya ma'lumotlarini to'ldiring.",
+      "name": "Kategoriya nomi",
+      "description": "Tavsif",
+      "sizeType": "O'lcham turi",
+      "letter": "Harflar",
+      "number": "Raqamlar",
+      "parent": "Asosiy kategoriya",
+      "root": "Asosiy kategoriya yo'q",
+      "image": "Kategoriya rasmi",
+      "status": "Holati",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "create": "Kategoriya yaratish",
+      "save": "Kategoriyani saqlash",
+      "delete": "Kategoriyani o'chirish",
+      "deleteConfirm": "Kategoriya va uning rasmi o'chirilsinmi?",
+      "loading": "Kategoriyalar yuklanmoqda...",
+      "loadFailed": "Kategoriyalarni yuklab bo'lmadi.",
+      "search": "Kategoriyalarni qidirish...",
+      "empty": "Kategoriyalar topilmadi.",
+      "deleteFailed": "Kategoriyani o'chirib bo'lmadi.",
+      "imageReferenceMissing": "Bu kategoriya rasmining attachment IDsi mavjud emas. Kategoriyani o'chirishdan oldin rasm attachment IDsi backenddan qaytishi kerak."
     }
   }
 }

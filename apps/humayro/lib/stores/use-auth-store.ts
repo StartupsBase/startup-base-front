@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { devtools } from "zustand/middleware"
 
 import type { UserDTO } from "@/lib/api"
 
@@ -10,10 +11,24 @@ type AuthState = {
   clear: () => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  identifier: null,
-  setUser: (user) => set({ user }),
-  setSession: (user, identifier) => set({ user, identifier: identifier ?? null }),
-  clear: () => set({ user: null, identifier: null }),
-}))
+export const useAuthStore = create<AuthState>()(
+  devtools(
+    (set) => ({
+      user: null,
+      identifier: null,
+      setUser: (user) => set({ user }, undefined, "auth/setUser"),
+      setSession: (user, identifier) =>
+        set(
+          { user, identifier: identifier ?? null },
+          undefined,
+          "auth/setSession"
+        ),
+      clear: () =>
+        set({ user: null, identifier: null }, undefined, "auth/clear"),
+    }),
+    {
+      name: "Humayro",
+      store: "auth",
+    }
+  )
+)

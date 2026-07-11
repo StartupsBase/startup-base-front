@@ -9,6 +9,8 @@
 export interface ProductListDTO {
   id?: number;
   name?: string;
+  nameRu?: string;
+  nameEng?: string;
   categoryId?: number;
   categoryName?: string;
   organizationId?: number;

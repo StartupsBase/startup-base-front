@@ -10,6 +10,8 @@ import type { CategoryDTOSizeType } from './categoryDTOSizeType';
 export interface CategoryDTO {
   id?: number;
   name?: string;
+  nameRu?: string;
+  nameEng?: string;
   description?: string;
   sizeType?: CategoryDTOSizeType;
   imageUrl?: string;

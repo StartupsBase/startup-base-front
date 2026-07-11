@@ -5,11 +5,22 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { formatPhoneNumberIntl } from "react-phone-number-input"
+import { toast } from "sonner"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-import { type UserDTO, useDelete, useMe1, useUpdate, useUploadPhoto } from "@/lib/api"
-import { getGetAll6QueryKey, useGetAll6 } from "@/lib/api/generated/admin-user/admin-user"
+import {
+  type UserDTO,
+  useDelete,
+  useMe1,
+  useUpdate,
+  useUploadPhoto,
+} from "@/lib/api"
+import {
+  getGetAll6QueryKey,
+  useGetAll6,
+} from "@/lib/api/generated/admin-user/admin-user"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Logo } from "@/components/logo"
@@ -25,7 +36,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover"
 import {
   DataTable,
   DataTableColumnHeader,
@@ -69,6 +84,7 @@ export function Dashboard({ language }: { language: string }) {
   const usersQuery = useGetAll6({
     query: { enabled: meQuery.isSuccess, retry: false },
   })
+  const [createOpen, setCreateOpen] = useState(false)
 
   useEffect(() => {
     if (meQuery.data) setUser(meQuery.data)
@@ -93,8 +109,8 @@ export function Dashboard({ language }: { language: string }) {
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
     .join(" ")
-  const canManageOrganizations = meQuery.data?.roles?.some((role) =>
-    role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
+  const canManageOrganizations = meQuery.data?.roles?.some(
+    (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
   )
   const columns = useMemo<ColumnDef<UserDTO>[]>(
     () => [
@@ -108,7 +124,11 @@ export function Dashboard({ language }: { language: string }) {
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             {row.original.photo?.s3Url ? (
-              <img src={row.original.photo.s3Url} alt="" className="size-9 rounded-full object-cover" />
+              <img
+                src={row.original.photo.s3Url}
+                alt=""
+                className="size-9 rounded-full object-cover"
+              />
             ) : (
               <span className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-medium">
                 {(row.getValue<string>("name") || "?").slice(0, 1)}
@@ -130,7 +150,11 @@ export function Dashboard({ language }: { language: string }) {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.phone")} />
         ),
-        cell: ({ row }) => row.getValue<string>("phone") || "—",
+        cell: ({ row }) => {
+          const phone = row.getValue<string>("phone")
+
+          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+        },
       },
       {
         id: "roles",
@@ -151,115 +175,72 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <TooltipProvider>
-      <SidebarProvider>
-        <Sidebar collapsible="icon" variant="inset">
-          <SidebarHeader>
-            <Link
-              href={`/${language}`}
-              aria-label="Humayro"
-              className="flex items-center gap-3 px-2 py-2 font-semibold group-data-[collapsible=icon]:justify-center"
-            >
-              <Logo className="size-8 text-primary transition-all group-data-[collapsible=icon]:size-6" />
-              <span className="group-data-[collapsible=icon]:hidden">Humayro</span>
-            </Link>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>{t("dashboard.navigation")}</SidebarGroupLabel>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive tooltip={t("dashboard.title")}>
-                    <Link href={`/${language}/dashboard`}>
-                      <HugeiconsIcon icon={Home01Icon} strokeWidth={2} />
-                      <span>{t("dashboard.title")}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-              {canManageOrganizations ? (
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip={t("dashboard.organizations")}>
-                      <Link href={`/${language}/dashboard/organizations`}>
-                        <span>{t("dashboard.organizations")}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              ) : null}
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <p className="truncate px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-              {userName || meQuery.data?.email || t("dashboard.loadingAccount")}
-            </p>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              {t("dashboard.signOut")}
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-        <header className="flex items-center justify-between border-b border-border pb-6">
-          <div>
-            <SidebarTrigger className="mb-3" />
-            <p className="text-sm font-medium text-primary">{t("dashboard.admin")}</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              {t("dashboard.title")}
-            </h1>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild><Button>{t("dashboard.addUser")}</Button></DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>{t("dashboard.addUser")}</DialogTitle><DialogDescription>{t("dashboard.addUserDescription")}</DialogDescription></DialogHeader>
-              <UserCreateForm onComplete={() => {}} />
-            </DialogContent>
-          </Dialog>
-        </header>
+    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+      <header className="flex items-center justify-between border-b border-border pb-6">
+        <div>
+          <SidebarTrigger className="mb-3" />
+          <p className="text-sm font-medium text-primary">
+            {t("dashboard.admin")}
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+            {t("dashboard.title")}
+          </h1>
+        </div>
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button>{t("dashboard.addUser")}</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("dashboard.addUser")}</DialogTitle>
+              <DialogDescription>
+                {t("dashboard.addUserDescription")}
+              </DialogDescription>
+            </DialogHeader>
+            <UserCreateForm onComplete={() => setCreateOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </header>
 
-        <section className="py-8">
-          {usersQuery.isLoading || meQuery.isLoading ? (
-            <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
-          ) : usersQuery.isError ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">
-              {getErrorMessage(usersQuery.error, t)}
-            </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={users}
-              searchColumn="name"
-              searchPlaceholder={t("dashboard.search")}
-              filters={[
-                {
-                  columnId: "roles",
-                  title: t("dashboard.roles"),
-                  options: [
-                    { label: "Admin", value: "ADMIN" },
-                    { label: t("dashboard.customer"), value: "USER" },
-                  ],
-                },
-              ]}
-              enableRowSelection
-              emptyMessage={t("dashboard.empty")}
-              labels={{
-                resetFilters: t("dashboard.resetFilters"),
-                columns: t("dashboard.columns"),
-                rowsPerPage: t("dashboard.rowsPerPage"),
-                selectedRows: (selected, total) =>
-                  t("dashboard.selectedRows", { selected, total }),
-                page: (page, total) => t("dashboard.page", { page, total }),
-                previous: t("dashboard.previous"),
-                next: t("dashboard.next"),
-              }}
-            />
-          )}
-        </section>
+      <section className="py-8">
+        {usersQuery.isLoading || meQuery.isLoading ? (
+          <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
+        ) : usersQuery.isError ? (
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">
+            {getErrorMessage(usersQuery.error, t)}
           </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={users}
+            searchColumn="name"
+            searchPlaceholder={t("dashboard.search")}
+            filters={[
+              {
+                columnId: "roles",
+                title: t("dashboard.roles"),
+                options: [
+                  { label: "Admin", value: "ADMIN" },
+                  { label: t("dashboard.customer"), value: "USER" },
+                ],
+              },
+            ]}
+            enableRowSelection
+            emptyMessage={t("dashboard.empty")}
+            labels={{
+              resetFilters: t("dashboard.resetFilters"),
+              columns: t("dashboard.columns"),
+              rowsPerPage: t("dashboard.rowsPerPage"),
+              selectedRows: (selected, total) =>
+                t("dashboard.selectedRows", { selected, total }),
+              page: (page, total) => t("dashboard.page", { page, total }),
+              previous: t("dashboard.previous"),
+              next: t("dashboard.next"),
+            }}
+          />
+        )}
+      </section>
+    </div>
   )
 }
 
@@ -273,26 +254,38 @@ function UserActions({ user }: { user: UserDTO }) {
   const [firstname, setFirstname] = useState(user.firstname ?? "")
   const [lastname, setLastname] = useState(user.lastname ?? "")
   const [phone, setPhone] = useState(user.phone ?? "")
-  const [gender, setGender] = useState<"" | "MALE" | "FEMALE">(user.gender ?? "")
+  const [gender, setGender] = useState<"" | "MALE" | "FEMALE">(
+    user.gender ?? ""
+  )
   const [file, setFile] = useState<File | null>(null)
 
   async function save() {
     if (user.id === undefined) return
-    await updateUser.mutateAsync({
-      id: user.id,
-      data: { firstname, lastname, phone, ...(gender ? { gender } : {}) },
-    })
-    if (file) {
-      await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
+    try {
+      await updateUser.mutateAsync({
+        id: user.id,
+        data: { firstname, lastname, phone, ...(gender ? { gender } : {}) },
+      })
+      if (file) {
+        await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
+      }
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      toast.success(t("notifications.updateSuccess"))
+      setOpen(false)
+    } catch {
+      toast.error(t("notifications.updateFailed"))
     }
-    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
-    setOpen(false)
   }
 
   async function remove() {
     if (user.id === undefined) return
-    await deleteUser.mutateAsync({ id: user.id })
-    await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+    try {
+      await deleteUser.mutateAsync({ id: user.id })
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      toast.success(t("notifications.deleteSuccess"))
+    } catch {
+      toast.error(t("notifications.deleteFailed"))
+    }
   }
 
   return (
@@ -302,11 +295,18 @@ function UserActions({ user }: { user: UserDTO }) {
       </Button>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">{t("dashboard.delete")}</Button>
+          <Button variant="destructive" size="sm">
+            {t("dashboard.delete")}
+          </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64">
           <p className="text-sm">{t("dashboard.deleteConfirm")}</p>
-          <Button variant="destructive" size="sm" disabled={deleteUser.isPending} onClick={remove}>
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={deleteUser.isPending}
+            onClick={remove}
+          >
             {t("dashboard.delete")}
           </Button>
         </PopoverContent>
@@ -318,21 +318,46 @@ function UserActions({ user }: { user: UserDTO }) {
             <DialogDescription>{user.email}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
-            <Input value={firstname} onChange={(event) => setFirstname(event.target.value)} placeholder={t("register.firstname")} />
-            <Input value={lastname} onChange={(event) => setLastname(event.target.value)} placeholder={t("register.lastname")} />
-            <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={t("register.phone")} />
-            <select value={gender} onChange={(event) => setGender(event.target.value as "" | "MALE" | "FEMALE")} className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm">
+            <Input
+              value={firstname}
+              onChange={(event) => setFirstname(event.target.value)}
+              placeholder={t("register.firstname")}
+            />
+            <Input
+              value={lastname}
+              onChange={(event) => setLastname(event.target.value)}
+              placeholder={t("register.lastname")}
+            />
+            <Input
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder={t("register.phone")}
+            />
+            <select
+              value={gender}
+              onChange={(event) =>
+                setGender(event.target.value as "" | "MALE" | "FEMALE")
+              }
+              className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm"
+            >
               <option value="">{t("register.genderUnspecified")}</option>
               <option value="MALE">{t("register.male")}</option>
               <option value="FEMALE">{t("register.female")}</option>
             </select>
             <label className="text-sm font-medium">
               {t("dashboard.profilePhoto")}
-              <Input type="file" accept="image/*" className="mt-2" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+              <Input
+                type="file"
+                accept="image/*"
+                className="mt-2"
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              />
             </label>
           </div>
           <DialogFooter>
-            <Button onClick={save} disabled={updateUser.isPending}>{t("dashboard.save")}</Button>
+            <Button onClick={save} disabled={updateUser.isPending}>
+              {t("dashboard.save")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -11,6 +11,8 @@ import type { ProductVariantCreateDTO } from './productVariantCreateDTO';
 export interface ProductCreateDTO {
   /** @minLength 1 */
   name: string;
+  nameRu?: string;
+  nameEng?: string;
   description?: string;
   categoryId: number;
   organizationId?: number;

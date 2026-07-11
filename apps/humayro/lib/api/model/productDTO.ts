@@ -11,6 +11,8 @@ import type { ProductVariantDTO } from './productVariantDTO';
 export interface ProductDTO {
   id?: number;
   name?: string;
+  nameRu?: string;
+  nameEng?: string;
   description?: string;
   categoryId?: number;
   categoryName?: string;
