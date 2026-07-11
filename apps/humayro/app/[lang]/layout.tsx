@@ -10,6 +10,7 @@ import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
+import HumayroLoader from "@/components/loader"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
   weight: ["400", "700"],
@@ -44,7 +45,9 @@ export default async function RootLayout({
       <body>
         <ThemeProvider>
           <QueryProvider>
-            <I18nProvider language={lang}>{children}</I18nProvider>
+            <I18nProvider language={lang}>
+              <HumayroLoader duration={7600}>{children}</HumayroLoader>
+            </I18nProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>
