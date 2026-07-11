@@ -44,6 +44,7 @@ export function DashboardShell({ children, language }: { children: React.ReactNo
     (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
   ) ?? false
   const isOrganizationsPage = pathname.startsWith(`/${language}/dashboard/organizations`)
+  const isAdministrationPage = pathname.startsWith(`/${language}/dashboard/adminstration`)
   const isDashboardPage = pathname === `/${language}/dashboard`
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname].filter(Boolean).join(" ")
 
@@ -87,6 +88,15 @@ export function DashboardShell({ children, language }: { children: React.ReactNo
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {canManageOrganizations ? (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isAdministrationPage} tooltip={t("administration.title")}>
+                      <Link href={`/${language}/dashboard/adminstration`}>
+                        <span>{t("administration.title")}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ) : null}
                 {canManageOrganizations ? (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isOrganizationsPage} tooltip={t("dashboard.organizations")}>

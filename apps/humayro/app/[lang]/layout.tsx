@@ -1,4 +1,4 @@
-import { M_PLUS_Rounded_1c } from "next/font/google"
+import { M_PLUS_1_Code, M_PLUS_Rounded_1c } from "next/font/google"
 import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
 import "leaflet/dist/leaflet.css"
@@ -16,6 +16,13 @@ const mPlusRounded1c = M_PLUS_Rounded_1c({
   weight: ["400", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+})
+
+const mPlus1Code = M_PLUS_1_Code({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 })
 
@@ -40,7 +47,12 @@ export default async function RootLayout({
     <html
       lang={lang}
       suppressHydrationWarning
-      className={cn("antialiased", mPlusRounded1c.variable, "font-sans")}
+      className={cn(
+        "antialiased",
+        mPlusRounded1c.variable,
+        mPlus1Code.variable,
+        "font-sans"
+      )}
     >
       <body>
         <ThemeProvider>
