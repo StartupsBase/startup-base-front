@@ -38,7 +38,9 @@ export function proxy(request: NextRequest) {
     const language = languages.find(
       (item) => pathname === `/${item}` || pathname.startsWith(`/${item}/`)
     )
-    const isDashboard = pathname === `/${language}/dashboard`
+    const isDashboard =
+      pathname === `/${language}/dashboard` ||
+      pathname.startsWith(`/${language}/dashboard/`)
 
     if (isDashboard && !request.cookies.get("humayro_access_token")?.value) {
       const url = request.nextUrl.clone()

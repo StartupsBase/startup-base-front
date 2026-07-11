@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 import { useMe1 } from "@/lib/api"
@@ -26,6 +26,7 @@ export function UserDropdown({ language }: { language: string }) {
   const identifier = useAuthStore((state) => state.identifier)
   const setUser = useAuthStore((state) => state.setUser)
   const clear = useAuthStore((state) => state.clear)
+  const pathname = usePathname()
   const meQuery = useMe1({ query: { enabled, retry: false } })
   const currentUser = meQuery.data ?? user
   const name = [currentUser?.firstname, currentUser?.lastname]
@@ -63,6 +64,8 @@ export function UserDropdown({ language }: { language: string }) {
     )
   }
 
+  console.log(pathname)
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -83,8 +86,13 @@ export function UserDropdown({ language }: { language: string }) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/${language}/dashboard`}>{t("home.dashboardAction")}</Link>
+          <Link href={`/${language}/dashboard/profile`}>{t("profile.title")}</Link>
         </DropdownMenuItem>
+        {pathname !== `/${language}/dashboard` && (
+          <DropdownMenuItem asChild>
+            <Link href={`/${language}/dashboard`}>{t("home.landingAction")}</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={signOut}
           className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"

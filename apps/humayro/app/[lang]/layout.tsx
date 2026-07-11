@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css"
 import { I18nProvider } from "@/components/i18n-provider"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { TelegramProvider } from "@/components/telegram-provider"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
@@ -44,7 +45,9 @@ export default async function RootLayout({
       <body>
         <ThemeProvider>
           <QueryProvider>
-            <I18nProvider language={lang}>{children}</I18nProvider>
+            <TelegramProvider>
+              <I18nProvider language={lang}>{children}</I18nProvider>
+            </TelegramProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>
