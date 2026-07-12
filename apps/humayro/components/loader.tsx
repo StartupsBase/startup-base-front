@@ -996,7 +996,7 @@ export default function HumayroLoader({
 
               <div className="relative mt-5 h-7 w-[min(74vw,290px)]">
                 <span
-                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-[176px] -translate-y-1/2 rounded-full"
+                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-[176px] -translate-x-1/2 -translate-y-1/2 rounded-full"
                   style={{
                     background: "var(--humayro-loader-glow)",
                     filter: "blur(7px)",

@@ -12,7 +12,11 @@ import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
+import { CustomCursor } from "@/components/custom-cursor"
 import HumayroLoader from "@/components/loader"
+import Header from "@/components/header/Header"
+import Footer from "@/components/footer/Footer"
+import Container from "@/components/container"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
   weight: ["400", "700"],
@@ -57,11 +61,18 @@ export default async function RootLayout({
       )}
     >
       <body>
+        <CustomCursor />
         <ThemeProvider>
           <QueryProvider>
             <TelegramProvider>
               <I18nProvider language={lang}>
-                <HumayroLoader>{children}</HumayroLoader>
+                <HumayroLoader>
+                  <Container>
+                    <Header language={lang} />
+                    {children}
+                  </Container>
+                  <Footer language={lang} />
+                </HumayroLoader>
               </I18nProvider>
             </TelegramProvider>
           </QueryProvider>

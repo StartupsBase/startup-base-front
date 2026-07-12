@@ -1,10 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { LogoBrand } from "@/components/logo"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { UserDropdown } from "@/components/user-dropdown"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { Button } from "@workspace/ui/components/button"
@@ -21,16 +17,6 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
   return (
     <main className="min-h-svh bg-background text-foreground">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
-        <header className="flex items-center justify-between">
-          <LogoBrand />
-
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher language={lang} />
-            <ThemeToggle />
-            <UserDropdown language={lang} />
-          </div>
-        </header>
-
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <p className="mb-6 text-sm font-semibold tracking-[0.24em] text-primary uppercase">
             {t("home.eyebrow")}
