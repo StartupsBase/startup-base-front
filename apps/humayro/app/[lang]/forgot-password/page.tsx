@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { ForgotPasswordForm } from "@/components/forgot-password-form"
+import { ForgotPasswordForm } from "./_components/forgot-password-form"
 import { LogoBrand } from "@/components/logo"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"

@@ -17,7 +17,7 @@ import {
   useUploadPhoto1,
 } from "@/lib/api/generated/profile/profile"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { ImageCropInput } from "@/components/image-crop-input"
+import { ImageCropInput } from "./image-crop-input"
 import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
@@ -109,11 +109,19 @@ export function ProfileForm() {
   }
 
   if (meQuery.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground md:p-10">{t("profile.loading")}</p>
+    return (
+      <p className="p-6 text-sm text-muted-foreground md:p-10">
+        {t("profile.loading")}
+      </p>
+    )
   }
 
   if (meQuery.isError || !meQuery.data) {
-    return <p className="p-6 text-sm text-destructive md:p-10">{t("profile.loadFailed")}</p>
+    return (
+      <p className="p-6 text-sm text-destructive md:p-10">
+        {t("profile.loadFailed")}
+      </p>
+    )
   }
 
   const pending = updateProfile.isPending || uploadPhoto.isPending
@@ -122,11 +130,18 @@ export function ProfileForm() {
   return (
     <div className="mx-auto w-full max-w-3xl p-6 md:p-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("profile.title")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t("profile.description")}</p>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          {t("profile.title")}
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("profile.description")}
+        </p>
       </div>
 
-      <form className="space-y-6 rounded-3xl border border-border bg-card p-6" onSubmit={form.handleSubmit(submit)}>
+      <form
+        className="space-y-6 rounded-3xl border border-border bg-card p-6"
+        onSubmit={form.handleSubmit(submit)}
+      >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-2xl font-semibold">
             {photoUrl ? (
@@ -141,10 +156,20 @@ export function ProfileForm() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("profile.firstname")} error={form.formState.errors.firstname && t("profile.errors.required")}>
+          <Field
+            label={t("profile.firstname")}
+            error={
+              form.formState.errors.firstname && t("profile.errors.required")
+            }
+          >
             <Input autoComplete="given-name" {...form.register("firstname")} />
           </Field>
-          <Field label={t("profile.lastname")} error={form.formState.errors.lastname && t("profile.errors.required")}>
+          <Field
+            label={t("profile.lastname")}
+            error={
+              form.formState.errors.lastname && t("profile.errors.required")
+            }
+          >
             <Input autoComplete="family-name" {...form.register("lastname")} />
           </Field>
         </div>
@@ -154,7 +179,10 @@ export function ProfileForm() {
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("profile.phone")} error={form.formState.errors.phone && t("profile.errors.phone")}>
+          <Field
+            label={t("profile.phone")}
+            error={form.formState.errors.phone && t("profile.errors.phone")}
+          >
             <Controller
               control={form.control}
               name="phone"
@@ -168,7 +196,10 @@ export function ProfileForm() {
               )}
             />
           </Field>
-          <Field label={t("profile.age")} error={form.formState.errors.age && t("profile.errors.age")}>
+          <Field
+            label={t("profile.age")}
+            error={form.formState.errors.age && t("profile.errors.age")}
+          >
             <Controller
               control={form.control}
               name="age"
@@ -183,7 +214,11 @@ export function ProfileForm() {
                   value={field.value ?? ""}
                   onBlur={field.onBlur}
                   onChange={(event) =>
-                    field.onChange(event.target.value === "" ? undefined : event.target.valueAsNumber)
+                    field.onChange(
+                      event.target.value === ""
+                        ? undefined
+                        : event.target.valueAsNumber
+                    )
                   }
                 />
               )}
@@ -202,8 +237,12 @@ export function ProfileForm() {
           </select>
         </Field>
 
-        {saved ? <p className="text-sm text-emerald-600">{t("profile.saved")}</p> : null}
-        {submitError ? <p className="text-sm text-destructive">{t("profile.saveFailed")}</p> : null}
+        {saved ? (
+          <p className="text-sm text-emerald-600">{t("profile.saved")}</p>
+        ) : null}
+        {submitError ? (
+          <p className="text-sm text-destructive">{t("profile.saveFailed")}</p>
+        ) : null}
 
         <div className="flex justify-end">
           <Button type="submit" disabled={pending}>
@@ -230,8 +269,12 @@ function Field({
     <label className="block space-y-2">
       <span className="text-sm font-medium">{label}</span>
       {children}
-      {hint ? <span className="block text-xs text-muted-foreground">{hint}</span> : null}
-      {error ? <span className="block text-xs text-destructive">{error}</span> : null}
+      {hint ? (
+        <span className="block text-xs text-muted-foreground">{hint}</span>
+      ) : null}
+      {error ? (
+        <span className="block text-xs text-destructive">{error}</span>
+      ) : null}
     </label>
   )
 }

@@ -2,14 +2,14 @@
 
 import { usePathname } from "next/navigation"
 import type { Language } from "@/i18n/config"
-import { LogoBrand } from "../logo"
-import { LanguageSwitcher } from "../language-switcher"
-import { ThemeToggle } from "../theme-toggle"
-import { UserDropdown } from "../user-dropdown"
 import Link from "next/link"
 import { HeartIcon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useState } from "react"
+import { LogoBrand } from "@/components/logo"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { UserDropdown } from "./user-dropdown"
 
 export default function Header({ language }: { language: Language }) {
   const pathname = usePathname()

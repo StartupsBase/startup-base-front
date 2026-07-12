@@ -14,11 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
-import type { MapCoordinates } from "@/components/maps/leaflet-location-map"
+import type { MapCoordinates } from "./leaflet-location-map"
 
 const LeafletLocationMap = dynamic(
   () =>
-    import("@/components/maps/leaflet-location-map").then(
+    import("./leaflet-location-map").then(
       (module) => module.LeafletLocationMap
     ),
   { ssr: false, loading: () => <MapLoading /> }
@@ -26,9 +26,7 @@ const LeafletLocationMap = dynamic(
 
 const YandexLocationMap = dynamic(
   () =>
-    import("@/components/maps/yandex-location-map").then(
-      (module) => module.YandexLocationMap
-    ),
+    import("./yandex-location-map").then((module) => module.YandexLocationMap),
   { ssr: false, loading: () => <MapLoading /> }
 )
 

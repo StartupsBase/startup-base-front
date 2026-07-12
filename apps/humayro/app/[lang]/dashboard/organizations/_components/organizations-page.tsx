@@ -23,7 +23,7 @@ import {
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { LocationPickerDialog } from "@/components/maps/location-picker-dialog"
+import { LocationPickerDialog } from "./maps/location-picker-dialog"
 import { Button } from "@workspace/ui/components/button"
 import {
   Dialog,

@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { useCreate } from "@/lib/api"
-import { getGetAll7QueryKey } from "@/lib/api/generated/admin-user/admin-user"
+import { getGetAllQueryKey } from "@/lib/api/generated/user-controller/user-controller"
 import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import { Input } from "@workspace/ui/components/input"
@@ -59,7 +59,7 @@ export function UserCreateForm({
         data:
           organizationId === undefined ? values : { ...values, organizationId },
       })
-      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() })
       toast.success(t("notifications.createSuccess"))
       onComplete()
     } catch {

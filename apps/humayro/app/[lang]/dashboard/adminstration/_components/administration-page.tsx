@@ -21,7 +21,7 @@ import {
   useUpdate1,
 } from "@/lib/api/generated/size/size"
 import { Input } from "@/components/input"
-import { ColorPicker } from "@/components/color-picker"
+import { ColorPicker } from "./color-picker"
 import { Button } from "@workspace/ui/components/button"
 import {
   DataTable,
@@ -127,20 +127,29 @@ function ColorsPanel() {
       {
         accessorKey: "name",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("administration.name")} />
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.name")}
+          />
         ),
         cell: ({ row }) => row.getValue<string>("name") || "—",
       },
       {
         accessorKey: "hexCode",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("administration.colors.hex")} />
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.colors.hex")}
+          />
         ),
         cell: ({ row }) => {
           const hexCode = row.getValue<string>("hexCode")
           return (
             <div className="flex items-center gap-2">
-              <span className="size-6 rounded-full border border-border" style={{ backgroundColor: hexCode }} />
+              <span
+                className="size-6 rounded-full border border-border"
+                style={{ backgroundColor: hexCode }}
+              />
               <span className="font-mono text-xs">{hexCode || "—"}</span>
             </div>
           )
@@ -301,22 +310,33 @@ function SizesPanel() {
       {
         accessorKey: "value",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("administration.sizes.value")} />
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.sizes.value")}
+          />
         ),
         cell: ({ row }) => row.getValue<string>("value") || "—",
       },
       {
         accessorKey: "type",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("administration.sizes.type")} />
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.sizes.type")}
+          />
         ),
         cell: ({ row }) =>
-          t(`administration.sizes.types.${row.getValue<string>("type") || "LETTER"}`),
+          t(
+            `administration.sizes.types.${row.getValue<string>("type") || "LETTER"}`
+          ),
       },
       {
         accessorKey: "sortOrder",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("administration.sizes.sortOrder")} />
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.sizes.sortOrder")}
+          />
         ),
         cell: ({ row }) => row.getValue<number>("sortOrder") ?? 0,
       },
@@ -362,8 +382,14 @@ function SizesPanel() {
               columnId: "type",
               title: t("administration.sizes.type"),
               options: [
-                { label: t("administration.sizes.types.LETTER"), value: "LETTER" },
-                { label: t("administration.sizes.types.NUMBER"), value: "NUMBER" },
+                {
+                  label: t("administration.sizes.types.LETTER"),
+                  value: "LETTER",
+                },
+                {
+                  label: t("administration.sizes.types.NUMBER"),
+                  value: "NUMBER",
+                },
               ],
             },
           ]}
@@ -580,7 +606,9 @@ function Message({
   )
 }
 
-function getTableLabels(t: (key: string, options?: Record<string, unknown>) => string) {
+function getTableLabels(
+  t: (key: string, options?: Record<string, unknown>) => string
+) {
   return {
     resetFilters: t("dashboard.resetFilters"),
     columns: t("dashboard.columns"),

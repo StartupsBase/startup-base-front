@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { LogoBrand } from "@/components/logo"
-import { RegisterForm } from "@/components/register-form"
+import { RegisterForm } from "./_components/register-form"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 
@@ -23,7 +23,9 @@ export default async function RegisterPage({
       <section className="w-full max-w-md space-y-8">
         <LogoBrand />
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{t("register.title")}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {t("register.title")}
+          </h1>
           <p className="text-muted-foreground">{t("register.subtitle")}</p>
         </div>
         <RegisterForm language={lang} />

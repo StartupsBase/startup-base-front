@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-import type { MapCoordinates } from "@/components/maps/leaflet-location-map"
+import type { MapCoordinates } from "./leaflet-location-map"
 
 type YandexLocationMapProps = {
   value?: MapCoordinates
@@ -19,9 +19,15 @@ function loadYandexMaps(apiKey: string) {
   if (windowWithYandex.ymaps3) return Promise.resolve(windowWithYandex.ymaps3)
 
   return new Promise<any>((resolve, reject) => {
-    const existingScript = document.querySelector<HTMLScriptElement>('script[data-yandex-maps="v3"]')
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[data-yandex-maps="v3"]'
+    )
     if (existingScript) {
-      existingScript.addEventListener("load", () => resolve((window as YandexWindow).ymaps3), { once: true })
+      existingScript.addEventListener(
+        "load",
+        () => resolve((window as YandexWindow).ymaps3),
+        { once: true }
+      )
       existingScript.addEventListener("error", reject, { once: true })
       return
     }
@@ -36,7 +42,10 @@ function loadYandexMaps(apiKey: string) {
   })
 }
 
-export function YandexLocationMap({ value, onLocationChange }: YandexLocationMapProps) {
+export function YandexLocationMap({
+  value,
+  onLocationChange,
+}: YandexLocationMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const onLocationChangeRef = useRef(onLocationChange)
   const [error, setError] = useState(false)
@@ -57,7 +66,8 @@ export function YandexLocationMap({ value, onLocationChange }: YandexLocationMap
         await ymaps3.ready
         if (disposed || !containerRef.current) return
 
-        const { YMap, YMapDefaultSchemeLayer, YMapListener, YMapMarker } = ymaps3
+        const { YMap, YMapDefaultSchemeLayer, YMapListener, YMapMarker } =
+          ymaps3
         const point = value ?? tashkent
         map = new YMap(containerRef.current, {
           location: { center: [point.longitude, point.latitude], zoom: 12 },
@@ -65,9 +75,13 @@ export function YandexLocationMap({ value, onLocationChange }: YandexLocationMap
         map.addChild(new YMapDefaultSchemeLayer())
 
         const markerElement = document.createElement("div")
-        markerElement.className = "flex size-8 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full border-2 border-white bg-primary text-xs text-primary-foreground shadow-lg"
+        markerElement.className =
+          "flex size-8 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full border-2 border-white bg-primary text-xs text-primary-foreground shadow-lg"
         markerElement.textContent = "•"
-        const marker = new YMapMarker({ coordinates: [point.longitude, point.latitude] }, markerElement)
+        const marker = new YMapMarker(
+          { coordinates: [point.longitude, point.latitude] },
+          markerElement
+        )
         map.addChild(marker)
         map.addChild(
           new YMapListener({
@@ -90,12 +104,25 @@ export function YandexLocationMap({ value, onLocationChange }: YandexLocationMap
   }, [apiKey, value?.latitude, value?.longitude])
 
   if (!apiKey) {
-    return <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">Yandex Maps API key is not configured.</p>
+    return (
+      <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
+        Yandex Maps API key is not configured.
+      </p>
+    )
   }
 
   if (error) {
-    return <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">Yandex Maps could not be loaded.</p>
+    return (
+      <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">
+        Yandex Maps could not be loaded.
+      </p>
+    )
   }
 
-  return <div ref={containerRef} className="h-80 w-full overflow-hidden rounded-xl" />
+  return (
+    <div
+      ref={containerRef}
+      className="h-80 w-full overflow-hidden rounded-xl"
+    />
+  )
 }

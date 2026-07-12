@@ -16,14 +16,33 @@ import {
 import { cn } from "@workspace/ui/lib/utils"
 
 const colorPresets = [
-  "#111827", "#6B7280", "#F9FAFB", "#EF4444", "#F97316", "#F59E0B",
-  "#EAB308", "#84CC16", "#22C55E", "#10B981", "#14B8A6", "#06B6D4",
-  "#0EA5E9", "#3B82F6", "#6366F1", "#8B5CF6", "#D946EF", "#EC4899",
+  "#111827",
+  "#6B7280",
+  "#F9FAFB",
+  "#EF4444",
+  "#F97316",
+  "#F59E0B",
+  "#EAB308",
+  "#84CC16",
+  "#22C55E",
+  "#10B981",
+  "#14B8A6",
+  "#06B6D4",
+  "#0EA5E9",
+  "#3B82F6",
+  "#6366F1",
+  "#8B5CF6",
+  "#D946EF",
+  "#EC4899",
 ] as const
 
 const hexPattern = /^#[0-9A-F]{6}$/
 
-export function ColorPicker({ disabled, onChange, value }: {
+export function ColorPicker({
+  disabled,
+  onChange,
+  value,
+}: {
   disabled?: boolean
   onChange: (value: string) => void
   value: string
@@ -59,13 +78,17 @@ export function ColorPicker({ disabled, onChange, value }: {
             className="size-7 shrink-0 rounded-full border border-black/10 shadow-inner"
             style={{ backgroundColor: normalizedValue }}
           />
-          <span className="font-mono text-sm tracking-wide">{value.toUpperCase()}</span>
+          <span className="font-mono text-sm tracking-wide">
+            {value.toUpperCase()}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80">
         <PopoverHeader>
           <PopoverTitle>{t("administration.colors.picker.title")}</PopoverTitle>
-          <PopoverDescription>{t("administration.colors.picker.description")}</PopoverDescription>
+          <PopoverDescription>
+            {t("administration.colors.picker.description")}
+          </PopoverDescription>
         </PopoverHeader>
 
         <div className="grid grid-cols-6 gap-2">
@@ -76,8 +99,9 @@ export function ColorPicker({ disabled, onChange, value }: {
               aria-label={preset}
               aria-pressed={normalizedValue === preset}
               className={cn(
-                "aspect-square rounded-full border border-black/10 shadow-sm outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                normalizedValue === preset && "ring-2 ring-primary ring-offset-2 ring-offset-popover"
+                "aspect-square rounded-full border border-black/10 shadow-sm transition-transform outline-none hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                normalizedValue === preset &&
+                  "ring-2 ring-primary ring-offset-2 ring-offset-popover"
               )}
               style={{ backgroundColor: preset }}
               onClick={() => selectColor(preset)}
@@ -100,7 +124,10 @@ export function ColorPicker({ disabled, onChange, value }: {
           <Input
             value={draft}
             onChange={(event) => updateDraft(event.target.value)}
-            className={cn("font-mono uppercase", draft && !hexPattern.test(draft) && "border-destructive")}
+            className={cn(
+              "font-mono uppercase",
+              draft && !hexPattern.test(draft) && "border-destructive"
+            )}
             placeholder="#000000"
             spellCheck={false}
           />

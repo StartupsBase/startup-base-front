@@ -122,11 +122,16 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
         />
       </div>
 
-      <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : closeCropper())}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : closeCropper())}
+      >
         <DialogContent className="sm:max-w-xl data-open:zoom-in-100 data-closed:zoom-out-100">
           <DialogHeader>
             <DialogTitle>{t("profile.crop.title")}</DialogTitle>
-            <DialogDescription>{t("profile.crop.description")}</DialogDescription>
+            <DialogDescription>
+              {t("profile.crop.description")}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="relative h-[min(55vh,28rem)] min-h-72 overflow-hidden rounded-3xl bg-black">
@@ -148,7 +153,10 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
           </div>
 
           <div className="grid gap-4">
-            <Control label={t("profile.crop.zoom")} value={Math.round(zoom * 100)}>
+            <Control
+              label={t("profile.crop.zoom")}
+              value={Math.round(zoom * 100)}
+            >
               <Slider
                 min={1}
                 max={3}
@@ -168,14 +176,29 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
             </Control>
           </div>
 
-          {error ? <p className="text-sm text-destructive">{t("profile.crop.failed")}</p> : null}
+          {error ? (
+            <p className="text-sm text-destructive">
+              {t("profile.crop.failed")}
+            </p>
+          ) : null}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={closeCropper} disabled={processing}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeCropper}
+              disabled={processing}
+            >
               {t("profile.crop.cancel")}
             </Button>
-            <Button type="button" onClick={applyCrop} disabled={processing || !croppedArea}>
-              {processing ? t("profile.crop.processing") : t("profile.crop.apply")}
+            <Button
+              type="button"
+              onClick={applyCrop}
+              disabled={processing || !croppedArea}
+            >
+              {processing
+                ? t("profile.crop.processing")
+                : t("profile.crop.apply")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -250,7 +273,8 @@ async function createCroppedImage(
 
   const blob = await new Promise<Blob>((resolve, reject) => {
     output.toBlob(
-      (result) => (result ? resolve(result) : reject(new Error("Image export failed"))),
+      (result) =>
+        result ? resolve(result) : reject(new Error("Image export failed")),
       "image/jpeg",
       0.92
     )

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { OrganizationsPage } from "@/components/organizations-page"
+import { OrganizationsPage } from "./_components/organizations-page"
 import { isLanguage } from "@/i18n/config"
 
 export default async function OrganizationsDashboardPage({
