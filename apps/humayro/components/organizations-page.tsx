@@ -8,18 +8,18 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner" 
+import { toast } from "sonner"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
 import { type OrganizationDTO, useMe1 } from "@/lib/api"
 import {
-  getGetAll5QueryKey,
-  useCreate5,
-  useDelete5,
-  useGetAll5,
-  useUpdate6,
+  getGetAll6QueryKey,
+  useCreate6,
+  useDelete6,
+  useGetAll6,
+  useUpdate7,
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
@@ -88,6 +88,8 @@ const organizationSchema = z.object({
       "INN must contain 9 to 14 digits."
     ),
   address: z.string().trim(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   active: z.boolean(),
 })
 
@@ -101,6 +103,8 @@ const emptyOrganization: OrganizationFormValues = {
   contactPhone: "",
   inn: "",
   address: "",
+  latitude: undefined,
+  longitude: undefined,
   active: true,
 }
 
@@ -115,6 +119,8 @@ function getOrganizationValues(
     contactPhone: organization?.contactPhone ?? "",
     inn: organization?.inn ?? "",
     address: organization?.address ?? "",
+    latitude: organization?.latitude,
+    longitude: organization?.longitude,
     active: organization?.active ?? true,
   }
 }
@@ -128,6 +134,8 @@ function compactOrganizationPayload(values: OrganizationFormValues) {
     ...(values.contactPhone ? { contactPhone: values.contactPhone } : {}),
     ...(values.inn ? { inn: values.inn } : {}),
     ...(values.address ? { address: values.address } : {}),
+    ...(values.latitude !== undefined ? { latitude: values.latitude } : {}),
+    ...(values.longitude !== undefined ? { longitude: values.longitude } : {}),
   }
 }
 
@@ -142,7 +150,7 @@ export function OrganizationsPage({ language }: { language: string }) {
     meQuery.data?.roles?.some(
       (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
     ) ?? false
-  const organizationsQuery = useGetAll5(undefined, {
+  const organizationsQuery = useGetAll6(undefined, {
     query: { enabled: canManageOrganizations, retry: false },
   })
   const [createOpen, setCreateOpen] = useState(false)
@@ -341,8 +349,8 @@ function OrganizationForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const create = useCreate5()
-  const update = useUpdate6()
+  const create = useCreate6()
+  const update = useUpdate7()
   const form = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationSchema),
     defaultValues: organization
@@ -364,9 +372,13 @@ function OrganizationForm({
         await create.mutateAsync({ data: payload })
       }
 
-      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
       toast.success(
-        t(editing ? "notifications.updateSuccess" : "notifications.createSuccess")
+        t(
+          editing
+            ? "notifications.updateSuccess"
+            : "notifications.createSuccess"
+        )
       )
       onComplete()
     } catch {
@@ -453,12 +465,18 @@ function OrganizationForm({
               {...form.register("address")}
             />
             <LocationPickerDialog
-              onSelect={(address) =>
+              onSelect={(address, coordinates) => {
                 form.setValue("address", address, {
                   shouldDirty: true,
                   shouldValidate: true,
                 })
-              }
+                form.setValue("latitude", coordinates.latitude, {
+                  shouldDirty: true,
+                })
+                form.setValue("longitude", coordinates.longitude, {
+                  shouldDirty: true,
+                })
+              }}
             />
           </div>
         </FormField>
@@ -507,14 +525,14 @@ function OrganizationActions({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const remove = useDelete5()
+  const remove = useDelete6()
   const [editOpen, setEditOpen] = useState(false)
 
   async function deleteOrganization() {
     if (organization.id === undefined) return
     try {
       await remove.mutateAsync({ id: organization.id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
       toast.success(t("notifications.deleteSuccess"))
     } catch {
       toast.error(t("notifications.deleteFailed"))

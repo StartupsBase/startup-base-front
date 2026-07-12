@@ -21,9 +21,18 @@
       "signOut": "Chiqish",
       "themeToDark": "Qorong'i mavzuni yoqish",
       "themeToLight": "Yorug' mavzuni yoqish",
-      "featureOne": { "title": "Saralangan kolleksiyalar", "description": "O'zingizga mos uslubni toping." },
-      "featureTwo": { "title": "Oson saralash", "description": "Kerakli kiyimlarni tezda tanlang." },
-      "featureThree": { "title": "Har kun uchun uslublar", "description": "Har bir vaziyat uchun liboslar." }
+      "featureOne": {
+        "title": "Saralangan kolleksiyalar",
+        "description": "O'zingizga mos uslubni toping."
+      },
+      "featureTwo": {
+        "title": "Oson saralash",
+        "description": "Kerakli kiyimlarni tezda tanlang."
+      },
+      "featureThree": {
+        "title": "Har kun uchun uslublar",
+        "description": "Har bir vaziyat uchun liboslar."
+      }
     },
     "profile": {
       "title": "Profil",
@@ -227,6 +236,8 @@
     "organization": {
       "users": "Foydalanuvchilar",
       "categories": "Kategoriyalar",
+      "branches": "Filiallar",
+      "products": "Mahsulotlar",
       "new": "Yangi tashkilot",
       "edit": "Tashkilotni tahrirlash",
       "name": "Tashkilot nomi",
@@ -249,6 +260,53 @@
       "search": "Tashkilotlarni qidirish...",
       "empty": "Tashkilotlar topilmadi.",
       "deleteConfirm": "Bu tashkilotni o'chirishni xohlaysizmi?"
+    },
+    "branch": {
+      "new": "Filial qo'shish",
+      "edit": "Filialni tahrirlash",
+      "createDescription": "Filial ma'lumotlarini to'ldiring.",
+      "name": "Filial nomi",
+      "phone": "Telefon",
+      "address": "Manzil",
+      "status": "Holati",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "create": "Filial yaratish",
+      "save": "Filialni saqlash",
+      "delete": "Filialni o'chirish",
+      "deleteConfirm": "Bu filialni o'chirishni xohlaysizmi?",
+      "loading": "Filiallar yuklanmoqda...",
+      "loadFailed": "Filiallarni yuklab bo'lmadi.",
+      "search": "Filiallarni qidirish...",
+      "empty": "Filiallar topilmadi."
+    },
+    "product": {
+      "new": "Mahsulot qo'shish",
+      "edit": "Mahsulotni tahrirlash",
+      "createDescription": "Yangi mahsulot ma'lumotlarini to'ldiring.",
+      "backToOrganization": "Tashkilotga qaytish",
+      "name": "Mahsulot nomi",
+      "nameRu": "Ruscha nomi",
+      "nameEng": "Inglizcha nomi",
+      "descriptionUz": "O'zbekcha tavsif",
+      "descriptionRu": "Ruscha tavsif",
+      "descriptionEng": "Inglizcha tavsif",
+      "category": "Kategoriya",
+      "selectCategory": "Kategoriyani tanlang",
+      "basePrice": "Asosiy narx",
+      "discountPercent": "Chegirma foizi",
+      "stock": "Qoldiq",
+      "status": "Holati",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "create": "Mahsulot yaratish",
+      "save": "Mahsulotni saqlash",
+      "delete": "Mahsulotni o'chirish",
+      "deleteConfirm": "Bu mahsulotni o'chirishni xohlaysizmi?",
+      "loading": "Mahsulotlar yuklanmoqda...",
+      "loadFailed": "Mahsulotlarni yuklab bo'lmadi.",
+      "search": "Mahsulotlarni qidirish...",
+      "empty": "Mahsulotlar topilmadi."
     },
     "mapPicker": {
       "title": "Xaritadan manzil tanlang",
