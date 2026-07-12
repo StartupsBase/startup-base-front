@@ -23,6 +23,7 @@
     "js-cookie": "^3.0.8",
     "leaflet": "^1.9.4",
     "next": "16.2.6",
+    "nextjs-toploader": "^3.9.17",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-easy-crop": "^6.2.2",

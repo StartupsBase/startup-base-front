@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { Button } from "@workspace/ui/components/button"
+import { ShimmerButton } from "@workspace/ui/components/shimmer-button"
 
 export default async function Page({ params }: { params: Promise<unknown> }) {
   const { lang } = (await params) as { lang?: string }
@@ -15,7 +16,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
   const { t } = await getTranslation(lang)
 
   return (
-    <main className="min-h-svh bg-background text-foreground">
+    <main className="min-h-1000 bg-background text-foreground">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <p className="mb-6 text-sm font-semibold tracking-[0.24em] text-primary uppercase">
@@ -29,6 +30,11 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link href={`/${lang}/book-demo`}>
+              <ShimmerButton className="h-[40px] min-w-40 bg-input/30! px-4">
+                {t("home.bookingDemoAction")}
+              </ShimmerButton>
+            </Link>
             <Button asChild size="lg" className="min-w-40">
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
