@@ -13,7 +13,9 @@ export interface ProductCreateDTO {
   name: string;
   nameRu?: string;
   nameEng?: string;
-  description?: string;
+  descriptionUz?: string;
+  descriptionRu?: string;
+  descriptionEng?: string;
   categoryId: number;
   organizationId?: number;
   basePrice: number;
@@ -23,6 +25,7 @@ export interface ProductCreateDTO {
      */
   discountPercent?: number;
   active?: boolean;
+  videoAttachmentId?: number;
   images?: ProductImageCreateDTO[];
   variants?: ProductVariantCreateDTO[];
 }

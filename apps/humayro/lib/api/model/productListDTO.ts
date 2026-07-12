@@ -19,6 +19,7 @@ export interface ProductListDTO {
   discountPercent?: number;
   discountedPrice?: number;
   mainImageUrl?: string;
+  videoUrl?: string;
   totalStock?: number;
   active?: boolean;
   ratingAvg?: number;

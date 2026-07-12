@@ -7,6 +7,7 @@
  */
 
 export interface ProductVariantCreateDTO {
+  id?: number;
   colorId: number;
   sizeId: number;
   stock: number;

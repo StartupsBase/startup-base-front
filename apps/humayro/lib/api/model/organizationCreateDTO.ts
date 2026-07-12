@@ -16,5 +16,7 @@ export interface OrganizationCreateDTO {
   /** @pattern ^[0-9]{9,14}$ */
   inn?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   logoId?: number;
 }

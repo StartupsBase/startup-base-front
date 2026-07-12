@@ -12,7 +12,9 @@ export interface CategoryDTO {
   name?: string;
   nameRu?: string;
   nameEng?: string;
-  description?: string;
+  descriptionUz?: string;
+  descriptionRu?: string;
+  descriptionEng?: string;
   sizeType?: CategoryDTOSizeType;
   imageUrl?: string;
   organizationId?: number;

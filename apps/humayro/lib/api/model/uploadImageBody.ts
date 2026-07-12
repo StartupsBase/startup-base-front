@@ -6,10 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetAll5Params = {
-active?: boolean;
-organizationId?: number;
-search?: string;
-page?: number;
-size?: number;
+export type UploadImageBody = {
+  file: Blob;
 };

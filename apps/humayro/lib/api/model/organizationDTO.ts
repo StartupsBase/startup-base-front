@@ -16,6 +16,8 @@ export interface OrganizationDTO {
   contactPhone?: string;
   inn?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   logo?: AttachmentDTO;
   active?: boolean;
 }

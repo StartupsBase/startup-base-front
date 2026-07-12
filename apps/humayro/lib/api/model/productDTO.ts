@@ -13,7 +13,9 @@ export interface ProductDTO {
   name?: string;
   nameRu?: string;
   nameEng?: string;
-  description?: string;
+  descriptionUz?: string;
+  descriptionRu?: string;
+  descriptionEng?: string;
   categoryId?: number;
   categoryName?: string;
   organizationId?: number;
@@ -24,6 +26,8 @@ export interface ProductDTO {
   active?: boolean;
   ratingAvg?: number;
   ratingCount?: number;
+  videoAttachmentId?: number;
+  videoUrl?: string;
   images?: ProductImageDTO[];
   variants?: ProductVariantDTO[];
 }

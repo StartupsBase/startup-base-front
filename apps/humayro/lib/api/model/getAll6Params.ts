@@ -5,10 +5,7 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { GetAll6Status } from './getAll6Status';
 
 export type GetAll6Params = {
-status?: GetAll6Status;
-page?: number;
-size?: number;
+active?: boolean;
 };

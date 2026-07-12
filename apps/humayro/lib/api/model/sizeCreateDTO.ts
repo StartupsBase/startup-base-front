@@ -12,4 +12,5 @@ export interface SizeCreateDTO {
   value: string;
   type: SizeCreateDTOType;
   sortOrder?: number;
+  organizationId?: number;
 }

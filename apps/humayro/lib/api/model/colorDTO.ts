@@ -9,5 +9,10 @@
 export interface ColorDTO {
   id?: number;
   name?: string;
+  nameUz?: string;
+  nameRu?: string;
+  nameEng?: string;
   hexCode?: string;
+  organizationId?: number;
+  organizationName?: string;
 }

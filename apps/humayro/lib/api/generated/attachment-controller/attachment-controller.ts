@@ -27,7 +27,10 @@ import type {
 import type {
   AttachmentDTO,
   GetAllByIdsParams,
-  UploadBody
+  UploadBody,
+  UploadImageBody,
+  UploadImagesBody,
+  UploadVideoBody
 } from '../../model';
 
 import { customInstance } from '../../mutator';
@@ -115,7 +118,193 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUploadMutationOptions(options), queryClient);
     }
-    export const getById6 = (
+    export const uploadVideo = (
+    uploadVideoBody?: BodyType<UploadVideoBody>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+      const formData = new FormData();
+if(uploadVideoBody?.file !== undefined) {
+ formData.append(`file`, uploadVideoBody.file);
+ }
+
+      return customInstance<AttachmentDTO>(
+      {url: `/api/attachments/upload-video`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUploadVideoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext> => {
+
+const mutationKey = ['uploadVideo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadVideo>>, {data?: BodyType<UploadVideoBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadVideo(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadVideoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadVideo>>>
+    export type UploadVideoMutationBody = BodyType<UploadVideoBody> | undefined
+    export type UploadVideoMutationError = ErrorType<unknown>
+
+    export const useUploadVideo = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadVideo>>,
+        TError,
+        {data?: BodyType<UploadVideoBody>},
+        TContext
+      > => {
+      return useMutation(getUploadVideoMutationOptions(options), queryClient);
+    }
+    export const uploadImages = (
+    uploadImagesBody?: BodyType<UploadImagesBody>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+      const formData = new FormData();
+if(uploadImagesBody?.files !== undefined) {
+ uploadImagesBody?.files.forEach(value => formData.append(`files`, value));
+ }
+
+      return customInstance<AttachmentDTO[]>(
+      {url: `/api/attachments/upload-images`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUploadImagesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImages>>, TError,{data?: BodyType<UploadImagesBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadImages>>, TError,{data?: BodyType<UploadImagesBody>}, TContext> => {
+
+const mutationKey = ['uploadImages'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadImages>>, {data?: BodyType<UploadImagesBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadImages(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadImagesMutationResult = NonNullable<Awaited<ReturnType<typeof uploadImages>>>
+    export type UploadImagesMutationBody = BodyType<UploadImagesBody> | undefined
+    export type UploadImagesMutationError = ErrorType<unknown>
+
+    export const useUploadImages = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImages>>, TError,{data?: BodyType<UploadImagesBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadImages>>,
+        TError,
+        {data?: BodyType<UploadImagesBody>},
+        TContext
+      > => {
+      return useMutation(getUploadImagesMutationOptions(options), queryClient);
+    }
+    export const uploadImage = (
+    uploadImageBody?: BodyType<UploadImageBody>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+      const formData = new FormData();
+if(uploadImageBody?.file !== undefined) {
+ formData.append(`file`, uploadImageBody.file);
+ }
+
+      return customInstance<AttachmentDTO>(
+      {url: `/api/attachments/upload-image`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUploadImageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data?: BodyType<UploadImageBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data?: BodyType<UploadImageBody>}, TContext> => {
+
+const mutationKey = ['uploadImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadImage>>, {data?: BodyType<UploadImageBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadImage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadImage>>>
+    export type UploadImageMutationBody = BodyType<UploadImageBody> | undefined
+    export type UploadImageMutationError = ErrorType<unknown>
+
+    export const useUploadImage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,{data?: BodyType<UploadImageBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadImage>>,
+        TError,
+        {data?: BodyType<UploadImageBody>},
+        TContext
+      > => {
+      return useMutation(getUploadImageMutationOptions(options), queryClient);
+    }
+    export const getById7 = (
     id: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -130,66 +319,66 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetById6QueryKey = (id: number,) => {
+export const getGetById7QueryKey = (id: number,) => {
     return [
     `/api/attachments/${id}`
     ] as const;
     }
 
 
-export const getGetById6QueryOptions = <TData = Awaited<ReturnType<typeof getById6>>, TError = ErrorType<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetById7QueryOptions = <TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetById6QueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetById7QueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById6>>> = ({ signal }) => getById6(id, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById7>>> = ({ signal }) => getById7(id, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetById6QueryResult = NonNullable<Awaited<ReturnType<typeof getById6>>>
-export type GetById6QueryError = ErrorType<unknown>
+export type GetById7QueryResult = NonNullable<Awaited<ReturnType<typeof getById7>>>
+export type GetById7QueryError = ErrorType<unknown>
 
 
-export function useGetById6<TData = Awaited<ReturnType<typeof getById6>>, TError = ErrorType<unknown>>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData>> & Pick<
+export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getById6>>,
+          Awaited<ReturnType<typeof getById7>>,
           TError,
-          Awaited<ReturnType<typeof getById6>>
+          Awaited<ReturnType<typeof getById7>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetById6<TData = Awaited<ReturnType<typeof getById6>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData>> & Pick<
+export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getById6>>,
+          Awaited<ReturnType<typeof getById7>>,
           TError,
-          Awaited<ReturnType<typeof getById6>>
+          Awaited<ReturnType<typeof getById7>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetById6<TData = Awaited<ReturnType<typeof getById6>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetById6<TData = Awaited<ReturnType<typeof getById6>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById6>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetById6QueryOptions(id,options)
+  const queryOptions = getGetById7QueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -201,7 +390,7 @@ export function useGetById6<TData = Awaited<ReturnType<typeof getById6>>, TError
 
 
 
-export const delete7 = (
+export const delete8 = (
     id: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -216,11 +405,11 @@ export const delete7 = (
 
 
 
-export const getDelete7MutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext> => {
+export const getDelete8MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete8>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof delete8>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete7'];
+const mutationKey = ['delete8'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -230,10 +419,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete7>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete8>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete7(id,requestOptions)
+          return  delete8(id,requestOptions)
         }
 
 
@@ -243,19 +432,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete7MutationResult = NonNullable<Awaited<ReturnType<typeof delete7>>>
+    export type Delete8MutationResult = NonNullable<Awaited<ReturnType<typeof delete8>>>
 
-    export type Delete7MutationError = ErrorType<unknown>
+    export type Delete8MutationError = ErrorType<unknown>
 
-    export const useDelete7 = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDelete8 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete8>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof delete7>>,
+        Awaited<ReturnType<typeof delete8>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getDelete7MutationOptions(options), queryClient);
+      return useMutation(getDelete8MutationOptions(options), queryClient);
     }
     export const getPresignedUrl = (
     id: number,

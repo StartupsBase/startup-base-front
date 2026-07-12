@@ -25,6 +25,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetAllParams,
+  PageResponseUserDTO,
   UploadPhotoBody,
   UserCreateDTO,
   UserDTO,
@@ -319,13 +321,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUploadPhotoMutationOptions(options), queryClient);
     }
     export const getAll = (
-
+    params?: GetAllParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
 
 
-      return customInstance<UserDTO[]>(
-      {url: `/api/users`, method: 'GET', signal
+      return customInstance<PageResponseUserDTO>(
+      {url: `/api/users`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -333,23 +336,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetAllQueryKey = () => {
+export const getGetAllQueryKey = (params?: GetAllParams,) => {
     return [
-    `/api/users`
+    `/api/users`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({ signal }) => getAll(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({ signal }) => getAll(params, requestOptions, signal);
 
 
 
@@ -363,7 +366,7 @@ export type GetAllQueryError = ErrorType<unknown>
 
 
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
+ params: undefined |  GetAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
@@ -373,7 +376,7 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = E
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
@@ -383,16 +386,16 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = E
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetAllQueryOptions(options)
+  const queryOptions = getGetAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -16,3 +16,4 @@ export * from './generated/size/size';
 export * from './generated/user-controller/user-controller';
 export * from './model';
 export * from './generated/admin-organization/admin-organization';
+export * from './generated/branch/branch';

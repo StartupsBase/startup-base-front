@@ -14,4 +14,5 @@ export interface UserUpdateDTO {
   age?: number;
   gender?: UserUpdateDTOGender;
   organizationId?: number;
+  branchId?: number;
 }

@@ -19,5 +19,7 @@ export interface UserDTO {
   photo?: AttachmentDTO;
   organizationId?: number;
   organizationName?: string;
+  branchId?: number;
+  branchName?: string;
   roles?: string[];
 }

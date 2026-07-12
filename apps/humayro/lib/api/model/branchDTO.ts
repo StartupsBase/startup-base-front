@@ -5,13 +5,15 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { SizeDTOType } from './sizeDTOType';
 
-export interface SizeDTO {
+export interface BranchDTO {
   id?: number;
-  value?: string;
-  type?: SizeDTOType;
-  sortOrder?: number;
+  name?: string;
+  phone?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   organizationId?: number;
   organizationName?: string;
+  active?: boolean;
 }

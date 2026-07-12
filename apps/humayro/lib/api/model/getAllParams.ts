@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetAll5Params = {
-active?: boolean;
-organizationId?: number;
+export type GetAllParams = {
 search?: string;
+organizationId?: number;
+branchId?: number;
 page?: number;
 size?: number;
 };

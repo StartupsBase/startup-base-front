@@ -27,4 +27,5 @@ export interface UserCreateDTO {
   age?: number;
   gender?: UserCreateDTOGender;
   organizationId?: number;
+  branchId?: number;
 }

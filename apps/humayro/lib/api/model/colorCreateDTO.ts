@@ -9,9 +9,13 @@
 export interface ColorCreateDTO {
   /** @minLength 1 */
   name: string;
+  nameUz?: string;
+  nameRu?: string;
+  nameEng?: string;
   /**
      * @minLength 1
      * @pattern ^#([A-Fa-f0-9]{6})$
      */
   hexCode: string;
+  organizationId?: number;
 }

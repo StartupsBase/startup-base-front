@@ -7,6 +7,7 @@
  */
 
 export interface ProductImageCreateDTO {
+  id?: number;
   attachmentId: number;
   main?: boolean;
   sortOrder?: number;

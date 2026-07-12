@@ -6,18 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface OrganizationUpdateDTO {
+export interface BranchUpdateDTO {
   /** @minLength 1 */
   name: string;
-  description?: string;
-  contactPerson?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  /** @pattern ^[0-9]{9,14}$ */
-  inn?: string;
+  phone?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
-  logoId?: number;
+  organizationId?: number;
   active?: boolean;
 }

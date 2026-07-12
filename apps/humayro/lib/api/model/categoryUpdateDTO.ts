@@ -12,7 +12,9 @@ export interface CategoryUpdateDTO {
   name: string;
   nameRu?: string;
   nameEng?: string;
-  description?: string;
+  descriptionUz?: string;
+  descriptionRu?: string;
+  descriptionEng?: string;
   sizeType: CategoryUpdateDTOSizeType;
   organizationId?: number;
   parentId?: number;
