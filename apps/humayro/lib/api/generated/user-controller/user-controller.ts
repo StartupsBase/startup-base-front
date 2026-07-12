@@ -5,7 +5,10 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query"
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -18,8 +21,8 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query"
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   GetAllParams,
@@ -27,619 +30,438 @@ import type {
   UploadPhotoBody,
   UserCreateDTO,
   UserDTO,
-  UserUpdateDTO,
-} from "../../model"
+  UserUpdateDTO
+} from '../../model';
 
-import { customInstance } from "../../mutator"
-import type { ErrorType, BodyType } from "../../mutator"
+import { customInstance } from '../../mutator';
+import type { ErrorType , BodyType } from '../../mutator';
 
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
 
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K
-): T & { queryKey: K } => {
-  const result = { queryKey } as T & { queryKey: K }
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue
+    if (key === 'queryKey') continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
       get: () => (query as Record<string, unknown>)[key],
-    })
+    });
   }
-  return result
-}
+  return result;
+};
 
 export const getById = (
-  id: number,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
+    id: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<UserDTO>(
-    { url: `/api/users/${id}`, method: "GET", signal },
-    options
-  )
-}
 
-export const getGetByIdQueryKey = (id: number) => {
-  return [`/api/users/${id}`] as const
-}
 
-export const getGetByIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getById>>,
-  TError = ErrorType<unknown>,
->(
-  id: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  }
+      return customInstance<UserDTO>(
+      {url: `/api/users/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetByIdQueryKey = (id: number,) => {
+    return [
+    `/api/users/${id}`
+    ] as const;
+    }
+
+
+export const getGetByIdQueryOptions = <TData = Awaited<ReturnType<typeof getById>>, TError = ErrorType<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetByIdQueryKey(id)
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getById>>> = ({
-    signal,
-  }) => getById(id, requestOptions, signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetByIdQueryKey(id);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: id !== null && id !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById>>> = ({ signal }) => getById(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetByIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getById>>
->
+export type GetByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getById>>>
 export type GetByIdQueryError = ErrorType<unknown>
 
-export function useGetById<
-  TData = Awaited<ReturnType<typeof getById>>,
-  TError = ErrorType<unknown>,
->(
-  id: number,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>
-    > &
-      Pick<
+
+export function useGetById<TData = Awaited<ReturnType<typeof getById>>, TError = ErrorType<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getById>>,
           TError,
           Awaited<ReturnType<typeof getById>>
-        >,
-        "initialData"
-      >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-}
-export function useGetById<
-  TData = Awaited<ReturnType<typeof getById>>,
-  TError = ErrorType<unknown>,
->(
-  id: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetById<TData = Awaited<ReturnType<typeof getById>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getById>>,
           TError,
           Awaited<ReturnType<typeof getById>>
-        >,
-        "initialData"
-      >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-}
-export function useGetById<
-  TData = Awaited<ReturnType<typeof getById>>,
-  TError = ErrorType<unknown>,
->(
-  id: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetById<TData = Awaited<ReturnType<typeof getById>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetById<TData = Awaited<ReturnType<typeof getById>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetByIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
 
-export function useGetById<
-  TData = Awaited<ReturnType<typeof getById>>,
-  TError = ErrorType<unknown>,
->(
-  id: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getById>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-} {
-  const queryOptions = getGetByIdQueryOptions(id, options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  return withQueryKey(query, queryOptions.queryKey)
-}
+
+
 
 export const update = (
-  id: number,
-  userUpdateDTO: BodyType<UserUpdateDTO>,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
+    id: number,
+    userUpdateDTO: BodyType<UserUpdateDTO>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<UserDTO>(
-    {
-      url: `/api/users/${id}`,
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      data: userUpdateDTO,
-      signal,
+
+
+      return customInstance<UserDTO>(
+      {url: `/api/users/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: userUpdateDTO, signal
     },
-    options
-  )
-}
+      options);
+    }
 
-export const getUpdateMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof update>>,
-    TError,
-    { id: number; data: BodyType<UserUpdateDTO> },
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof update>>,
-  TError,
-  { id: number; data: BodyType<UserUpdateDTO> },
-  TContext
-> => {
-  const mutationKey = ["update"]
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof update>>,
-    { id: number; data: BodyType<UserUpdateDTO> }
-  > = (props) => {
-    const { id, data } = props ?? {}
 
-    return update(id, data, requestOptions)
-  }
 
-  return { mutationFn, ...mutationOptions }
-}
+export const getUpdateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: BodyType<UserUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: BodyType<UserUpdateDTO>}, TContext> => {
 
-export type UpdateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof update>>
->
-export type UpdateMutationBody = BodyType<UserUpdateDTO>
-export type UpdateMutationError = ErrorType<unknown>
+const mutationKey = ['update'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const useUpdate = <TError = ErrorType<unknown>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof update>>,
-      TError,
-      { id: number; data: BodyType<UserUpdateDTO> },
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof update>>,
-  TError,
-  { id: number; data: BodyType<UserUpdateDTO> },
-  TContext
-> => {
-  return useMutation(getUpdateMutationOptions(options), queryClient)
-}
-export const _delete = (
-  id: number,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update>>, {id: number;data: BodyType<UserUpdateDTO>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  update(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMutationResult = NonNullable<Awaited<ReturnType<typeof update>>>
+    export type UpdateMutationBody = BodyType<UserUpdateDTO>
+    export type UpdateMutationError = ErrorType<unknown>
+
+    export const useUpdate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update>>, TError,{id: number;data: BodyType<UserUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof update>>,
+        TError,
+        {id: number;data: BodyType<UserUpdateDTO>},
+        TContext
+      > => {
+      return useMutation(getUpdateMutationOptions(options), queryClient);
+    }
+    export const _delete = (
+    id: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<void>(
-    { url: `/api/users/${id}`, method: "DELETE", signal },
-    options
-  )
-}
 
-export const getDeleteMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof _delete>>,
-    TError,
-    { id: number },
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof _delete>>,
-  TError,
-  { id: number },
-  TContext
-> => {
-  const mutationKey = ["_delete"]
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof _delete>>,
-    { id: number }
-  > = (props) => {
-    const { id } = props ?? {}
-
-    return _delete(id, requestOptions)
-  }
-
-  return { mutationFn, ...mutationOptions }
-}
-
-export type _DeleteMutationResult = NonNullable<
-  Awaited<ReturnType<typeof _delete>>
->
-
-export type _DeleteMutationError = ErrorType<unknown>
-
-export const useDelete = <TError = ErrorType<unknown>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof _delete>>,
-      TError,
-      { id: number },
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof _delete>>,
-  TError,
-  { id: number },
-  TContext
-> => {
-  return useMutation(getDeleteMutationOptions(options), queryClient)
-}
-export const uploadPhoto = (
-  id: number,
-  uploadPhotoBody?: BodyType<UploadPhotoBody>,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
-) => {
-  const formData = new FormData()
-  if (uploadPhotoBody?.file !== undefined) {
-    formData.append(`file`, uploadPhotoBody.file)
-  }
-
-  return customInstance<UserDTO>(
-    {
-      url: `/api/users/${id}/photo`,
-      method: "PUT",
-      headers: { "Content-Type": "multipart/form-data" },
-      data: formData,
-      signal,
+      return customInstance<void>(
+      {url: `/api/users/${id}`, method: 'DELETE', signal
     },
-    options
-  )
-}
+      options);
+    }
 
-export const getUploadPhotoMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof uploadPhoto>>,
-    TError,
-    { id: number; data?: BodyType<UploadPhotoBody> },
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof uploadPhoto>>,
-  TError,
-  { id: number; data?: BodyType<UploadPhotoBody> },
-  TContext
-> => {
-  const mutationKey = ["uploadPhoto"]
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof uploadPhoto>>,
-    { id: number; data?: BodyType<UploadPhotoBody> }
-  > = (props) => {
-    const { id, data } = props ?? {}
 
-    return uploadPhoto(id, data, requestOptions)
-  }
 
-  return { mutationFn, ...mutationOptions }
-}
+export const getDeleteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext> => {
 
-export type UploadPhotoMutationResult = NonNullable<
-  Awaited<ReturnType<typeof uploadPhoto>>
->
-export type UploadPhotoMutationBody = BodyType<UploadPhotoBody> | undefined
-export type UploadPhotoMutationError = ErrorType<unknown>
+const mutationKey = ['_delete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const useUploadPhoto = <TError = ErrorType<unknown>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof uploadPhoto>>,
-      TError,
-      { id: number; data?: BodyType<UploadPhotoBody> },
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof uploadPhoto>>,
-  TError,
-  { id: number; data?: BodyType<UploadPhotoBody> },
-  TContext
-> => {
-  return useMutation(getUploadPhotoMutationOptions(options), queryClient)
-}
-export const getAll = (
-  params?: GetAllParams,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof _delete>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  _delete(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type _DeleteMutationResult = NonNullable<Awaited<ReturnType<typeof _delete>>>
+
+    export type _DeleteMutationError = ErrorType<unknown>
+
+    export const useDelete = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof _delete>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof _delete>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteMutationOptions(options), queryClient);
+    }
+    export const uploadPhoto = (
+    id: number,
+    uploadPhotoBody?: BodyType<UploadPhotoBody>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<PageResponseUserDTO>(
-    { url: `/api/users`, method: "GET", params, signal },
-    options
-  )
-}
 
-export const getGetAllQueryKey = (params?: GetAllParams) => {
-  return [`/api/users`, ...(params ? [params] : [])] as const
-}
+      const formData = new FormData();
+if(uploadPhotoBody?.file !== undefined) {
+ formData.append(`file`, uploadPhotoBody.file);
+ }
 
-export const getGetAllQueryOptions = <
-  TData = Awaited<ReturnType<typeof getAll>>,
-  TError = ErrorType<unknown>,
->(
-  params?: GetAllParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  }
+      return customInstance<UserDTO>(
+      {url: `/api/users/${id}/photo`, method: 'PUT',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUploadPhotoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPhoto>>, TError,{id: number;data?: BodyType<UploadPhotoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadPhoto>>, TError,{id: number;data?: BodyType<UploadPhotoBody>}, TContext> => {
+
+const mutationKey = ['uploadPhoto'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadPhoto>>, {id: number;data?: BodyType<UploadPhotoBody>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  uploadPhoto(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadPhotoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadPhoto>>>
+    export type UploadPhotoMutationBody = BodyType<UploadPhotoBody> | undefined
+    export type UploadPhotoMutationError = ErrorType<unknown>
+
+    export const useUploadPhoto = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPhoto>>, TError,{id: number;data?: BodyType<UploadPhotoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadPhoto>>,
+        TError,
+        {id: number;data?: BodyType<UploadPhotoBody>},
+        TContext
+      > => {
+      return useMutation(getUploadPhotoMutationOptions(options), queryClient);
+    }
+    export const getAll = (
+    params?: GetAllParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetAllQueryKey(params)
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({
-    signal,
-  }) => getAll(params, requestOptions, signal)
+      return customInstance<PageResponseUserDTO>(
+      {url: `/api/users`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getAll>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+
+
+
+export const getGetAllQueryKey = (params?: GetAllParams,) => {
+    return [
+    `/api/users`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAllQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({ signal }) => getAll(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetAllQueryResult = NonNullable<Awaited<ReturnType<typeof getAll>>>
 export type GetAllQueryError = ErrorType<unknown>
 
-export function useGetAll<
-  TData = Awaited<ReturnType<typeof getAll>>,
-  TError = ErrorType<unknown>,
->(
-  params: undefined | GetAllParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>
-    > &
-      Pick<
+
+export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
           Awaited<ReturnType<typeof getAll>>
-        >,
-        "initialData"
-      >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-}
-export function useGetAll<
-  TData = Awaited<ReturnType<typeof getAll>>,
-  TError = ErrorType<unknown>,
->(
-  params?: GetAllParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
           Awaited<ReturnType<typeof getAll>>
-        >,
-        "initialData"
-      >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-}
-export function useGetAll<
-  TData = Awaited<ReturnType<typeof getAll>>,
-  TError = ErrorType<unknown>,
->(
-  params?: GetAllParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ErrorType<unknown>>(
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
 
-export function useGetAll<
-  TData = Awaited<ReturnType<typeof getAll>>,
-  TError = ErrorType<unknown>,
->(
-  params?: GetAllParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>
-} {
-  const queryOptions = getGetAllQueryOptions(params, options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  return withQueryKey(query, queryOptions.queryKey)
-}
+
+
 
 export const create = (
-  userCreateDTO: BodyType<UserCreateDTO>,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
+    userCreateDTO: BodyType<UserCreateDTO>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<UserDTO>(
-    {
-      url: `/api/users`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: userCreateDTO,
-      signal,
+
+
+      return customInstance<UserDTO>(
+      {url: `/api/users`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: userCreateDTO, signal
     },
-    options
-  )
-}
+      options);
+    }
 
-export const getCreateMutationOptions = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof create>>,
-    TError,
-    { data: BodyType<UserCreateDTO> },
-    TContext
-  >
-  request?: SecondParameter<typeof customInstance>
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof create>>,
-  TError,
-  { data: BodyType<UserCreateDTO> },
-  TContext
-> => {
-  const mutationKey = ["create"]
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof create>>,
-    { data: BodyType<UserCreateDTO> }
-  > = (props) => {
-    const { data } = props ?? {}
 
-    return create(data, requestOptions)
-  }
 
-  return { mutationFn, ...mutationOptions }
-}
+export const getCreateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BodyType<UserCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BodyType<UserCreateDTO>}, TContext> => {
 
-export type CreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof create>>
->
-export type CreateMutationBody = BodyType<UserCreateDTO>
-export type CreateMutationError = ErrorType<unknown>
+const mutationKey = ['create'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const useCreate = <TError = ErrorType<unknown>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof create>>,
-      TError,
-      { data: BodyType<UserCreateDTO> },
-      TContext
-    >
-    request?: SecondParameter<typeof customInstance>
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof create>>,
-  TError,
-  { data: BodyType<UserCreateDTO> },
-  TContext
-> => {
-  return useMutation(getCreateMutationOptions(options), queryClient)
-}
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create>>, {data: BodyType<UserCreateDTO>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  create(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMutationResult = NonNullable<Awaited<ReturnType<typeof create>>>
+    export type CreateMutationBody = BodyType<UserCreateDTO>
+    export type CreateMutationError = ErrorType<unknown>
+
+    export const useCreate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BodyType<UserCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof create>>,
+        TError,
+        {data: BodyType<UserCreateDTO>},
+        TContext
+      > => {
+      return useMutation(getCreateMutationOptions(options), queryClient);
+    }

@@ -18,7 +18,7 @@ export function ProductCreatePage({
   const organizationHref = `/${language}/dashboard/organizations/${organizationId}`
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8 md:px-10">
+    <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">
       <Link
         href={organizationHref}
         className="text-sm font-medium text-primary hover:underline"
@@ -35,6 +35,7 @@ export function ProductCreatePage({
       </header>
       <ProductForm
         organizationId={organizationId}
+        showAssistant
         onComplete={() => router.push(organizationHref)}
       />
     </main>
