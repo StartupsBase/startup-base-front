@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { LogoBrand } from "@/components/logo"
-import { ResetPasswordForm } from "@/components/reset-password-form"
+import { ResetPasswordForm } from "./_components/reset-password-form"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 

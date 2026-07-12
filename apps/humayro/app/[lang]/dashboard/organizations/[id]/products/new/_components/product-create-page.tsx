@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import { ProductForm } from "@/components/product-form"
+import { ProductForm } from "../../../_components/product-form"
 
 export function ProductCreatePage({
   language,

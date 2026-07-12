@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { AdministrationPage } from "@/components/administration-page"
+import { AdministrationPage } from "./_components/administration-page"
 import { isLanguage } from "@/i18n/config"
 
 export default async function AdministrationRoute({

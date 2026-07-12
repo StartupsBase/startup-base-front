@@ -13,7 +13,7 @@ import { useLogin } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
-import { GoogleLoginButton } from "@/components/google-login-button"
+import { GoogleLoginButton } from "./google-login-button"
 import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
@@ -259,9 +259,7 @@ function LoginForm() {
           className={cn("w-full", loginMutation.isPending && "cursor-wait")}
           disabled={loginMutation.isPending}
         >
-          {loginMutation.isPending
-            ? t("login.submitting")
-            : t("login.submit")}
+          {loginMutation.isPending ? t("login.submitting") : t("login.submit")}
         </Button>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
@@ -270,7 +268,7 @@ function LoginForm() {
         </div>
         <GoogleLoginButton />
         <p className="text-center text-sm text-muted-foreground">
-          {t("login.noAccount")} {" "}
+          {t("login.noAccount")}{" "}
           <Link
             href={`/${pathname.split("/")[1] ?? "ru"}/register`}
             className="font-medium text-primary hover:underline"

@@ -33,7 +33,9 @@ export function ResetPasswordForm({
   const resetPassword = useResetPassword()
   const schema = z
     .object({
-      phone: z.string().regex(/^\+998\d{9}$/, t("passwordRecovery.errors.phone")),
+      phone: z
+        .string()
+        .regex(/^\+998\d{9}$/, t("passwordRecovery.errors.phone")),
       code: z.string().min(1, t("passwordRecovery.errors.code")),
       newPassword: z.string().min(6, t("passwordRecovery.errors.password")),
       confirmPassword: z.string(),
@@ -71,12 +73,19 @@ export function ResetPasswordForm({
   return (
     <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
       <label className="block space-y-2">
-        <span className="text-sm font-medium">{t("passwordRecovery.phoneLabel")}</span>
+        <span className="text-sm font-medium">
+          {t("passwordRecovery.phoneLabel")}
+        </span>
         <Controller
           control={form.control}
           name="phone"
           render={({ field }) => (
-            <PhoneInput value={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} />
+            <PhoneInput
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              name={field.name}
+            />
           )}
         />
       </label>
@@ -86,7 +95,9 @@ export function ResetPasswordForm({
         </p>
       ) : null}
       <label className="block space-y-2">
-        <span className="text-sm font-medium">{t("passwordRecovery.codeLabel")}</span>
+        <span className="text-sm font-medium">
+          {t("passwordRecovery.codeLabel")}
+        </span>
         <Input autoComplete="one-time-code" {...form.register("code")} />
       </label>
       {form.formState.errors.code?.message ? (
@@ -95,8 +106,14 @@ export function ResetPasswordForm({
         </p>
       ) : null}
       <label className="block space-y-2">
-        <span className="text-sm font-medium">{t("passwordRecovery.newPasswordLabel")}</span>
-        <PasswordInput valid={newPassword.length >= 6} autoComplete="new-password" {...form.register("newPassword")} />
+        <span className="text-sm font-medium">
+          {t("passwordRecovery.newPasswordLabel")}
+        </span>
+        <PasswordInput
+          valid={newPassword.length >= 6}
+          autoComplete="new-password"
+          {...form.register("newPassword")}
+        />
       </label>
       {form.formState.errors.newPassword?.message ? (
         <p className="text-sm text-destructive">
@@ -104,8 +121,14 @@ export function ResetPasswordForm({
         </p>
       ) : null}
       <label className="block space-y-2">
-        <span className="text-sm font-medium">{t("passwordRecovery.confirmPasswordLabel")}</span>
-        <PasswordInput valid={confirmPassword.length >= 6 && confirmPassword === newPassword} autoComplete="new-password" {...form.register("confirmPassword")} />
+        <span className="text-sm font-medium">
+          {t("passwordRecovery.confirmPasswordLabel")}
+        </span>
+        <PasswordInput
+          valid={confirmPassword.length >= 6 && confirmPassword === newPassword}
+          autoComplete="new-password"
+          {...form.register("confirmPassword")}
+        />
       </label>
       {form.formState.errors.confirmPassword?.message ? (
         <p className="text-sm text-destructive">
@@ -117,13 +140,20 @@ export function ResetPasswordForm({
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full" type="submit" disabled={resetPassword.isPending}>
+      <Button
+        className="w-full"
+        type="submit"
+        disabled={resetPassword.isPending}
+      >
         {resetPassword.isPending
           ? t("passwordRecovery.resettingPassword")
           : t("passwordRecovery.resetPassword")}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        <Link href={`/${language}/login`} className="font-medium text-primary hover:underline">
+        <Link
+          href={`/${language}/login`}
+          className="font-medium text-primary hover:underline"
+        >
           {t("passwordRecovery.backToLogin")}
         </Link>
       </p>

@@ -48,9 +48,9 @@ import {
 } from "@/lib/api/generated/product/product"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { UserCreateForm } from "@/components/user-create-form"
-import { ProductForm } from "@/components/product-form"
-import { LocationPickerDialog } from "@/components/maps/location-picker-dialog"
+import { UserCreateForm } from "../../../_components/user-create-form"
+import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
+import { ProductForm } from "./product-form"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
 import {

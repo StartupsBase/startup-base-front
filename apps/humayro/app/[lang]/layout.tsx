@@ -3,10 +3,10 @@ import { M_PLUS_1_Code, M_PLUS_Rounded_1c } from "next/font/google"
 import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
 
-import Footer from "@/components/footer/Footer"
-import Header from "@/components/header/Header"
+import Footer from "./_components/footer"
+import Header from "./_components/header"
 import { I18nProvider } from "@/components/i18n-provider"
-import HumayroLoader from "@/components/loader"
+import HumayroLoader from "./_components/loader"
 import { QueryProvider } from "@/components/query-provider"
 import { SonnerProvider } from "@/components/sonner-provider"
 import { TelegramProvider } from "@/components/telegram-provider"
@@ -64,8 +64,8 @@ export default async function RootLayout({
             <TelegramProvider>
               <I18nProvider language={lang}>
                 <HumayroLoader>
-                    <Header language={lang} />
-                    {children}
+                  <Header language={lang} />
+                  {children}
                   <Footer language={lang} />
                 </HumayroLoader>
               </I18nProvider>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { ProductCreatePage } from "@/components/product-create-page"
+import { ProductCreatePage } from "./_components/product-create-page"
 import { isLanguage } from "@/i18n/config"
 
 export default async function NewProductPage({

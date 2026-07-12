@@ -89,22 +89,39 @@ export function RegisterForm({ language }: { language: string }) {
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("register.firstname")} error={form.formState.errors.firstname?.message}>
+        <Field
+          label={t("register.firstname")}
+          error={form.formState.errors.firstname?.message}
+        >
           <Input autoComplete="given-name" {...form.register("firstname")} />
         </Field>
-        <Field label={t("register.lastname")} error={form.formState.errors.lastname?.message}>
+        <Field
+          label={t("register.lastname")}
+          error={form.formState.errors.lastname?.message}
+        >
           <Input autoComplete="family-name" {...form.register("lastname")} />
         </Field>
       </div>
-      <Field label={t("register.email")} error={form.formState.errors.email?.message}>
+      <Field
+        label={t("register.email")}
+        error={form.formState.errors.email?.message}
+      >
         <Input type="email" autoComplete="email" {...form.register("email")} />
       </Field>
-      <Field label={t("register.phone")} error={form.formState.errors.phone?.message}>
+      <Field
+        label={t("register.phone")}
+        error={form.formState.errors.phone?.message}
+      >
         <Controller
           control={form.control}
           name="phone"
           render={({ field }) => (
-            <PhoneInput value={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} />
+            <PhoneInput
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              name={field.name}
+            />
           )}
         />
       </Field>
@@ -118,23 +135,46 @@ export function RegisterForm({ language }: { language: string }) {
           <option value="FEMALE">{t("register.female")}</option>
         </select>
       </Field>
-      <Field label={t("register.password")} error={form.formState.errors.password?.message}>
-        <PasswordInput valid={password.length >= 6} autoComplete="new-password" {...form.register("password")} />
+      <Field
+        label={t("register.password")}
+        error={form.formState.errors.password?.message}
+      >
+        <PasswordInput
+          valid={password.length >= 6}
+          autoComplete="new-password"
+          {...form.register("password")}
+        />
       </Field>
-      <Field label={t("register.confirmPassword")} error={form.formState.errors.confirmPassword?.message}>
-        <PasswordInput valid={confirmPassword.length >= 6 && confirmPassword === password} autoComplete="new-password" {...form.register("confirmPassword")} />
+      <Field
+        label={t("register.confirmPassword")}
+        error={form.formState.errors.confirmPassword?.message}
+      >
+        <PasswordInput
+          valid={confirmPassword.length >= 6 && confirmPassword === password}
+          autoComplete="new-password"
+          {...form.register("confirmPassword")}
+        />
       </Field>
       {form.formState.errors.root?.message ? (
         <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full" type="submit" disabled={registerMutation.isPending}>
-        {registerMutation.isPending ? t("register.submitting") : t("register.submit")}
+      <Button
+        className="w-full"
+        type="submit"
+        disabled={registerMutation.isPending}
+      >
+        {registerMutation.isPending
+          ? t("register.submitting")
+          : t("register.submit")}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        {t("register.hasAccount")} {" "}
-        <Link href={`/${language}/login`} className="font-medium text-primary hover:underline">
+        {t("register.hasAccount")}{" "}
+        <Link
+          href={`/${language}/login`}
+          className="font-medium text-primary hover:underline"
+        >
           {t("register.signIn")}
         </Link>
       </p>

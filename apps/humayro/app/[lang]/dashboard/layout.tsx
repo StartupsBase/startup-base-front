@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "./_components/dashboard-shell"
 import { isLanguage } from "@/i18n/config"
 
 export default async function DashboardLayout({

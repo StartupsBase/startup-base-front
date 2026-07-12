@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useGoogleCallback } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { googleReturnPathKey } from "@/components/google-login-button"
+import { googleReturnPathKey } from "@/lib/auth"
 
 export function GoogleLoginCallback({ language }: { language: string }) {
   const { t } = useTranslation()
@@ -34,7 +34,8 @@ export function GoogleLoginCallback({ language }: { language: string }) {
     const storedReturnPath = sessionStorage.getItem(googleReturnPathKey)
     sessionStorage.removeItem(googleReturnPathKey)
     const destination =
-      storedReturnPath?.startsWith(`/${language}/`) && !storedReturnPath.startsWith("//")
+      storedReturnPath?.startsWith(`/${language}/`) &&
+      !storedReturnPath.startsWith("//")
         ? storedReturnPath
         : `/${language}/dashboard`
 
@@ -69,7 +70,10 @@ function CallbackMessage({
       <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
         <p className="text-base font-medium">{title}</p>
         {action && href ? (
-          <Link href={href} className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+          <Link
+            href={href}
+            className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+          >
             {action}
           </Link>
         ) : null}

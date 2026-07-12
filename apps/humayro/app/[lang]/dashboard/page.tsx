@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { Dashboard } from "@/components/dashboard"
+import { Dashboard } from "./_components/dashboard"
 import { isLanguage } from "@/i18n/config"
 
 export default async function DashboardPage({

@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { toast } from "sonner"
 
-import { UserCreateForm } from "@/components/user-create-form"
+import { UserCreateForm } from "./user-create-form"
 import {
   useDelete,
   useMe1,
@@ -16,9 +16,9 @@ import {
   type UserDTO,
 } from "@/lib/api"
 import {
-  getGetAll7QueryKey,
-  useGetAll7,
-} from "@/lib/api/generated/admin-user/admin-user"
+  getGetAllQueryKey,
+  useGetAll,
+} from "@/lib/api/generated/user-controller/user-controller"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Button } from "@workspace/ui/components/button"
@@ -42,9 +42,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
-import {
-  SidebarTrigger
-} from "@workspace/ui/components/sidebar"
+import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -65,7 +63,7 @@ export function Dashboard({ language }: { language: string }) {
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { retry: false } })
-  const usersQuery = useGetAll7(undefined, {
+  const usersQuery = useGetAll(undefined, {
     query: { enabled: meQuery.isSuccess, retry: false },
   })
   const [createOpen, setCreateOpen] = useState(false)
@@ -253,7 +251,7 @@ function UserActions({ user }: { user: UserDTO }) {
       if (file) {
         await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
       }
-      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() })
       toast.success(t("notifications.updateSuccess"))
       setOpen(false)
     } catch {
@@ -265,7 +263,7 @@ function UserActions({ user }: { user: UserDTO }) {
     if (user.id === undefined) return
     try {
       await deleteUser.mutateAsync({ id: user.id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() })
       toast.success(t("notifications.deleteSuccess"))
     } catch {
       toast.error(t("notifications.deleteFailed"))

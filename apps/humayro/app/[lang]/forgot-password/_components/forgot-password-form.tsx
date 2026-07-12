@@ -28,7 +28,9 @@ export function ForgotPasswordForm({ language }: { language: string }) {
   async function onSubmit({ phone }: FormValues) {
     try {
       await requestReset.mutateAsync({ params: { phone } })
-      router.push(`/${language}/reset-password?phone=${encodeURIComponent(phone)}`)
+      router.push(
+        `/${language}/reset-password?phone=${encodeURIComponent(phone)}`
+      )
     } catch {
       form.setError("root", {
         message: t("passwordRecovery.errors.sendFailed"),
@@ -39,12 +41,19 @@ export function ForgotPasswordForm({ language }: { language: string }) {
   return (
     <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
       <label className="block space-y-2">
-        <span className="text-sm font-medium">{t("passwordRecovery.phoneLabel")}</span>
+        <span className="text-sm font-medium">
+          {t("passwordRecovery.phoneLabel")}
+        </span>
         <Controller
           control={form.control}
           name="phone"
           render={({ field }) => (
-            <PhoneInput value={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} />
+            <PhoneInput
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              name={field.name}
+            />
           )}
         />
       </label>
@@ -58,14 +67,21 @@ export function ForgotPasswordForm({ language }: { language: string }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full" type="submit" disabled={requestReset.isPending}>
+      <Button
+        className="w-full"
+        type="submit"
+        disabled={requestReset.isPending}
+      >
         {requestReset.isPending
           ? t("passwordRecovery.sendingCode")
           : t("passwordRecovery.sendCode")}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        {t("passwordRecovery.rememberedPassword")} {" "}
-        <Link href={`/${language}/login`} className="font-medium text-primary hover:underline">
+        {t("passwordRecovery.rememberedPassword")}{" "}
+        <Link
+          href={`/${language}/login`}
+          className="font-medium text-primary hover:underline"
+        >
           {t("passwordRecovery.signIn")}
         </Link>
       </p>

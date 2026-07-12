@@ -1,8 +1,7 @@
 "use client"
 
 import { CSSProperties, ReactNode, useEffect, useMemo, useState } from "react"
-import { usePathname } from "next/navigation"
-import { HumayroLoaderLayers } from "@/components/icons/humayro-loader-layers"
+import { HumayroLoaderLayers } from "./humayro-loader-layers"
 
 type HumayroLoaderProps = {
   children: ReactNode
@@ -239,20 +238,13 @@ export default function HumayroLoader({
   duration = 7600,
   showLoadingText = true,
 }: HumayroLoaderProps) {
-  const pathname = usePathname()
-
-  const [mounted, setMounted] = useState(false)
-  const [visible, setVisible] = useState(false)
-  const [animationKey, setAnimationKey] = useState(0)
+  const [mounted, setMounted] = useState(true)
+  const [visible, setVisible] = useState(true)
 
   const stableCoreParticles = useMemo(() => coreParticles, [])
   const stableOrbitParticles = useMemo(() => orbitParticles, [])
 
   useEffect(() => {
-    setMounted(true)
-    setVisible(true)
-    setAnimationKey((current) => current + 1)
-
     const fadeTimer = window.setTimeout(
       () => {
         setVisible(false)
@@ -268,13 +260,12 @@ export default function HumayroLoader({
       window.clearTimeout(fadeTimer)
       window.clearTimeout(removeTimer)
     }
-  }, [pathname, duration])
+  }, [duration])
 
   return (
     <>
       {mounted && (
         <div
-          key={animationKey}
           className={`fixed inset-0 z-[999999] overflow-hidden transition-opacity duration-500 ${
             visible
               ? "pointer-events-auto opacity-100"
@@ -659,10 +650,12 @@ export default function HumayroLoader({
                 0 0 8px rgba(72, 112, 43, 0.18),
                 0 0 22px rgba(142, 175, 76, 0.14);
               --humayro-core-particle: #5e9639;
-              --humayro-core-particle-shadow: 0 0 6px rgba(73, 127, 43, 0.95),
+              --humayro-core-particle-shadow:
+                0 0 6px rgba(73, 127, 43, 0.95),
                 0 0 15px rgba(111, 159, 57, 0.65);
               --humayro-orbit-particle: #6c9f3f;
-              --humayro-orbit-particle-shadow: 0 0 5px rgba(84, 139, 45, 0.92),
+              --humayro-orbit-particle-shadow:
+                0 0 5px rgba(84, 139, 45, 0.92),
                 0 0 12px rgba(127, 174, 67, 0.56);
               background: radial-gradient(
                 circle at 50% 42%,
@@ -695,7 +688,8 @@ export default function HumayroLoader({
                 0 0 8px rgba(226, 232, 156, 0.34),
                 0 0 22px rgba(107, 148, 57, 0.22);
               --humayro-core-particle: #dce97f;
-              --humayro-core-particle-shadow: 0 0 5px rgba(220, 233, 127, 0.95),
+              --humayro-core-particle-shadow:
+                0 0 5px rgba(220, 233, 127, 0.95),
                 0 0 12px rgba(121, 165, 57, 0.52);
               --humayro-orbit-particle: #b9d664;
               --humayro-orbit-particle-shadow: 0 0 5px rgba(185, 214, 100, 0.8);
@@ -975,7 +969,7 @@ export default function HumayroLoader({
               <HumayroLoaderLayers />
 
               <h1
-                className="humayro-title mt-1 bg-linear-to-r from-[#285b37] via-[#4f8a45] to-[#91ae55] bg-clip-text text-[clamp(42px,9vw,72px)] leading-none font-semibold tracking-[0.12em] text-transparent dark:text-white "
+                className="humayro-title mt-1 bg-linear-to-r from-[#285b37] via-[#4f8a45] to-[#91ae55] bg-clip-text text-[clamp(42px,9vw,72px)] leading-none font-semibold tracking-[0.12em] text-transparent dark:text-white"
                 style={{
                   textShadow: "var(--humayro-loader-title-shadow)",
                 }}
