@@ -1,32 +1,32 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { toast } from "sonner"
-import { Home01Icon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
 
+import { UserCreateForm } from "@/components/user-create-form"
 import {
-  type UserDTO,
   useDelete,
   useMe1,
   useUpdate,
   useUploadPhoto,
+  type UserDTO,
 } from "@/lib/api"
 import {
-  getGetAll6QueryKey,
-  useGetAll6,
+  getGetAll7QueryKey,
+  useGetAll7,
 } from "@/lib/api/generated/admin-user/admin-user"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { Logo } from "@/components/logo"
-import { UserCreateForm } from "@/components/user-create-form"
 import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
+import {
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
+} from "@workspace/ui/components/data-table"
 import {
   Dialog,
   DialogContent,
@@ -36,31 +36,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
+import { Input } from "@workspace/ui/components/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
 import {
-  DataTable,
-  DataTableColumnHeader,
-  type ColumnDef,
-} from "@workspace/ui/components/data-table"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
+  SidebarTrigger
 } from "@workspace/ui/components/sidebar"
-import { TooltipProvider } from "@workspace/ui/components/tooltip"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -81,7 +65,7 @@ export function Dashboard({ language }: { language: string }) {
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { retry: false } })
-  const usersQuery = useGetAll6({
+  const usersQuery = useGetAll7(undefined, {
     query: { enabled: meQuery.isSuccess, retry: false },
   })
   const [createOpen, setCreateOpen] = useState(false)
@@ -105,7 +89,7 @@ export function Dashboard({ language }: { language: string }) {
     router.replace(`/${language}/login`)
   }
 
-  const users = usersQuery.data ?? []
+  const users = usersQuery.data?.content ?? []
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
     .join(" ")
@@ -269,7 +253,7 @@ function UserActions({ user }: { user: UserDTO }) {
       if (file) {
         await uploadPhoto.mutateAsync({ id: user.id, data: { file } })
       }
-      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
       toast.success(t("notifications.updateSuccess"))
       setOpen(false)
     } catch {
@@ -281,7 +265,7 @@ function UserActions({ user }: { user: UserDTO }) {
     if (user.id === undefined) return
     try {
       await deleteUser.mutateAsync({ id: user.id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
       toast.success(t("notifications.deleteSuccess"))
     } catch {
       toast.error(t("notifications.deleteFailed"))

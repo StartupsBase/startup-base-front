@@ -1,22 +1,20 @@
+import "leaflet/dist/leaflet.css"
 import { M_PLUS_1_Code, M_PLUS_Rounded_1c } from "next/font/google"
 import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
-import "leaflet/dist/leaflet.css"
 
+import Footer from "@/components/footer/Footer"
+import Header from "@/components/header/Header"
 import { I18nProvider } from "@/components/i18n-provider"
+import HumayroLoader from "@/components/loader"
 import { QueryProvider } from "@/components/query-provider"
-import { ThemeProvider } from "@/components/theme-provider"
-import { TelegramProvider } from "@/components/telegram-provider"
 import { SonnerProvider } from "@/components/sonner-provider"
+import { TelegramProvider } from "@/components/telegram-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
-import { CustomCursor } from "@/components/custom-cursor"
-import HumayroLoader from "@/components/loader"
-import Header from "@/components/header/Header"
-import Footer from "@/components/footer/Footer"
-import Container from "@/components/container"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
   weight: ["400", "700"],
@@ -61,16 +59,13 @@ export default async function RootLayout({
       )}
     >
       <body>
-        <CustomCursor />
         <ThemeProvider>
           <QueryProvider>
             <TelegramProvider>
               <I18nProvider language={lang}>
                 <HumayroLoader>
-                  <Container>
                     <Header language={lang} />
                     {children}
-                  </Container>
                   <Footer language={lang} />
                 </HumayroLoader>
               </I18nProvider>
