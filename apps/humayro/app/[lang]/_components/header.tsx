@@ -3,13 +3,15 @@
 import { usePathname } from "next/navigation"
 import type { Language } from "@/i18n/config"
 import Link from "next/link"
-import { HeartIcon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
+import { HeartIcon, SearchList01Icon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useState } from "react"
 import { LogoBrand } from "@/components/logo"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserDropdown } from "./user-dropdown"
+import { Input } from "@/components/input"
+import { Button } from "@workspace/ui/components/button"
 
 export default function Header({ language }: { language: Language }) {
   const pathname = usePathname()
@@ -34,33 +36,36 @@ export default function Header({ language }: { language: Language }) {
 
   return (
     <header
-      className={`
-        sticky top-2 z-50 mx-auto flex items-center justify-between
-        duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]
-        w-[calc(100%-80rem)] 
-        transition-all
-        border dark:border-none
-        ${
-          isSticky
-            ? "min-w-[1380px] rounded-4xl bg-white/15 p-2 backdrop-blur dark:bg-primary/15"
-            : "w-full max-w-none rounded-none border border-none bg-transparent p-2 shadow-none dark:border-none"
-        }
-      `}
+      className={`sticky top-2 z-50 mx-auto flex w-[calc(100%-80rem)] items-center justify-between border transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-none ${
+        isSticky
+          ? "min-w-[1380px] rounded-4xl bg-white/15 p-2 backdrop-blur dark:bg-primary/15"
+          : "w-full max-w-none rounded-none border border-none bg-transparent p-2 shadow-none dark:border-none"
+      } `}
     >
-      <div className="flex w-full max-w-[1580px] mx-auto justify-between px-4">
-      <LogoBrand />
+      <div className="mx-auto flex w-full max-w-[1580px] justify-between px-4">
+        <LogoBrand />
 
-      <div className="flex items-center gap-2">
-        <LanguageSwitcher language={language} />
-        <ThemeToggle />
-        <Link href={"/favourites"} className="p-1">
-          <HugeiconsIcon icon={HeartIcon} className="size-5" />
-        </Link>
-        <Link href={"/cart"} className="p-1">
-          <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
-        </Link>
-        <UserDropdown language={language} />
-      </div>
+        <div className="flex items-center gap-2">
+          <Button className="h-[44px] rounded-[12px] flex items-center justify-center">
+            <HugeiconsIcon
+              icon={SearchList01Icon}
+              className="size-5"
+            />
+            Katalog
+          </Button>
+          <Input className="w-[450px]" />
+        </div>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher language={language} />
+          <ThemeToggle />
+          <Link href={"/favourites"} className="p-1">
+            <HugeiconsIcon icon={HeartIcon} className="size-5" />
+          </Link>
+          <Link href={"/cart"} className="p-1">
+            <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
+          </Link>
+          <UserDropdown language={language} />
+        </div>
       </div>
     </header>
   )

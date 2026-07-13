@@ -10,7 +10,20 @@ import { HugeiconsIcon } from "@hugeicons/react"
 
 import { isLanguage } from "@/i18n/config"
 import { Button } from "@workspace/ui/components/button"
-
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@workspace/ui/components/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import { TextAnimate } from "@workspace/ui/components/text-animate"
 type BookDemoPageProps = {
   params: Promise<{ lang: string }>
 }
@@ -120,12 +133,14 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
 
         <section className="grid items-center gap-12 pt-10 pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(430px,0.82fr)] lg:gap-20 lg:pt-16 lg:pb-20">
           <div className="max-w-2xl">
-            <p className="mb-6 inline-flex rounded-full border border-[#96ad8d]/50 bg-white/65 px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-[#52704a] dark:border-[#6e8c69]/50 dark:bg-[#173022]/70 dark:text-[#b8d69e]">
-              {copy.eyebrow}
-            </p>
-            <h1 className="text-5xl leading-[0.98] font-bold tracking-[-0.065em] whitespace-pre-line sm:text-6xl lg:text-7xl xl:text-[5.3rem]">
+            <TextAnimate
+              animation="blurInUp"
+              by="character"
+              duration={1.5}
+              className="text-5xl leading-[0.98] font-bold tracking-[-0.065em] whitespace-pre-line sm:text-6xl lg:text-7xl xl:text-[5.3rem]"
+            >
               {copy.title}
-            </h1>
+            </TextAnimate>
             <p className="mt-7 max-w-xl text-base leading-7 text-[#5a6b58] sm:text-lg sm:leading-8 dark:text-[#b1c2b0]">
               {copy.description}
             </p>
@@ -175,21 +190,9 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
             className="rounded-[2rem] border border-white/80 bg-white/85 p-5 shadow-[0_28px_70px_rgba(50,72,47,.14)] backdrop-blur-xl sm:p-8 dark:border-white/10 dark:bg-[#17251c]/90"
           >
             <div className="mb-7 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-bold tracking-[0.18em] text-[#719364] dark:text-[#b3d38e]">
-                  {copy.bookingEyebrow}
-                </p>
-                <h2 className="mt-2 text-2xl font-bold tracking-[-0.045em] sm:text-3xl">
-                  {copy.bookingTitle}
-                </h2>
-              </div>
-              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#deefd5] text-[#40663e] dark:bg-[#28432a] dark:text-[#c8e5b6]">
-                <HugeiconsIcon
-                  icon={Calendar03Icon}
-                  className="size-5"
-                  strokeWidth={1.8}
-                />
-              </span>
+              <h2 className="mt-2 text-2xl font-bold tracking-[-0.045em] sm:text-3xl">
+                {copy.bookingTitle}
+              </h2>
             </div>
             <p className="mb-7 max-w-md text-sm leading-6 text-[#61735f] dark:text-[#b0c1af]">
               {copy.bookingDescription}
@@ -197,82 +200,86 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
 
             <form className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-2 text-sm font-semibold">
-                  {copy.name}
-                  <input
+                <div className="grid gap-2 text-sm font-semibold">
+                  <Label htmlFor="name">{copy.name}</Label>
+                  <Input
+                    id="name"
                     required
                     name="name"
                     autoComplete="name"
                     placeholder={
                       lang === "ru" ? "Например, Малика" : "Masalan, Malika"
                     }
-                    className="h-12 rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] px-4 text-sm font-normal transition outline-none focus:border-[#6f9467] focus:ring-4 focus:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus:border-[#9fc38e] dark:focus:ring-[#5f8652]/30"
+                    className="h-12 rounded-2xl border-[#dbe4d7] bg-[#f9fbf7] px-4 font-normal focus-visible:border-[#6f9467] focus-visible:ring-4 focus-visible:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus-visible:border-[#9fc38e] dark:focus-visible:ring-[#5f8652]/30"
                   />
-                </label>
-                <label className="grid gap-2 text-sm font-semibold">
-                  {copy.phone}
-                  <input
+                </div>
+                <div className="grid gap-2 text-sm font-semibold">
+                  <Label htmlFor="phone">{copy.phone}</Label>
+                  <Input
+                    id="phone"
                     required
                     name="phone"
                     type="tel"
                     autoComplete="tel"
                     placeholder="+998 90 123 45 67"
-                    className="h-12 rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] px-4 text-sm font-normal transition outline-none focus:border-[#6f9467] focus:ring-4 focus:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus:border-[#9fc38e] dark:focus:ring-[#5f8652]/30"
+                    className="h-12 rounded-2xl border-[#dbe4d7] bg-[#f9fbf7] px-4 font-normal focus-visible:border-[#6f9467] focus-visible:ring-4 focus-visible:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus-visible:border-[#9fc38e] dark:focus-visible:ring-[#5f8652]/30"
                   />
-                </label>
+                </div>
               </div>
 
-              <label className="grid gap-2 text-sm font-semibold">
-                {copy.style}
-                <select
-                  required
-                  name="style"
-                  defaultValue=""
-                  className="h-12 rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] px-4 text-sm font-normal transition outline-none focus:border-[#6f9467] focus:ring-4 focus:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus:border-[#9fc38e] dark:focus:ring-[#5f8652]/30"
-                >
-                  <option value="" disabled>
-                    {copy.stylePlaceholder}
-                  </option>
-                  {copy.styles.map((style) => (
-                    <option key={style}>{style}</option>
-                  ))}
-                </select>
-              </label>
+              <div className="grid gap-2 text-sm font-semibold">
+                <Label htmlFor="style">{copy.style}</Label>
+                <Select name="style" required>
+                  <SelectTrigger
+                    id="style"
+                    className="h-12 w-full rounded-2xl border-[#dbe4d7] bg-[#f9fbf7] px-4 font-normal focus-visible:border-[#6f9467] focus-visible:ring-4 focus-visible:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus-visible:border-[#9fc38e] dark:focus-visible:ring-[#5f8652]/30"
+                  >
+                    <SelectValue placeholder={copy.stylePlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {copy.styles.map((style) => (
+                      <SelectItem key={style} value={style}>
+                        {style}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-[0.92fr_1.08fr]">
-                <label className="grid gap-2 text-sm font-semibold">
-                  {copy.day}
-                  <input
+                <div className="grid gap-2 text-sm font-semibold">
+                  <Label htmlFor="date">{copy.day}</Label>
+                  <Input
+                    id="date"
                     required
                     name="date"
                     type="date"
-                    className="h-12 rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] px-4 text-sm font-normal transition outline-none focus:border-[#6f9467] focus:ring-4 focus:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus:border-[#9fc38e] dark:focus:ring-[#5f8652]/30"
+                    className="h-12 rounded-2xl border-[#dbe4d7] bg-[#f9fbf7] px-4 font-normal focus-visible:border-[#6f9467] focus-visible:ring-4 focus-visible:ring-[#c7dfbd]/45 dark:border-white/10 dark:bg-white/5 dark:focus-visible:border-[#9fc38e] dark:focus-visible:ring-[#5f8652]/30"
                   />
-                </label>
-                <fieldset>
-                  <legend className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-                    <HugeiconsIcon
-                      icon={Clock01Icon}
-                      className="size-4 text-[#66895f]"
-                    />
-                    {copy.time}
-                  </legend>
-                  <div className="grid grid-cols-2 gap-2">
+                </div>
+                <fieldset className="grid gap-2">
+                  <legend className="text-sm font-semibold">{copy.time}</legend>
+                  <RadioGroup
+                    name="time"
+                    required
+                    aria-label={copy.time}
+                    className="grid grid-cols-2 gap-2"
+                  >
                     {copy.times.map((time) => (
-                      <label key={time} className="cursor-pointer">
-                        <input
-                          className="peer sr-only"
-                          type="radio"
-                          name="time"
+                      <Label
+                        key={time}
+                        htmlFor={`time-${time}`}
+                        className="h-12 cursor-pointer justify-center rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] text-sm font-medium transition hover:border-[#a4bd9c] has-[[data-state=checked]]:border-[#5f8957] has-[[data-state=checked]]:bg-[#dcefd4] has-[[data-state=checked]]:text-[#31542e] dark:border-white/10 dark:bg-white/5 dark:has-[[data-state=checked]]:border-[#91bd80] dark:has-[[data-state=checked]]:bg-[#294529] dark:has-[[data-state=checked]]:text-[#e4f5d9]"
+                      >
+                        <RadioGroupItem
+                          id={`time-${time}`}
                           value={time}
-                          required
+                          className="sr-only"
                         />
-                        <span className="flex h-12 items-center justify-center rounded-2xl border border-[#dbe4d7] bg-[#f9fbf7] text-sm font-medium transition peer-checked:border-[#5f8957] peer-checked:bg-[#dcefd4] peer-checked:text-[#31542e] hover:border-[#a4bd9c] dark:border-white/10 dark:bg-white/5 dark:peer-checked:border-[#91bd80] dark:peer-checked:bg-[#294529] dark:peer-checked:text-[#e4f5d9]">
-                          {time}
-                        </span>
-                      </label>
+                        {time}
+                      </Label>
                     ))}
-                  </div>
+                  </RadioGroup>
                 </fieldset>
               </div>
 
@@ -288,14 +295,14 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
                   strokeWidth={2}
                 />
               </Button>
-              <p className="flex items-center justify-center gap-1.5 text-center text-xs leading-5 text-[#758673] dark:text-[#9fb09e]">
+              {/* <p className="flex items-center justify-center gap-1.5 text-center text-xs leading-5 text-[#758673] dark:text-[#9fb09e]">
                 <HugeiconsIcon
                   icon={CheckmarkCircle02Icon}
                   className="size-4 shrink-0 text-[#6e9a61]"
                   strokeWidth={1.8}
                 />
                 {copy.privacy}
-              </p>
+              </p> */}
             </form>
           </div>
         </section>
