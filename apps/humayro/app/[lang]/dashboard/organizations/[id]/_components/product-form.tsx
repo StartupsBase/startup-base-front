@@ -488,7 +488,9 @@ export function ProductForm({
       <div
         className={cn(
           "grid gap-8",
-          showAssistant && "xl:grid-cols-[minmax(0,1fr)_20rem]"
+          showAssistant &&
+            step !== steps.length - 1 &&
+            "xl:grid-cols-[minmax(0,1fr)_20rem]"
         )}
       >
         <div className="grid min-w-0 gap-6">
@@ -498,20 +500,28 @@ export function ProductForm({
           >
             {steps.map((item, index) => (
               <li key={item}>
-                <div
-                  className={cn(
-                    "h-1.5 rounded-full bg-muted",
-                    index <= step && "bg-primary"
-                  )}
-                />
-                <p
-                  className={cn(
-                    "mt-2 text-xs text-muted-foreground",
-                    index === step && "font-medium text-foreground"
-                  )}
+                <button
+                  type="button"
+                  className="w-full text-left disabled:cursor-default"
+                  disabled={index >= step || pending}
+                  onClick={() => setStep(index)}
                 >
-                  {index + 1}. {t(`product.step.${item}`)}
-                </p>
+                  <span
+                    className={cn(
+                      "block h-1.5 rounded-full bg-muted",
+                      index <= step && "bg-primary"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "mt-2 block text-xs text-muted-foreground",
+                      index === step && "font-medium text-foreground",
+                      index < step && "hover:text-foreground"
+                    )}
+                  >
+                    {index + 1}. {t(`product.step.${item}`)}
+                  </span>
+                </button>
               </li>
             ))}
           </ol>
@@ -564,9 +574,12 @@ export function ProductForm({
           {step === 3 ? (
             <ReviewStep
               values={form.getValues() as ProductValues}
-              imageCount={images.length}
+              images={images}
               videoName={videoName}
-              variantCount={variants.length}
+              videoUrl={videoUrl}
+              variants={variants}
+              colors={colors}
+              sizes={sizes}
               categoryName={
                 categories.find(
                   (category) =>
@@ -577,10 +590,28 @@ export function ProductForm({
             />
           ) : null}
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
+          <div
+            className={cn(
+              "flex items-center border-t border-border pt-4",
+              step === steps.length - 1
+                ? "justify-end gap-3"
+                : "justify-between"
+            )}
+          >
+            {step === steps.length - 1 ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending}
+                onClick={() => setStep(0)}
+              >
+                {t("product.edit")}
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="outline"
+              className={cn(step === steps.length - 1 && "hidden")}
               disabled={step === 0 || pending}
               onClick={() => setStep((current) => Math.max(0, current - 1))}
             >
@@ -592,12 +623,12 @@ export function ProductForm({
               </Button>
             ) : (
               <Button type="submit" disabled={pending}>
-                {editing ? t("product.save") : t("product.create")}
+                {editing ? t("product.save") : t("product.publish")}
               </Button>
             )}
           </div>
         </div>
-        {showAssistant ? (
+        {showAssistant && step !== steps.length - 1 ? (
           <ProductAssistant
             values={previewValues}
             images={images}
@@ -1134,39 +1165,261 @@ function ProductAssistant({
 
 function ReviewStep({
   values,
-  imageCount,
+  images,
   videoName,
-  variantCount,
+  videoUrl,
+  variants,
+  colors,
+  sizes,
   categoryName,
   t,
 }: {
   values: ProductValues
-  imageCount: number
+  images: ProductImage[]
   videoName: string
-  variantCount: number
+  videoUrl?: string
+  variants: ProductVariant[]
+  colors: Array<{ id?: number; name?: string; hexCode?: string }>
+  sizes: Array<{ id?: number; value?: string }>
   categoryName?: string
   t: Translation
 }) {
-  const items = [
-    [t("product.name"), values.name],
-    [t("product.category"), categoryName ?? "—"],
-    [t("product.basePrice"), String(values.basePrice)],
-    [t("product.discountPercent"), `${values.discountPercent}%`],
-    [t("product.images"), String(imageCount)],
-    [t("product.video"), videoName || "—"],
-    [t("product.variants"), String(variantCount)],
+  const sortedImages = [...images].sort(
+    (a, b) =>
+      Number(b.main) - Number(a.main) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+  )
+  const basePrice = Number(values.basePrice)
+  const discount = Number(values.discountPercent)
+  const price = basePrice * (1 - discount / 100)
+  const uniqueColorIds = [
+    ...new Set(variants.map((variant) => variant.colorId)),
   ]
+  const uniqueSizeIds = [...new Set(variants.map((variant) => variant.sizeId))]
+  const descriptions = [
+    [t("product.descriptionUz"), values.descriptionUz],
+    [t("product.descriptionRu"), values.descriptionRu],
+    [t("product.descriptionEng"), values.descriptionEng],
+  ].filter((item): item is [string, string] => Boolean(item[1]))
+
   return (
-    <section className="grid gap-4">
-      <h3 className="text-lg font-medium">{t("product.reviewTitle")}</h3>
-      <dl className="grid gap-3 rounded-2xl border p-5 sm:grid-cols-2">
-        {items.map(([label, value]) => (
-          <div key={label}>
-            <dt className="text-xs text-muted-foreground">{label}</dt>
-            <dd className="mt-1 font-medium">{value}</dd>
+    <section className="grid gap-6">
+      <div>
+        <div>
+          <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+            {t("product.livePreview")}
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold">
+            {t("product.reviewTitle")}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("product.reviewDescription")}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid overflow-hidden rounded-3xl border bg-card shadow-sm lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
+        <div className="grid min-h-[32rem] grid-cols-2 gap-1 bg-muted p-1">
+          {sortedImages.length > 0 ? (
+            sortedImages.slice(0, 4).map((image, index) => (
+              <div
+                key={`${image.attachmentId}-${index}`}
+                className={cn(
+                  "min-h-52 bg-background bg-cover bg-center",
+                  sortedImages.length === 1 && "col-span-2 row-span-2"
+                )}
+                style={
+                  image.url
+                    ? { backgroundImage: `url(${image.url})` }
+                    : undefined
+                }
+              >
+                {!image.url ? (
+                  <span className="flex size-full items-center justify-center text-sm text-muted-foreground">
+                    {image.name}
+                  </span>
+                ) : null}
+              </div>
+            ))
+          ) : (
+            <div className="col-span-2 flex min-h-[32rem] items-center justify-center text-sm text-muted-foreground">
+              {t("product.noPreviewImage")}
+            </div>
+          )}
+        </div>
+
+        <div className="grid content-start gap-6 p-6 lg:p-8">
+          <div>
+            <p className="text-sm font-medium text-primary">
+              {categoryName ?? "—"}
+            </p>
+            <h3 className="mt-2 text-3xl font-semibold tracking-tight">
+              {values.name}
+            </h3>
+            <div className="mt-2 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
+              {values.nameRu ? <span>{values.nameRu}</span> : null}
+              {values.nameEng ? <span>{values.nameEng}</span> : null}
+            </div>
           </div>
-        ))}
-      </dl>
+
+          {values.descriptionUz ? (
+            <div
+              className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+              dangerouslySetInnerHTML={{ __html: values.descriptionUz }}
+            />
+          ) : null}
+
+          <div>
+            <div className="flex items-baseline gap-3">
+              <p className="text-3xl font-semibold">{price.toLocaleString()}</p>
+              {discount > 0 ? (
+                <p className="text-base text-muted-foreground line-through">
+                  {basePrice.toLocaleString()}
+                </p>
+              ) : null}
+            </div>
+            {discount > 0 ? (
+              <span className="mt-2 inline-flex rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive">
+                -{discount}%
+              </span>
+            ) : null}
+          </div>
+
+          {uniqueColorIds.length > 0 ? (
+            <div>
+              <p className="mb-3 text-sm font-medium">{t("product.color")}</p>
+              <div className="flex flex-wrap gap-3">
+                {uniqueColorIds.map((colorId) => {
+                  const color = colors.find(
+                    (item) => item.id === Number(colorId)
+                  )
+                  return (
+                    <div
+                      key={colorId}
+                      className="flex items-center gap-2 rounded-full border px-3 py-2 text-sm"
+                    >
+                      <span
+                        className="size-4 rounded-full border"
+                        style={{
+                          backgroundColor: color?.hexCode ?? "transparent",
+                        }}
+                      />
+                      {color?.name ?? colorId}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          {uniqueSizeIds.length > 0 ? (
+            <div>
+              <p className="mb-3 text-sm font-medium">{t("product.size")}</p>
+              <div className="flex flex-wrap gap-2">
+                {uniqueSizeIds.map((sizeId) => (
+                  <span
+                    key={sizeId}
+                    className="min-w-14 rounded-full border px-4 py-2 text-center text-sm font-medium"
+                  >
+                    {sizes.find((item) => item.id === Number(sizeId))?.value ??
+                      sizeId}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-3 border-t pt-5 text-sm">
+            <div className="rounded-2xl bg-muted/60 p-4">
+              <p className="text-muted-foreground">{t("product.stock")}</p>
+              <p className="mt-1 text-lg font-semibold">
+                {variants.reduce(
+                  (total, variant) => total + Number(variant.stock || 0),
+                  0
+                )}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 p-4">
+              <p className="text-muted-foreground">{t("product.status")}</p>
+              <p className="mt-1 text-lg font-semibold">
+                {values.active ? t("product.active") : t("product.inactive")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border bg-card p-5">
+          <h3 className="font-semibold">{t("product.variants")}</h3>
+          {variants.length > 0 ? (
+            <div className="mt-4 grid gap-2">
+              {variants.map((variant, index) => (
+                <div
+                  key={`${variant.colorId}-${variant.sizeId}-${index}`}
+                  className="grid grid-cols-3 gap-3 rounded-xl bg-muted/60 p-3 text-sm"
+                >
+                  <span>
+                    {colors.find((item) => item.id === Number(variant.colorId))
+                      ?.name ?? "—"}
+                  </span>
+                  <span>
+                    {sizes.find((item) => item.id === Number(variant.sizeId))
+                      ?.value ?? "—"}
+                  </span>
+                  <span className="text-right">
+                    {variant.price || basePrice} · {variant.stock}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t("product.noVariants")}
+            </p>
+          )}
+        </div>
+
+        <div className="rounded-2xl border bg-card p-5">
+          <h3 className="font-semibold">{t("product.mediaSummary")}</h3>
+          <dl className="mt-4 grid gap-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{t("product.images")}</dt>
+              <dd>{images.length}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{t("product.video")}</dt>
+              <dd>{videoName || "—"}</dd>
+            </div>
+            {videoUrl ? (
+              <video
+                className="mt-2 w-full rounded-xl"
+                controls
+                src={videoUrl}
+              />
+            ) : null}
+          </dl>
+        </div>
+      </div>
+
+      {descriptions.length > 0 ? (
+        <div className="grid gap-3">
+          {descriptions.map(([label, description]) => (
+            <details
+              key={label}
+              className="rounded-2xl border bg-card p-5"
+              open={label === t("product.descriptionUz")}
+            >
+              <summary className="cursor-pointer font-semibold">
+                {label}
+              </summary>
+              <div
+                className="prose prose-sm dark:prose-invert mt-4 max-w-none text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            </details>
+          ))}
+        </div>
+      ) : null}
     </section>
   )
 }
