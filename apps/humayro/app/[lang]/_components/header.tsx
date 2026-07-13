@@ -36,18 +36,18 @@ export default function Header({ language }: { language: Language }) {
     <header
       className={`
         sticky top-2 z-50 mx-auto flex items-center justify-between
-        will-change-[width]
         duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]
-        w-[calc(100%-60rem)] 
+        w-[calc(100%-80rem)] 
         transition-all
+        border dark:border-none
         ${
           isSticky
-            ? "max-w-[1100px] rounded-4xl bg-primary/15 px-5 py-2 shadow-md backdrop-blur"
-            : "w-full max-w-none rounded-none bg-transparent px-2 py-2 shadow-none"
+            ? "min-w-[1380px] rounded-4xl bg-white/15 p-2 backdrop-blur dark:bg-primary/15"
+            : "w-full max-w-none rounded-none border border-none bg-transparent p-2 shadow-none dark:border-none"
         }
       `}
     >
-      <div className="mx-auto flex w-full max-w-6xl justify-between">
+      <div className="flex w-full max-w-[1580px] mx-auto justify-between px-4">
       <LogoBrand />
 
       <div className="flex items-center gap-2">
