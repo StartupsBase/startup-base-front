@@ -1,0 +1,85 @@
+"use client"
+
+import { useTranslation } from "react-i18next"
+
+const storefrontKeys = [
+  "catalogEyebrow",
+  "catalogTitle",
+  "catalogDescription",
+  "allCategories",
+  "newest",
+  "priceLow",
+  "priceHigh",
+  "addToCart",
+  "adding",
+  "favorite",
+  "unfavorite",
+  "noProducts",
+  "productsError",
+  "retry",
+  "signInRequired",
+  "signIn",
+  "addedToCart",
+  "addedToFavorites",
+  "removedFromFavorites",
+  "outOfStock",
+  "actionError",
+  "favoritesTitle",
+  "favoritesDescription",
+  "favoritesEmptyTitle",
+  "favoritesEmptyDescription",
+  "cartTitle",
+  "cartDescription",
+  "cartEmptyTitle",
+  "cartEmptyDescription",
+  "popularProducts",
+  "clearCart",
+  "remove",
+  "itemTotal",
+  "total",
+  "checkout",
+  "recipientName",
+  "recipientPhone",
+  "deliveryAddress",
+  "note",
+  "placeOrder",
+  "placingOrder",
+  "checkoutError",
+  "orderSuccess",
+  "orderSuccessDescription",
+  "orderNumber",
+  "myOrders",
+  "ordersDescription",
+  "ordersEmptyTitle",
+  "ordersEmptyDescription",
+  "order",
+  "orderedAt",
+  "cancelOrder",
+  "orderCancelled",
+  "pieces",
+  "searchPlaceholder",
+  "searchResults",
+  "searchHint",
+  "searchEmpty",
+  "searchError",
+  "searchClose",
+  "withoutCategory",
+  "favoritesNav",
+  "cartNav",
+  "statusNew",
+  "statusConfirmed",
+  "statusShipped",
+  "statusDelivered",
+  "statusCancelled",
+] as const
+
+type StorefrontKey = (typeof storefrontKeys)[number]
+type StorefrontCopy = Record<StorefrontKey, string>
+
+export function useStorefrontCopy() {
+  const { t } = useTranslation()
+
+  return Object.fromEntries(
+    storefrontKeys.map((key) => [key, t(`storefront.${key}`)])
+  ) as StorefrontCopy
+}

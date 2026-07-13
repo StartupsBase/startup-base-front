@@ -1,9 +1,12 @@
-import React from 'react'
+import type { Language } from "@/i18n/config"
 
-const FavouritesPage = () => {
-  return (
-    <div>FavouritesPage</div>
-  )
+import { FavouritesView } from "./_components/favourites-view"
+
+export default async function FavouritesPage({
+  params,
+}: {
+  params: Promise<{ lang: Language }>
+}) {
+  const { lang } = await params
+  return <FavouritesView language={lang} />
 }
-
-export default FavouritesPage

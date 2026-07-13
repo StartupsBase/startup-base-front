@@ -1,12 +1,12 @@
 import type { Language } from "@/i18n/config"
 
-import { CartView } from "./_components/cart-view"
+import { OrdersView } from "./_components/orders-view"
 
-export default async function CartPage({
+export default async function OrdersPage({
   params,
 }: {
   params: Promise<{ lang: Language }>
 }) {
   const { lang } = await params
-  return <CartView language={lang} />
+  return <OrdersView language={lang} />
 }
