@@ -53,21 +53,34 @@ import { cn } from "@workspace/ui/lib/utils"
 
 const MAX_VIDEO_SIZE = 5 * 1024 * 1024
 
-const productSchema = z.object({
-  name: z.string().trim().min(1, "Product name is required."),
-  nameRu: z.string().trim(),
-  nameEng: z.string().trim(),
-  descriptionUz: z.string().trim(),
-  descriptionRu: z.string().trim(),
-  descriptionEng: z.string().trim(),
-  categoryId: z.coerce.number().int().positive("Select a category."),
-  basePrice: z.coerce.number().nonnegative("Price cannot be negative."),
-  discountPercent: z.coerce.number().min(0).max(100),
-  active: z.boolean(),
-})
+type Translation = ReturnType<typeof useTranslation>["t"]
 
-type ProductValues = z.infer<typeof productSchema>
-type ProductInputs = z.input<typeof productSchema>
+function createProductSchema(t: Translation) {
+  return z.object({
+    name: z.string().trim().min(1, t("product.validation.nameRequired")),
+    nameRu: z.string().trim(),
+    nameEng: z.string().trim(),
+    descriptionUz: z.string().trim(),
+    descriptionRu: z.string().trim(),
+    descriptionEng: z.string().trim(),
+    categoryId: z.coerce
+      .number({ error: t("product.validation.categoryRequired") })
+      .int(t("product.validation.categoryRequired"))
+      .positive(t("product.validation.categoryRequired")),
+    basePrice: z.coerce
+      .number({ error: t("product.validation.priceInvalid") })
+      .nonnegative(t("product.validation.priceNonNegative")),
+    discountPercent: z.coerce
+      .number({ error: t("product.validation.discountInvalid") })
+      .min(0, t("product.validation.discountRange"))
+      .max(100, t("product.validation.discountRange")),
+    active: z.boolean(),
+  })
+}
+
+type ProductSchema = ReturnType<typeof createProductSchema>
+type ProductValues = z.infer<ProductSchema>
+type ProductInputs = z.input<ProductSchema>
 type ProductSource = ProductListDTO | ProductDTO
 
 type ProductImage = ProductImageCreateDTO & {
@@ -165,7 +178,7 @@ export function ProductForm({
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [editorVersion, setEditorVersion] = useState(0)
   const form = useForm<ProductInputs, unknown, ProductValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(createProductSchema(t)),
     defaultValues: productValues(product),
   })
   const previewValues = useWatch({ control: form.control })
@@ -602,8 +615,6 @@ export function ProductForm({
     </form>
   )
 }
-
-type Translation = ReturnType<typeof useTranslation>["t"]
 
 function BasicStep({
   form,

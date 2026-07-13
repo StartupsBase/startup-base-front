@@ -348,7 +348,15 @@
       "fillLocalizedFields": "Заполнить поля RU и EN",
       "fillLocalizedFieldsDescription": "Пока узбекские название и описание копируются в русские и английские поля. Позже это действие можно подключить к сервису перевода.",
       "translationSourceMissing": "Сначала заполните узбекское название или описание.",
-      "localizedFieldsFilled": "Русские и английские поля заполнены."
+      "localizedFieldsFilled": "Русские и английские поля заполнены.",
+      "validation": {
+        "nameRequired": "Введите название товара.",
+        "categoryRequired": "Выберите категорию.",
+        "priceInvalid": "Введите цену числом.",
+        "priceNonNegative": "Цена не может быть отрицательной.",
+        "discountInvalid": "Введите процент скидки числом.",
+        "discountRange": "Процент скидки должен быть от 0 до 100."
+      }
     },
     "mapPicker": {
       "title": "Выберите адрес на карте",

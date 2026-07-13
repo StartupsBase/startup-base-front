@@ -348,7 +348,15 @@
       "fillLocalizedFields": "RU va EN maydonlarini to'ldirish",
       "fillLocalizedFieldsDescription": "Hozircha o'zbekcha nom va tavsif ruscha hamda inglizcha maydonlarga ko'chiriladi. Keyin bu amal tarjima xizmatiga ulanishi mumkin.",
       "translationSourceMissing": "Avval o'zbekcha nom yoki tavsifni kiriting.",
-      "localizedFieldsFilled": "Ruscha va inglizcha maydonlar to'ldirildi."
+      "localizedFieldsFilled": "Ruscha va inglizcha maydonlar to'ldirildi.",
+      "validation": {
+        "nameRequired": "Mahsulot nomini kiriting.",
+        "categoryRequired": "Kategoriyani tanlang.",
+        "priceInvalid": "Narxni raqam bilan kiriting.",
+        "priceNonNegative": "Narx manfiy bo'lishi mumkin emas.",
+        "discountInvalid": "Chegirma foizini raqam bilan kiriting.",
+        "discountRange": "Chegirma foizi 0 dan 100 gacha bo'lishi kerak."
+      }
     },
     "mapPicker": {
       "title": "Xaritadan manzil tanlang",
