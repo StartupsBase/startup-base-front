@@ -30,6 +30,32 @@
   --sidebar-accent-foreground: oklch(0.245 0.058 170);
   --sidebar-border: oklch(0.89 0.024 205);
   --sidebar-ring: oklch(0.62 0.14 178);
+  --humayro-top-background:
+    radial-gradient(
+      ellipse 84% 52% at 50% -8%,
+      color-mix(in oklch, var(--primary) 45%, transparent) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 56% 36% at 8% 24%,
+      color-mix(in oklch, var(--primary) 13%, transparent) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      color-mix(in oklch, var(--primary) 22%, transparent) 0.65px,
+      transparent 0.65px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(0.9 0.06 178) 0%,
+      oklch(0.96 0.028 178) 50%,
+      var(--background) 100%
+    );
+  --humayro-top-background-height: clamp(78rem, 39vw, 32rem);
+  --humayro-top-background-size:
+    100% var(--humayro-top-background-height),
+    100% var(--humayro-top-background-height), 18px 18px,
+    100% var(--humayro-top-background-height);
 }
 
 .dark {
@@ -64,4 +90,41 @@
   --sidebar-accent-foreground: oklch(0.94 0.018 190);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.72 0.14 178);
+  --humayro-top-background:
+    radial-gradient(
+      ellipse 88% 58% at 50% -10%,
+      color-mix(in oklch, var(--primary) 42%, transparent) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 58% 38% at 8% 22%,
+      color-mix(in oklch, var(--primary) 14%, transparent) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      color-mix(in oklch, var(--primary) 24%, transparent) 0.6px,
+      transparent 0.6px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(0.2 0.055 190) 0%,
+      oklch(0.16 0.04 198) 50%,
+      var(--background) 100%
+    );
+  --humayro-top-background-height: clamp(78rem, 39vw, 32rem);
+  --humayro-top-background-size:
+    100% var(--humayro-top-background-height),
+    100% var(--humayro-top-background-height), 18px 18px,
+    100% var(--humayro-top-background-height);
+}
+
+.humayro-top-background {
+  background: transparent;
+}
+
+body:has(.humayro-top-background) {
+  background-color: var(--background);
+  background-image: var(--humayro-top-background);
+  background-size: var(--humayro-top-background-size);
+  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
 }

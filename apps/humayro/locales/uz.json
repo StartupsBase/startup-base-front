@@ -14,6 +14,7 @@
       "description": "Humayro har bir uslub, mavsum va lahza uchun kiyimlarni topish, saralash va tanlashni osonlashtiradi.",
       "primaryAction": "Kiyimlarni ko'rish",
       "secondaryAction": "Hisob yaratish",
+      "bookingDemoAction": "Bepul demo — 30 daqiqa",
       "loginAction": "Kirish",
       "landingAction": "Bosh sahifa",
       "account": "Hisob",
