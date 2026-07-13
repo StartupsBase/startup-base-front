@@ -21,12 +21,11 @@ const Footer = ({ language }: { language: Language }) => {
     return null
   }
   return (
-    <div className="bottom-0 block w-full rounded-t-[45px] border">
-      <div className="mx-auto flex w-full max-w-6xl justify-between px-6 py-5 md:px-10">
+    <div className="px-4">
+      <div className="flex w-full justify-between rounded-t-[45px] border px-6 py-5">
         <div className="flex items-start gap-3">
           <Link href={"/blogs"}>Blogs</Link>
           <Link href={"/privacy-policy"}>Privacy Policy</Link>
-          <Link href={"/support"}>Support</Link>
         </div>
         <div className="flex items-center gap-2">
           <HugeiconsIcon icon={TelegramIcon} className="size-5" />

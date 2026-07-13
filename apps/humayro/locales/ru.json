@@ -14,6 +14,7 @@
       "description": "Humayro помогает находить, сортировать и выбирать одежду для любого стиля, сезона и случая.",
       "primaryAction": "Смотреть одежду",
       "secondaryAction": "Создать аккаунт",
+      "bookingDemoAction": "Записаться на демо",
       "loginAction": "Войти",
       "landingAction": "Главная страница",
       "account": "Аккаунт",
