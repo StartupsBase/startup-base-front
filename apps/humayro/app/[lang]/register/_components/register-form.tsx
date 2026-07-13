@@ -15,6 +15,13 @@ import { Input } from "@/components/input"
 import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 
 type FormValues = {
   firstname: string
@@ -126,14 +133,25 @@ export function RegisterForm({ language }: { language: string }) {
         />
       </Field>
       <Field label={t("register.gender")}>
-        <select
-          className="flex h-11 w-full rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          {...form.register("gender")}
-        >
-          <option value="">{t("register.genderUnspecified")}</option>
-          <option value="MALE">{t("register.male")}</option>
-          <option value="FEMALE">{t("register.female")}</option>
-        </select>
+        <Controller
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <Select
+              name={field.name}
+              value={field.value}
+              onValueChange={field.onChange}
+            >
+              <SelectTrigger onBlur={field.onBlur} className="h-11 w-full px-4">
+                <SelectValue placeholder={t("register.genderUnspecified")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MALE">{t("register.male")}</SelectItem>
+                <SelectItem value="FEMALE">{t("register.female")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
       </Field>
       <Field
         label={t("register.password")}

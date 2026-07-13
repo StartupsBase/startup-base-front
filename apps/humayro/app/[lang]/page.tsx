@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { Button } from "@workspace/ui/components/button"
@@ -8,6 +7,10 @@ import { ShimmerButton } from "@workspace/ui/components/shimmer-button"
 import { TextAnimate } from "@workspace/ui/components/text-animate"
 import { DiaTextReveal } from "@workspace/ui/components/dia-text-reveal"
 import YouTubeVideo from "@/components/you-tube"
+import KpiStatsCards from "@/components/kpi-stats-cards"
+import CustomerStories from "./_components/customer-stories"
+import FaqSection from "./_components/faq-section"
+import TeamSection from "./_components/team-section"
 
 export default async function Page({ params }: { params: Promise<unknown> }) {
   const { lang } = (await params) as { lang?: string }
@@ -23,11 +26,13 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <DiaTextReveal
             text={t("home.eyebrow")}
+            duration={1.5}
             className="text-DiaTextRevealrimary mb-6 text-sm font-semibold tracking-[0.24em] uppercase"
           />
           <TextAnimate
             animation="blurInUp"
             by="character"
+            duration={1.5}
             className="max-w-5xl text-5xl font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl"
           >
             {t("home.title")}
@@ -35,6 +40,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
           <TextAnimate
             animation="slideLeft"
             by="character"
+            duration={1.5}
             className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl"
           >
             {t("home.description")}
@@ -68,6 +74,10 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
 
         <YouTubeVideo />
       </div>
+      <KpiStatsCards />
+      <CustomerStories lang={lang} />
+      <TeamSection lang={lang} />
+      <FaqSection lang={lang} />
     </main>
   )
 }
