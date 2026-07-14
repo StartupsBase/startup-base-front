@@ -105,6 +105,11 @@ export function UserDropdown({ language }: { language: string }) {
             {t("profile.title")}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/${language}/orders`}>
+            {t("storefront.myOrders")}
+          </Link>
+        </DropdownMenuItem>
         {pathname !== `/${language}/dashboard` && (
           <DropdownMenuItem asChild>
             <Link href={`/${language}/dashboard`}>

@@ -2,16 +2,16 @@
 
 import { usePathname } from "next/navigation"
 import type { Language } from "@/i18n/config"
-import Link from "next/link"
-import { HeartIcon, SearchList01Icon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
+import { SearchList01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useState } from "react"
 import { LogoBrand } from "@/components/logo"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserDropdown } from "./user-dropdown"
-import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
+import { AdvancedSearch } from "./advanced-search"
+import { StorefrontNavActions } from "./storefront/storefront-nav-actions"
 
 export default function Header({ language }: { language: Language }) {
   const pathname = usePathname()
@@ -53,17 +53,12 @@ export default function Header({ language }: { language: Language }) {
             />
             Katalog
           </Button>
-          <Input className="w-[450px]" />
+          <AdvancedSearch language={language} />
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher language={language} />
           <ThemeToggle />
-          <Link href={"/favourites"} className="p-1">
-            <HugeiconsIcon icon={HeartIcon} className="size-5" />
-          </Link>
-          <Link href={"/cart"} className="p-1">
-            <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
-          </Link>
+          <StorefrontNavActions language={language} />
           <UserDropdown language={language} />
         </div>
       </div>

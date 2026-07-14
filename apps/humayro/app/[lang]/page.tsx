@@ -11,6 +11,7 @@ import KpiStatsCards from "@/components/kpi-stats-cards"
 import CustomerStories from "./_components/customer-stories"
 import FaqSection from "./_components/faq-section"
 import TeamSection from "./_components/team-section"
+import { CatalogSection } from "./_components/storefront/catalog-section"
 import InfiniteScroll from "@/components/infinite-scroll"
 import Support from "@/components/support"
 
@@ -77,6 +78,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
         <YouTubeVideo />
       </div>
       <InfiniteScroll />
+      <CatalogSection language={lang} />
       <KpiStatsCards />
       <CustomerStories lang={lang} />
       <TeamSection lang={lang} />
