@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-import authImage from "@/assets/auth/dd01b95e8c02bc4973082d74abd82a110519b9be.jpg"
+import authImage from "../../../assets/auth/dd01b95e8c02bc4973082d74abd82a110519b9be.jpg"
 import { LoginForm } from "./_components/login-form"
 import { LogoBrand } from "@/components/logo"
 import { isLanguage } from "@/i18n/config"

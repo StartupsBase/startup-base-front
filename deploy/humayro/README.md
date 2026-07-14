@@ -46,7 +46,8 @@ Add this repository secret so the image-build job can read it:
 - `HUMAYRO_YANDEX_MAPS_API_KEY`: browser API key restricted to
   `https://humayro.uz/*` at Yandex.
 
-Add these repository or environment variables:
+Add these repository variables (the enable flag must be repository-level so it
+is available before GitHub starts the deployment job):
 
 - `HUMAYRO_API_URL=https://swagger.humayro.uz`
 - `HUMAYRO_DEPLOY_ENABLED=true` (set this only after the VPS is ready)
