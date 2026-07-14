@@ -21,7 +21,7 @@ import {
 } from "@/lib/api/generated/user-controller/user-controller"
 import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import { useGetAll5 as useBranches } from "@/lib/api/generated/branch/branch"
-import { clearAuthToken } from "@/lib/auth-client"
+import { clearAuthToken, hasAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -75,7 +75,7 @@ export function Dashboard({ language }: { language: string }) {
   const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clear)
-  const meQuery = useMe1({ query: { retry: false } })
+  const meQuery = useMe1({ query: { retry: false, enabled: !!hasAuthToken() } })
   const [search, setSearch] = useState("")
   const [organizationId, setOrganizationId] = useState("")
   const [branchId, setBranchId] = useState("")
