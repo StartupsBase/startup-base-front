@@ -5,6 +5,11 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": [
+        "DEPLOYMENT_VERSION",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_YANDEX_MAPS_API_KEY"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {

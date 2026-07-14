@@ -123,7 +123,7 @@ function ScrollVelocityRowImpl({
       ro.observe(block)
 
       io = new IntersectionObserver(([entry]) => {
-        isInViewRef.current = entry.isIntersecting
+        isInViewRef.current = entry?.isIntersecting ?? false
       })
       io.observe(container)
 
