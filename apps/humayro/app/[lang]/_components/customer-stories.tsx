@@ -1,5 +1,5 @@
 import Image from "next/image"
-
+import { BlurFade } from "@workspace/ui/components/blur-fade"
 import { Marquee } from "@workspace/ui/components/marquee"
 
 type CustomerStoriesProps = {
@@ -173,12 +173,16 @@ export default function CustomerStories({ lang }: CustomerStoriesProps) {
   return (
     <section className="overflow-hidden py-20 sm:py-24">
       <div className="mx-auto px-6 text-center md:px-10">
+        <BlurFade delay={0.25} inView>
         <p className="text-xs font-semibold tracking-[0.18em] text-[#16836b] uppercase dark:text-[#71c9b4]">
           {copy.eyebrow}
         </p>
+        </BlurFade>
+        <BlurFade delay={0.25 * 2} inView>
         <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.05em] text-balance text-[#123e33] sm:text-5xl dark:text-[#edf8f4]">
           {copy.title}
         </h2>
+        </BlurFade>
       </div>
 
       <div className="relative mt-11 space-y-5 sm:mt-14 sm:space-y-6">

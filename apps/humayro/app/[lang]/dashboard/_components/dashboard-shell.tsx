@@ -51,10 +51,10 @@ export function DashboardShell({
       (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
     ) ?? false
   const isOrganizationsPage = pathname.startsWith(
-    `/${language}/dashboard/organizations`
+    `/dashboard/organizations`
   )
   const isAdministrationPage = pathname.startsWith(
-    `/${language}/dashboard/adminstration`
+    `/dashboard/adminstration`
   )
   const isDashboardPage = pathname === `/${language}/dashboard`
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
@@ -118,7 +118,7 @@ export function DashboardShell({
                       isActive={isAdministrationPage}
                       tooltip={t("administration.title")}
                     >
-                      <Link href={`/${language}/dashboard/adminstration`}>
+                      <Link href={`/dashboard/adminstration`}>
                         <span>{t("administration.title")}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -131,7 +131,7 @@ export function DashboardShell({
                       isActive={isOrganizationsPage}
                       tooltip={t("dashboard.organizations")}
                     >
-                      <Link href={`/${language}/dashboard/organizations`}>
+                      <Link href={`/dashboard/organizations`}>
                         <span>{t("dashboard.organizations")}</span>
                       </Link>
                     </SidebarMenuButton>
