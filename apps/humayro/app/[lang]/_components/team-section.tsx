@@ -37,7 +37,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Toshkent",
       image: "/images/team/dilshodbek-khodjakov.png",
       isFounder: true,
-      linkedinUrl: "https://www.linkedin.com/",
+      linkedinUrl: "https://www.linkedin.com/in/mavlon-akmalov-84153a34b/",
     },
     {
       name: "Rovshanbek Mirvoxitov",
@@ -47,7 +47,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Toshkent",
       isFounder: true,
       image: "/images/team/umid-sultonov.png",
-      linkedinUrl: "https://www.linkedin.com/",
+      linkedinUrl: "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },
   ],
   ru: [
@@ -69,7 +69,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Ташкент",
       image: "/images/team/dilshodbek-khodjakov.png",
       isFounder: true,
-      linkedinUrl: "https://www.linkedin.com/",
+      linkedinUrl: "https://www.linkedin.com/in/mavlon-akmalov-84153a34b/",
     },
     {
       name: "Ровшанбек Мирвохитов",
@@ -79,7 +79,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Ташкент",
       isFounder: true,
       image: "/images/team/umid-sultonov.png",
-      linkedinUrl: "https://www.linkedin.com/",
+      linkedinUrl: "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },
   ],
 }

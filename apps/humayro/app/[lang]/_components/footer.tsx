@@ -134,7 +134,7 @@ const Footer = ({ language }: { language: Language }) => {
 
       <p
         aria-hidden="true"
-        className="pointer-events-none mb-[0.12em] text-center text-[clamp(4.3rem,17.8vw,17rem)] leading-none font-black tracking-[-0.035em] text-foreground/5 select-none"
+        className="pointer-events-none text-center text-[clamp(4.3rem,17.8vw,17rem)] leading-none font-black tracking-[-0.035em] text-foreground/5 select-none"
       >
         HUMAYRO
       </p>
