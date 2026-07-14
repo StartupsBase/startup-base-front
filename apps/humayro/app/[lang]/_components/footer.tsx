@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ArrowUp01Icon,
   InstagramIcon,
   TelegramIcon,
   WhatsappIcon,
@@ -9,10 +10,40 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { Logo } from "@/components/logo"
 import type { Language } from "@/i18n/config"
+
+const footerCopy = {
+  uz: {
+    description:
+      "Uslubingizni kashf qiling va garderobingizni oson boshqaring.",
+    navigation: "Asosiy bo‘limlar",
+    information: "Ma’lumot",
+    home: "Bosh sahifa",
+    demo: "Demo bron qilish",
+    blog: "Blog",
+    privacy: "Maxfiylik siyosati",
+    signIn: "Kirish",
+    follow: "Bizni kuzating",
+    backToTop: "Yuqoriga qaytish",
+  },
+  ru: {
+    description: "Открывайте свой стиль и легко управляйте гардеробом.",
+    navigation: "Основные разделы",
+    information: "Информация",
+    home: "Главная",
+    demo: "Записаться на демо",
+    blog: "Блог",
+    privacy: "Политика конфиденциальности",
+    signIn: "Войти",
+    follow: "Мы в соцсетях",
+    backToTop: "Наверх",
+  },
+} as const
 
 const Footer = ({ language }: { language: Language }) => {
   const pathname = usePathname()
+  const copy = footerCopy[language]
 
   if (
     pathname.startsWith(`/${language}/dashboard`) ||
@@ -20,20 +51,108 @@ const Footer = ({ language }: { language: Language }) => {
   ) {
     return null
   }
+
   return (
-    <div className="px-4">
-      <div className="flex w-full justify-between rounded-t-[45px] border px-6 py-5">
-        <div className="flex items-start gap-3">
-          <Link href={"/blogs"}>Blogs</Link>
-          <Link href={"/privacy-policy"}>Privacy Policy</Link>
+    <footer className="relative mt-15 overflow-hidden border-t rounded-t-[45px] border-border/70 bg-background px-4 pt-14 sm:px-6 lg:px-10">
+      <div className="mx-auto grid w-full max-w-7xl gap-12 pb-16 sm:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1fr] lg:gap-16">
+        <div className="max-w-xs">
+          <Link
+            href={`/${language}`}
+            aria-label="Humayro"
+            className="inline-flex items-center gap-2 text-lg font-bold tracking-tight"
+          >
+            <Logo className="size-9" />
+            <span>Humayro</span>
+          </Link>
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
+            {copy.description}
+          </p>
+          <div className="mt-6">
+            <p className="mb-3 text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+              {copy.follow}
+            </p>
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <HugeiconsIcon icon={TelegramIcon} className="size-5" />
+              <HugeiconsIcon icon={InstagramIcon} className="size-5" />
+              <HugeiconsIcon icon={WhatsappIcon} className="size-5" />
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <HugeiconsIcon icon={TelegramIcon} className="size-5" />
-          <HugeiconsIcon icon={InstagramIcon} className="size-5" />
-          <HugeiconsIcon icon={WhatsappIcon} className="size-5" />
-        </div>
+
+        <nav aria-label={copy.navigation}>
+          <h2 className="mb-4 font-semibold">{copy.navigation}</h2>
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li>
+              <Link
+                className="transition-colors hover:text-primary"
+                href={`/${language}`}
+              >
+                {copy.home}
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="transition-colors hover:text-primary"
+                href={`/${language}/book-demo`}
+              >
+                {copy.demo}
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="transition-colors hover:text-primary"
+                href={`/${language}/blogs`}
+              >
+                {copy.blog}
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <nav aria-label={copy.information}>
+          <h2 className="mb-4 font-semibold">{copy.information}</h2>
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li>
+              <Link
+                className="transition-colors hover:text-primary"
+                href={`/${language}/privacy-policy`}
+              >
+                {copy.privacy}
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="transition-colors hover:text-primary"
+                href={`/${language}/login`}
+              >
+                {copy.signIn}
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
-    </div>
+
+      <p
+        aria-hidden="true"
+        className="pointer-events-none mb-[0.12em] text-center text-[clamp(4.3rem,17.8vw,17rem)] leading-none font-black tracking-[-0.035em] text-foreground/5 select-none"
+      >
+        HUMAYRO
+      </p>
+
+      <button
+        type="button"
+        aria-label={copy.backToTop}
+        title={copy.backToTop}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="fixed right-5 bottom-5 z-50 grid size-11 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg cursor-pointer transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <HugeiconsIcon
+          icon={ArrowUp01Icon}
+          className="size-5"
+          strokeWidth={2}
+        />
+      </button>
+    </footer>
   )
 }
 
