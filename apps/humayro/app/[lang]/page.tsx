@@ -11,6 +11,8 @@ import KpiStatsCards from "@/components/kpi-stats-cards"
 import CustomerStories from "./_components/customer-stories"
 import FaqSection from "./_components/faq-section"
 import TeamSection from "./_components/team-section"
+import InfiniteScroll from "@/components/infinite-scroll"
+import Support from "@/components/support"
 
 export default async function Page({ params }: { params: Promise<unknown> }) {
   const { lang } = (await params) as { lang?: string }
@@ -21,7 +23,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
   const { t } = await getTranslation(lang)
 
   return (
-    <main className="humayro-top-background min-h-1000 text-foreground">
+    <main className="humayro-top-background min-h-1000 text-foreground relative">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <DiaTextReveal
@@ -74,10 +76,12 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
 
         <YouTubeVideo />
       </div>
+      <InfiniteScroll />
       <KpiStatsCards />
       <CustomerStories lang={lang} />
       <TeamSection lang={lang} />
       <FaqSection lang={lang} />
+      <Support />
     </main>
   )
 }
