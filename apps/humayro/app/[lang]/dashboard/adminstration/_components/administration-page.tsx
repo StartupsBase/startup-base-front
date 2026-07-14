@@ -5,7 +5,13 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { useMe1, type ColorDTO, type SizeDTO } from "@/lib/api"
+import {
+  useMe1,
+  type ColorDTO,
+  type OrganizationDTO,
+  type SizeDTO,
+} from "@/lib/api"
+import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
   getGetAll3QueryKey,
   useCreate3,
@@ -156,6 +162,16 @@ function ColorsPanel() {
         },
       },
       {
+        accessorKey: "organizationName",
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.organization")}
+          />
+        ),
+        cell: ({ row }) => row.getValue<string>("organizationName") || "—",
+      },
+      {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => (
@@ -231,8 +247,14 @@ function ColorForm({
   const update = useUpdate4()
   const [name, setName] = React.useState(color?.name ?? "")
   const [hexCode, setHexCode] = React.useState(color?.hexCode ?? "#000000")
+  const [organizationId, setOrganizationId] = React.useState<number | "">(
+    color?.organizationId ?? ""
+  )
   const [error, setError] = React.useState(false)
-  const valid = name.trim().length > 0 && /^#[0-9a-fA-F]{6}$/.test(hexCode)
+  const valid =
+    name.trim().length > 0 &&
+    /^#[0-9a-fA-F]{6}$/.test(hexCode) &&
+    organizationId !== ""
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -240,7 +262,11 @@ function ColorForm({
     setError(false)
 
     try {
-      const data = { name: name.trim(), hexCode: hexCode.toUpperCase() }
+      const data = {
+        name: name.trim(),
+        hexCode: hexCode.toUpperCase(),
+        organizationId,
+      }
       if (color?.id !== undefined)
         await update.mutateAsync({ id: color.id, data })
       else await create.mutateAsync({ data })
@@ -266,6 +292,13 @@ function ColorForm({
       </Field>
       <Field label={t("administration.colors.hex")}>
         <ColorPicker value={hexCode} onChange={setHexCode} disabled={pending} />
+      </Field>
+      <Field label={t("administration.organization")}>
+        <OrganizationSelect
+          value={organizationId}
+          onChange={setOrganizationId}
+          disabled={pending}
+        />
       </Field>
       {error ? (
         <p className="text-sm text-destructive">
@@ -339,6 +372,16 @@ function SizesPanel() {
           />
         ),
         cell: ({ row }) => row.getValue<number>("sortOrder") ?? 0,
+      },
+      {
+        accessorKey: "organizationName",
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("administration.organization")}
+          />
+        ),
+        cell: ({ row }) => row.getValue<string>("organizationName") || "—",
       },
       {
         id: "actions",
@@ -429,15 +472,19 @@ function SizeForm({ size, onSaved }: { size?: SizeDTO; onSaved: () => void }) {
     size?.type ?? "LETTER"
   )
   const [sortOrder, setSortOrder] = React.useState(size?.sortOrder ?? 0)
+  const [organizationId, setOrganizationId] = React.useState<number | "">(
+    size?.organizationId ?? ""
+  )
   const [error, setError] = React.useState(false)
+  const valid = value.trim().length > 0 && organizationId !== ""
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
-    if (!value.trim()) return setError(true)
+    if (!valid) return setError(true)
     setError(false)
 
     try {
-      const data = { value: value.trim(), type, sortOrder }
+      const data = { value: value.trim(), type, sortOrder, organizationId }
       if (size?.id !== undefined)
         await update.mutateAsync({ id: size.id, data })
       else await create.mutateAsync({ data })
@@ -487,17 +534,63 @@ function SizeForm({ size, onSaved }: { size?: SizeDTO; onSaved: () => void }) {
           onChange={(event) => setSortOrder(event.target.valueAsNumber || 0)}
         />
       </Field>
+      <Field label={t("administration.organization")}>
+        <OrganizationSelect
+          value={organizationId}
+          onChange={setOrganizationId}
+          disabled={pending}
+        />
+      </Field>
       {error ? (
         <p className="text-sm text-destructive">
           {t("administration.saveFailed")}
         </p>
       ) : null}
       <DialogFooter>
-        <Button type="submit" disabled={!value.trim() || pending}>
+        <Button type="submit" disabled={!valid || pending}>
           {pending ? t("administration.saving") : t("administration.save")}
         </Button>
       </DialogFooter>
     </form>
+  )
+}
+
+function OrganizationSelect({
+  disabled,
+  onChange,
+  value,
+}: {
+  disabled?: boolean
+  onChange: (value: number | "") => void
+  value: number | ""
+}) {
+  const { t } = useTranslation()
+  const organizationsQuery = useOrganizations(undefined, {
+    query: { retry: false },
+  })
+  const organizations = (organizationsQuery.data ?? []).filter(
+    (organization): organization is OrganizationDTO & { id: number } =>
+      organization.id !== undefined
+  )
+
+  return (
+    <select
+      value={value}
+      onChange={(event) =>
+        onChange(event.target.value ? Number(event.target.value) : "")
+      }
+      disabled={disabled || organizationsQuery.isLoading}
+      className="h-11 rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <option value="" disabled>
+        {t("administration.selectOrganization")}
+      </option>
+      {organizations.map((organization) => (
+        <option key={organization.id} value={organization.id}>
+          {organization.name}
+        </option>
+      ))}
+    </select>
   )
 }
 
