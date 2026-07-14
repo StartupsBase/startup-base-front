@@ -46,11 +46,9 @@ Add this repository secret so the image-build job can read it:
 - `HUMAYRO_YANDEX_MAPS_API_KEY`: browser API key restricted to
   `https://humayro.uz/*` at Yandex.
 
-Add these repository variables (the enable flag must be repository-level so it
-is available before GitHub starts the deployment job):
+Add these repository variables:
 
 - `HUMAYRO_API_URL=https://swagger.humayro.uz`
-- `HUMAYRO_DEPLOY_ENABLED=true` (set this only after the VPS is ready)
 - `HUMAYRO_DEPLOY_PORT=22` (optional)
 - `HUMAYRO_DEPLOY_PATH=humayro` (optional; relative to the SSH user's home)
 
@@ -61,9 +59,9 @@ host key collected during CI.
 ## 3. Deploy
 
 Pull requests run lint, TypeScript, and the production build. A push to `main`
-publishes an image addressed by its digest. When deployment is enabled, the
-workflow copies the Compose manifest and deployment script to the VPS, waits for
-the new container health check, and rolls back to the previous image if needed.
+publishes an image addressed by its digest. Successful `main` builds copy the
+Compose manifest and deployment script to the VPS, wait for the new container
+health check, and roll back to the previous image if needed.
 
 The workflow can also be started manually from **Actions > Humayro CI/CD**.
 

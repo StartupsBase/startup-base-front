@@ -125,7 +125,7 @@ jobs:
 
   deploy:
     name: Deploy to humayro.uz
-    if: github.ref == 'refs/heads/main' && vars.HUMAYRO_DEPLOY_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main'
     needs: image
     runs-on: ubuntu-latest
     permissions:
