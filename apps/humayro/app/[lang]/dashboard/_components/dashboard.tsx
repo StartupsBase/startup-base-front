@@ -19,7 +19,9 @@ import {
   getGetAllQueryKey,
   useGetAll,
 } from "@/lib/api/generated/user-controller/user-controller"
-import { clearAuthToken } from "@/lib/auth-client"
+import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
+import { useGetAll5 as useBranches } from "@/lib/api/generated/branch/branch"
+import { clearAuthToken, hasAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -56,16 +58,49 @@ function getErrorMessage(error: unknown, t: (key: string) => string) {
   return t("dashboard.loadFailed")
 }
 
+function useDebouncedValue(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedValue(value), delay)
+    return () => window.clearTimeout(timeout)
+  }, [delay, value])
+
+  return debouncedValue
+}
+
 export function Dashboard({ language }: { language: string }) {
   const router = useRouter()
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clear)
-  const meQuery = useMe1({ query: { retry: false } })
-  const usersQuery = useGetAll(undefined, {
+  const meQuery = useMe1({ query: { retry: false, enabled: !!hasAuthToken() } })
+  const [search, setSearch] = useState("")
+  const [organizationId, setOrganizationId] = useState("")
+  const [branchId, setBranchId] = useState("")
+  const debouncedSearch = useDebouncedValue(search.trim(), 300)
+  const selectedOrganizationId = organizationId
+    ? Number(organizationId)
+    : undefined
+  const selectedBranchId = branchId ? Number(branchId) : undefined
+  const organizationsQuery = useOrganizations(undefined, {
     query: { enabled: meQuery.isSuccess, retry: false },
   })
+  const branchesQuery = useBranches(
+    { organizationId: selectedOrganizationId, size: 100 },
+    { query: { enabled: meQuery.isSuccess, retry: false } }
+  )
+  const usersQuery = useGetAll(
+    {
+      search: debouncedSearch || undefined,
+      organizationId: selectedOrganizationId,
+      branchId: selectedBranchId,
+    },
+    {
+      query: { enabled: meQuery.isSuccess, retry: false },
+    }
+  )
   const [createOpen, setCreateOpen] = useState(false)
 
   useEffect(() => {
@@ -185,6 +220,47 @@ export function Dashboard({ language }: { language: string }) {
       </header>
 
       <section className="py-8">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={t("dashboard.search")}
+            className="w-full sm:w-64"
+          />
+          <select
+            value={organizationId}
+            onChange={(event) => {
+              setOrganizationId(event.target.value)
+              setBranchId("")
+            }}
+            disabled={organizationsQuery.isLoading}
+            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">{t("dashboard.allOrganizations")}</option>
+            {organizationsQuery.data?.map((organization) =>
+              organization.id !== undefined ? (
+                <option key={organization.id} value={organization.id}>
+                  {organization.name}
+                </option>
+              ) : null
+            )}
+          </select>
+          <select
+            value={branchId}
+            onChange={(event) => setBranchId(event.target.value)}
+            disabled={branchesQuery.isLoading}
+            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">{t("dashboard.allBranches")}</option>
+            {branchesQuery.data?.content?.map((branch) =>
+              branch.id !== undefined ? (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ) : null
+            )}
+          </select>
+        </div>
         {usersQuery.isLoading || meQuery.isLoading ? (
           <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
         ) : usersQuery.isError ? (
@@ -195,8 +271,6 @@ export function Dashboard({ language }: { language: string }) {
           <DataTable
             columns={columns}
             data={users}
-            searchColumn="name"
-            searchPlaceholder={t("dashboard.search")}
             filters={[
               {
                 columnId: "roles",

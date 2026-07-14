@@ -993,48 +993,42 @@ function VariantsStep({
           key={variant.id ?? index}
           className="grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_1fr_110px_130px_auto]"
         >
-          <Select
+          <select
             value={variant.colorId}
-            onValueChange={(colorId) => onChange(index, { colorId })}
+            onChange={(event) =>
+              onChange(index, { colorId: event.target.value })
+            }
+            className="h-9 w-full rounded-4xl border border-input bg-input/30 px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.color")} />
-            </SelectTrigger>
-            <SelectContent>
-              {colors.map((color) =>
-                color.id !== undefined ? (
-                  <SelectItem key={color.id} value={String(color.id)}>
-                    <span className="flex items-center gap-2">
-                      {color.hexCode ? (
-                        <span
-                          className="size-3 rounded-full border"
-                          style={{ backgroundColor: color.hexCode }}
-                        />
-                      ) : null}
-                      {color.name}
-                    </span>
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
-          <Select
+            <option value="" disabled>
+              {t("product.color")}
+            </option>
+            {colors.map((color) =>
+              color.id !== undefined ? (
+                <option key={color.id} value={String(color.id)}>
+                  {color.name}
+                </option>
+              ) : null
+            )}
+          </select>
+          <select
             value={variant.sizeId}
-            onValueChange={(sizeId) => onChange(index, { sizeId })}
+            onChange={(event) =>
+              onChange(index, { sizeId: event.target.value })
+            }
+            className="h-9 w-full rounded-4xl border border-input bg-input/30 px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.size")} />
-            </SelectTrigger>
-            <SelectContent>
-              {sizes.map((size) =>
-                size.id !== undefined ? (
-                  <SelectItem key={size.id} value={String(size.id)}>
-                    {size.value}
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
+            <option value="" disabled>
+              {t("product.size")}
+            </option>
+            {sizes.map((size) =>
+              size.id !== undefined ? (
+                <option key={size.id} value={String(size.id)}>
+                  {size.value}
+                </option>
+              ) : null
+            )}
+          </select>
           <Input
             type="number"
             min="0"

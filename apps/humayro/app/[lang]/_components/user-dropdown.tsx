@@ -1,9 +1,9 @@
 "use client"
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useMe1 } from "@/lib/api"
@@ -22,13 +22,13 @@ import {
 export function UserDropdown({ language }: { language: string }) {
   const queryClient = useQueryClient()
   const { t } = useTranslation()
-  const [enabled, setEnabled] = useState(false)
+  const [enabled, setEnabled] = useState(!!hasAuthToken())
   const user = useAuthStore((state) => state.user)
   const identifier = useAuthStore((state) => state.identifier)
   const setUser = useAuthStore((state) => state.setUser)
   const clear = useAuthStore((state) => state.clear)
   const pathname = usePathname()
-  const meQuery = useMe1({ query: { enabled, retry: false } })
+  const meQuery = useMe1({ query: { enabled, retry: false,  } })
   const currentUser = meQuery.data ?? user
   const name = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)

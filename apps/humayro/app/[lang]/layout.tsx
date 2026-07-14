@@ -11,7 +11,7 @@ import { QueryProvider } from "@/components/query-provider"
 import { SonnerProvider } from "@/components/sonner-provider"
 import { TelegramProvider } from "@/components/telegram-provider"
 import { ThemeProvider } from "@/components/theme-provider"
-import NextTopLoader from 'nextjs-toploader';
+import NextTopLoader from "nextjs-toploader"
 import { isLanguage, languages } from "@/i18n/config"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
@@ -65,9 +65,9 @@ export default async function RootLayout({
             <TelegramProvider>
               <I18nProvider language={lang}>
                 <HumayroLoader>
-                <NextTopLoader color="#008872" />
-                    <Header language={lang} />
-                    {children}
+                  <NextTopLoader color="#008872" />
+                  <Header language={lang} />
+                  {children}
                   <Footer language={lang} />
                 </HumayroLoader>
               </I18nProvider>
