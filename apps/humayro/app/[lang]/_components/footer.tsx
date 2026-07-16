@@ -9,6 +9,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 
 import { Logo } from "@/components/logo"
 import type { Language } from "@/i18n/config"
@@ -44,6 +45,15 @@ const footerCopy = {
 const Footer = ({ language }: { language: Language }) => {
   const pathname = usePathname()
   const copy = footerCopy[language]
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setShowBackToTop(window.scrollY > 50)
+
+    handleScroll()
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   if (
     pathname.startsWith(`/${language}/dashboard`) ||
@@ -53,7 +63,7 @@ const Footer = ({ language }: { language: Language }) => {
   }
 
   return (
-    <footer className="relative mt-15 overflow-hidden border-t rounded-t-[45px] border-border/70 bg-background px-4 pt-14 sm:px-6 lg:px-10">
+    <footer className="relative mt-15 overflow-hidden rounded-t-[45px] border-t border-border/70 bg-background px-4 pt-14 sm:px-6 lg:px-10">
       <div className="mx-auto grid w-full max-w-7xl gap-12 pb-16 sm:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1fr] lg:gap-16">
         <div className="max-w-xs">
           <Link
@@ -134,24 +144,26 @@ const Footer = ({ language }: { language: Language }) => {
 
       <p
         aria-hidden="true"
-        className="pointer-events-none mb-[0.12em] text-center text-[clamp(4.3rem,17.8vw,17rem)] leading-none font-black tracking-[-0.035em] text-foreground/5 select-none"
+        className="pointer-events-none text-center text-[clamp(4.3rem,17.8vw,17rem)] leading-none font-black tracking-[-0.035em] text-foreground/5 select-none"
       >
         HUMAYRO
       </p>
 
-      <button
-        type="button"
-        aria-label={copy.backToTop}
-        title={copy.backToTop}
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed right-5 bottom-5 z-50 grid size-11 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg cursor-pointer transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-      >
-        <HugeiconsIcon
-          icon={ArrowUp01Icon}
-          className="size-5"
-          strokeWidth={2}
-        />
-      </button>
+      {showBackToTop && (
+        <button
+          type="button"
+          aria-label={copy.backToTop}
+          title={copy.backToTop}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed right-5 bottom-5 z-50 grid size-11 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+        >
+          <HugeiconsIcon
+            icon={ArrowUp01Icon}
+            className="size-5"
+            strokeWidth={2}
+          />
+        </button>
+      )}
     </footer>
   )
 }

@@ -36,21 +36,18 @@ export default function Header({ language }: { language: Language }) {
 
   return (
     <header
-      className={`sticky top-2 z-50 mx-auto flex w-[calc(100%-80rem)] items-center justify-between border transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-none ${
+      className={`sticky top-2 z-50 mx-auto flex items-center justify-between border transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-none ${
         isSticky
-          ? "min-w-[1380px] rounded-4xl bg-white/15 p-2 backdrop-blur dark:bg-primary/15"
-          : "w-full max-w-none rounded-none border border-none bg-transparent p-2 shadow-none dark:border-none"
+          ? "w-[calc(100%-4rem)] max-w-[1380px] rounded-4xl bg-white/15 p-2 backdrop-blur dark:bg-primary/15"
+          : "w-[calc(100%-2rem)] max-w-[1580px] rounded-none border-none bg-transparent p-2 shadow-none"
       } `}
     >
-      <div className="mx-auto flex w-full max-w-[1580px] justify-between px-4">
+      <div className="flex w-full justify-between px-4">
         <LogoBrand />
 
         <div className="flex items-center gap-2">
-          <Button className="h-[44px] rounded-[12px] flex items-center justify-center">
-            <HugeiconsIcon
-              icon={SearchList01Icon}
-              className="size-5"
-            />
+          <Button className="flex h-[44px] items-center justify-center rounded-[12px]">
+            <HugeiconsIcon icon={SearchList01Icon} className="size-5" />
             Katalog
           </Button>
           <AdvancedSearch language={language} />

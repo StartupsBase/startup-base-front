@@ -9,6 +9,7 @@ import { useGetCart } from "@/lib/api/generated/cart/cart"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
+import { useAuthStore } from "@/lib/stores/use-auth-store"
 
 export function StorefrontNavActions({ language }: { language: Language }) {
   const hasToken = useHasAuthToken()
@@ -19,6 +20,7 @@ export function StorefrontNavActions({ language }: { language: Language }) {
   const favoritesQuery = useGetFavoriteIds({
     query: { enabled: hasToken, retry: false },
   })
+  const user = useAuthStore((state) => state.user)
 
   return (
     <>
@@ -29,13 +31,15 @@ export function StorefrontNavActions({ language }: { language: Language }) {
       >
         <HugeiconsIcon icon={HeartIcon} className="size-5" />
       </NavAction>
-      <NavAction
-        href={`/${language}/cart`}
-        label={text.cartNav}
-        count={cartQuery.data?.totalItems}
-      >
-        <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
-      </NavAction>
+      {user && (
+        <NavAction
+          href={`/${language}/cart`}
+          label={text.cartNav}
+          count={cartQuery.data?.totalItems}
+        >
+          <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
+        </NavAction>
+      )}
     </>
   )
 }
@@ -59,7 +63,7 @@ function NavAction({
     >
       {children}
       {count != null && count > 0 && (
-        <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold leading-4 text-primary-foreground">
+        <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-4 font-bold text-primary-foreground">
           {count > 99 ? "99+" : count}
         </span>
       )}

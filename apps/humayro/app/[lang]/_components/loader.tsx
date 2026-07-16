@@ -266,7 +266,7 @@ export default function HumayroLoader({
     <>
       {mounted && (
         <div
-          className={`fixed inset-0 z-[999999] overflow-hidden transition-opacity duration-500 ${
+          className={`fixed inset-0 z-999999 overflow-hidden transition-opacity duration-500 ${
             visible
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0"
