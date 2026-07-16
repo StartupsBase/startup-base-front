@@ -17,3 +17,7 @@ export * from './generated/user-controller/user-controller';
 export * from './model';
 export * from './generated/admin-organization/admin-organization';
 export * from './generated/branch/branch';
+export * from './generated/admin-backup-audit-controller/admin-backup-audit-controller';
+export * from './generated/admin-backup-policy-controller/admin-backup-policy-controller';
+export * from './generated/internal-backup-audit-controller/internal-backup-audit-controller';
+export * from './generated/internal-backup-policy-controller/internal-backup-policy-controller';

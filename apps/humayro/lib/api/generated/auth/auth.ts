@@ -26,6 +26,7 @@ import type {
 
 import type {
   ForgotPasswordParams,
+  ForgotPasswordResponseDTO,
   GoogleCallbackParams,
   JwtDTO,
   LoginDTO,
@@ -353,7 +354,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customInstance<string>(
+      return customInstance<ForgotPasswordResponseDTO>(
       {url: `/api/auth/forgot-password`, method: 'POST',
         params, signal
     },

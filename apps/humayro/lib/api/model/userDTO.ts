@@ -21,5 +21,6 @@ export interface UserDTO {
   organizationName?: string;
   branchId?: number;
   branchName?: string;
+  telegramUsername?: string;
   roles?: string[];
 }
