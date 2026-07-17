@@ -61,4 +61,4 @@ WORKDIR /app
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/humayro/server.js"]
