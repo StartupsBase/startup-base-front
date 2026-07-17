@@ -57,7 +57,7 @@ COPY --from=builder --chown=nextjs:nodejs /workspace/apps/humayro/public ./apps/
 COPY --from=builder --chown=nextjs:nodejs /workspace/apps/humayro/.next/static ./apps/humayro/.next/static
 
 USER nextjs
-WORKDIR /app/apps/humayro
+WORKDIR /app
 
 EXPOSE 3000
 
