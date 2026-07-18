@@ -122,6 +122,81 @@
   background: transparent;
 }
 
+/* Critical loader paint: this CSS must arrive with the server-rendered shell. */
+.humayro-loader {
+  --humayro-loader-aura: radial-gradient(
+    circle,
+    rgba(164, 192, 92, 0.18) 0%,
+    rgba(107, 152, 61, 0.08) 37%,
+    transparent 72%
+  );
+  --humayro-loader-core: radial-gradient(
+    circle,
+    rgba(91, 135, 49, 0.62) 0%,
+    rgba(150, 187, 75, 0.25) 30%,
+    transparent 72%
+  );
+  --humayro-loader-glow: radial-gradient(
+    ellipse,
+    rgba(119, 161, 61, 0.32) 0%,
+    rgba(153, 188, 92, 0.11) 45%,
+    transparent 76%
+  );
+  --humayro-loader-title-shadow:
+    0 0 8px rgba(72, 112, 43, 0.18), 0 0 22px rgba(142, 175, 76, 0.14);
+  --humayro-core-particle: #5e9639;
+  --humayro-core-particle-shadow:
+    0 0 6px rgba(73, 127, 43, 0.95), 0 0 15px rgba(111, 159, 57, 0.65);
+  --humayro-orbit-particle: #6c9f3f;
+  --humayro-orbit-particle-shadow:
+    0 0 5px rgba(84, 139, 45, 0.92), 0 0 12px rgba(127, 174, 67, 0.56);
+  background: radial-gradient(
+    circle at 50% 42%,
+    #f2f7e9 0%,
+    #fbfdf7 33%,
+    #ffffff 72%
+  );
+}
+
+.dark .humayro-loader {
+  --humayro-loader-aura: radial-gradient(
+    circle,
+    rgba(191, 220, 104, 0.09) 0%,
+    rgba(99, 154, 56, 0.04) 37%,
+    transparent 72%
+  );
+  --humayro-loader-core: radial-gradient(
+    circle,
+    rgba(245, 244, 170, 0.95) 0%,
+    rgba(161, 193, 77, 0.31) 30%,
+    transparent 72%
+  );
+  --humayro-loader-glow: radial-gradient(
+    ellipse,
+    rgba(161, 201, 73, 0.36) 0%,
+    rgba(94, 140, 46, 0.12) 45%,
+    transparent 76%
+  );
+  --humayro-loader-title-shadow:
+    0 0 8px rgba(226, 232, 156, 0.34), 0 0 22px rgba(107, 148, 57, 0.22);
+  --humayro-core-particle: #dce97f;
+  --humayro-core-particle-shadow:
+    0 0 5px rgba(220, 233, 127, 0.95), 0 0 12px rgba(121, 165, 57, 0.52);
+  --humayro-orbit-particle: #b9d664;
+  --humayro-orbit-particle-shadow: 0 0 5px rgba(185, 214, 100, 0.8);
+  background: radial-gradient(
+    circle at 50% 42%,
+    #0b2f26 0%,
+    #06251e 30%,
+    #031b16 61%,
+    #01120f 100%
+  );
+}
+
+.humayro-title {
+  opacity: 0;
+}
+
 body:has(.humayro-top-background) {
   background-color: var(--background);
   background-image: var(--humayro-top-background);
