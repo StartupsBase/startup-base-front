@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import type { Language } from "@/i18n/config"
 import { hasAuthToken } from "@/lib/auth-client"
+import { useGuestStorefront } from "@/lib/guest-storefront"
 import {
   addItem,
   getGetCartQueryKey,
@@ -42,15 +43,7 @@ export function useStorefrontActions(language: Language) {
   const [pendingCartId, setPendingCartId] = useState<number | null>(null)
   const [pendingFavoriteId, setPendingFavoriteId] = useState<number | null>(null)
   const text = useStorefrontCopy()
-
-  function requireAuthentication() {
-    if (hasAuthToken()) return true
-
-    toast.info(text.signInRequired)
-    const returnPath = `${window.location.pathname}${window.location.search}`
-    router.push(getLoginHref(language, returnPath))
-    return false
-  }
+  const guestStorefront = useGuestStorefront()
 
   function handleError(error: unknown) {
     if (getStatus(error) === 401) {
@@ -63,8 +56,6 @@ export function useStorefrontActions(language: Language) {
   }
 
   async function addProductToCart(productId: number) {
-    if (!requireAuthentication()) return
-
     setPendingCartId(productId)
     try {
       const product = await getById2(productId)
@@ -74,6 +65,12 @@ export function useStorefrontActions(language: Language) {
 
       if (variant?.id == null) {
         toast.info(text.outOfStock)
+        return
+      }
+
+      if (!hasAuthToken()) {
+        guestStorefront.addToCart(productId, variant.id)
+        toast.success(text.addedToCart)
         return
       }
 
@@ -88,7 +85,11 @@ export function useStorefrontActions(language: Language) {
   }
 
   async function toggleFavorite(productId: number, isFavorite: boolean) {
-    if (!requireAuthentication()) return
+    if (!hasAuthToken()) {
+      const added = guestStorefront.toggleFavorite(productId)
+      toast.success(added ? text.addedToFavorites : text.removedFromFavorites)
+      return
+    }
 
     setPendingFavoriteId(productId)
     try {
@@ -117,5 +118,10 @@ export function useStorefrontActions(language: Language) {
     toggleFavorite,
     pendingCartId,
     pendingFavoriteId,
+    guestCartCount: guestStorefront.cart.reduce(
+      (total, item) => total + item.quantity,
+      0
+    ),
+    guestFavoriteIds: guestStorefront.favoriteIds,
   }
 }

@@ -47,6 +47,7 @@ import {
 } from "@workspace/ui/components/popover"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 import { ImageCropInput } from "../../profile/_components/image-crop-input"
+import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 import { LocationPickerDialog } from "./maps/location-picker-dialog"
 
 const organizationSchema = z.object({
@@ -281,7 +282,11 @@ export function OrganizationsPage({ language }: { language: string }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-      <header className="flex items-center justify-between border-b border-border pb-6">
+      <DashboardBreadcrumb
+        language={language}
+        items={[{ label: t("dashboard.organizations") }]}
+      />
+      <header className="mt-6 flex items-center justify-between border-b border-border pb-6">
         <div>
           <SidebarTrigger className="mb-3" />
           <p className="text-sm font-medium text-primary">

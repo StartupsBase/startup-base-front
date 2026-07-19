@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 import { ProductForm } from "../../../_components/product-form"
+import { DashboardBreadcrumb } from "../../../../../_components/dashboard-breadcrumb"
 
 export function ProductCreatePage({
   language,
@@ -19,12 +19,17 @@ export function ProductCreatePage({
 
   return (
     <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">
-      <Link
-        href={organizationHref}
-        className="text-sm font-medium text-primary hover:underline"
-      >
-        {t("product.backToOrganization")}
-      </Link>
+      <DashboardBreadcrumb
+        language={language}
+        items={[
+          {
+            href: `/${language}/dashboard/organizations`,
+            label: t("dashboard.organizations"),
+          },
+          { href: organizationHref, label: t("product.backToOrganization") },
+          { label: t("product.new") },
+        ]}
+      />
       <header className="my-6 border-b border-border pb-6">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("product.new")}

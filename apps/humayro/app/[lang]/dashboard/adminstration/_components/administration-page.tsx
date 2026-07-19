@@ -28,6 +28,7 @@ import {
 } from "@/lib/api/generated/size/size"
 import { Input } from "@/components/input"
 import { ColorPicker } from "./color-picker"
+import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 import { Button } from "@workspace/ui/components/button"
 import {
   DataTable,
@@ -54,7 +55,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs"
 
-export function AdministrationPage() {
+export function AdministrationPage({ language }: { language: string }) {
   const { t } = useTranslation()
   const meQuery = useMe1({ query: { retry: false } })
   const canManage = meQuery.data?.roles?.some(
@@ -79,7 +80,11 @@ export function AdministrationPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl p-6 md:p-10">
-      <div className="mb-8">
+      <DashboardBreadcrumb
+        language={language}
+        items={[{ label: t("administration.title") }]}
+      />
+      <div className="mt-6 mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("administration.title")}
         </h1>

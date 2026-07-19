@@ -14,5 +14,5 @@ export default async function ProfilePage({
     notFound()
   }
 
-  return <ProfileForm />
+  return <ProfileForm language={lang} />
 }

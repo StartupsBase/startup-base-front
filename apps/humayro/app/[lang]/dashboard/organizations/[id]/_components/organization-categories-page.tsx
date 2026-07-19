@@ -51,6 +51,7 @@ import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
 import { ProductForm } from "./product-form"
+import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
 import {
@@ -489,12 +490,19 @@ export function OrganizationCategoriesPage({
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-      <Link
-        href={`/${language}/dashboard/organizations`}
-        className="text-sm font-medium text-primary hover:underline"
-      >
-        {t("category.backToOrganizations")}
-      </Link>
+      <DashboardBreadcrumb
+        language={language}
+        items={[
+          {
+            href: `/${language}/dashboard/organizations`,
+            label: t("dashboard.organizations"),
+          },
+          {
+            label:
+              organizationQuery.data?.name ?? t("organization.loadingDetails"),
+          },
+        ]}
+      />
       <Tabs
         value={activeTab}
         onValueChange={(value) =>
