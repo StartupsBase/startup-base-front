@@ -9,6 +9,7 @@ import { useGoogleCallback } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { googleReturnPathKey } from "@/lib/auth"
+import { getPostAuthDestination } from "@/lib/auth-routing"
 
 export function GoogleLoginCallback({ language }: { language: string }) {
   const { t } = useTranslation()
@@ -17,9 +18,10 @@ export function GoogleLoginCallback({ language }: { language: string }) {
   const setSession = useAuthStore((state) => state.setSession)
   const handledToken = useRef<string | null>(null)
   const code = searchParams.get("code") ?? ""
+  const oauthError = searchParams.get("error")
   const callbackQuery = useGoogleCallback(
     { code },
-    { query: { enabled: Boolean(code), retry: false } }
+    { query: { enabled: Boolean(code) && !oauthError, retry: false } }
   )
 
   useEffect(() => {
@@ -31,19 +33,12 @@ export function GoogleLoginCallback({ language }: { language: string }) {
     saveAuthToken(token)
     setSession(session.user ?? null, session.user?.email ?? "")
 
-    const storedReturnPath = sessionStorage.getItem(googleReturnPathKey)
     sessionStorage.removeItem(googleReturnPathKey)
-    const destination =
-      storedReturnPath?.startsWith(`/${language}/`) &&
-      !storedReturnPath.startsWith("//")
-        ? storedReturnPath
-        : `/${language}/dashboard`
-
-    router.replace(destination)
+    router.replace(getPostAuthDestination(language, session.user))
     router.refresh()
   }, [callbackQuery.data, language, router, setSession])
 
-  if (!code || callbackQuery.isError) {
+  if (oauthError || !code || callbackQuery.isError) {
     return (
       <CallbackMessage
         title={t("login.googleFailed")}
