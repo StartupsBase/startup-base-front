@@ -503,15 +503,48 @@ export function OrganizationCategoriesPage({
           )
         }
       >
-        <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <SidebarTrigger className="mb-3" />
-            <p className="text-sm font-medium text-primary">
-              {t("dashboard.organizations")}
-            </p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              {organizationQuery.data?.name ?? t("dashboard.organizations")}
-            </h1>
+        <header className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-3xl border bg-card p-5 shadow-sm md:p-6">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-muted text-2xl font-semibold text-muted-foreground md:size-24">
+              {organizationQuery.data?.logo?.s3Url ? (
+                <img
+                  src={organizationQuery.data.logo.s3Url}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                (organizationQuery.data?.name ?? "?").slice(0, 1).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0">
+              <SidebarTrigger className="mb-2" />
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-medium text-primary">
+                  {t("dashboard.organizations")}
+                </p>
+                {organizationQuery.data ? (
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                      organizationQuery.data.active === false
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-emerald-500/10 text-emerald-600"
+                    }`}
+                  >
+                    {organizationQuery.data.active === false
+                      ? t("organization.inactive")
+                      : t("organization.active")}
+                  </span>
+                ) : null}
+              </div>
+              <h1 className="mt-1 truncate text-3xl font-semibold tracking-tight">
+                {organizationQuery.data?.name ?? t("organization.loadingDetails")}
+              </h1>
+              {organizationQuery.data?.description ? (
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  {organizationQuery.data.description}
+                </p>
+              ) : null}
+            </div>
           </div>
           {activeTab === "users" ? (
             <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
@@ -578,6 +611,36 @@ export function OrganizationCategoriesPage({
             </Button>
           )}
         </header>
+        {organizationQuery.data ? (
+          <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <OrganizationInfo
+              label={t("organization.contactPerson")}
+              value={organizationQuery.data.contactPerson}
+            />
+            <OrganizationInfo
+              label={t("organization.contact")}
+              value={
+                [
+                  organizationQuery.data.contactEmail,
+                  organizationQuery.data.contactPhone
+                    ? formatPhoneNumberIntl(organizationQuery.data.contactPhone) ||
+                      organizationQuery.data.contactPhone
+                    : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(" · ") || undefined
+              }
+            />
+            <OrganizationInfo
+              label="INN"
+              value={organizationQuery.data.inn}
+            />
+            <OrganizationInfo
+              label={t("organization.address")}
+              value={organizationQuery.data.address}
+            />
+          </section>
+        ) : null}
         <TabsList className="mt-6">
           <TabsTrigger value="users">{t("organization.users")}</TabsTrigger>
           <TabsTrigger value="categories">
@@ -672,6 +735,23 @@ export function OrganizationCategoriesPage({
         </TabsContent>
       </Tabs>
     </main>
+  )
+}
+
+function OrganizationInfo({
+  label,
+  value,
+}: {
+  label: string
+  value?: string
+}) {
+  return (
+    <div className="rounded-2xl border bg-card p-4">
+      <p className="text-xs font-medium tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-2 break-words text-sm font-medium">{value || "—"}</p>
+    </div>
   )
 }
 

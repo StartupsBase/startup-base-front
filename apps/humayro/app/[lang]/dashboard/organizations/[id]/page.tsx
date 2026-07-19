@@ -11,9 +11,17 @@ export default async function OrganizationDetailsPage({
   const { lang, id } = (await params) as { lang?: string; id?: string }
   const organizationId = Number(id)
 
+  if (
+    !isLanguage(lang) ||
+    !Number.isSafeInteger(organizationId) ||
+    organizationId <= 0
+  ) {
+    notFound()
+  }
+
   return (
     <OrganizationCategoriesPage
-      language={lang as string || defaultLanguage}
+      language={lang ?? defaultLanguage}
       organizationId={organizationId}
     />
   )

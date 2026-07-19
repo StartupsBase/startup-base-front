@@ -17,16 +17,25 @@ import { Slider } from "@workspace/ui/components/slider"
 
 type ImageCropInputProps = {
   disabled?: boolean
+  cropShape?: "rect" | "round"
+  fileName?: string
   onChange: (file: File) => void
+  translationPrefix?: "organization.logoCrop" | "profile.crop"
 }
 
-export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
+export function ImageCropInput({
+  cropShape = "round",
+  disabled,
+  fileName = "profile-photo",
+  onChange,
+  translationPrefix = "profile.crop",
+}: ImageCropInputProps) {
   const { t } = useTranslation()
   const galleryInput = React.useRef<HTMLInputElement>(null)
   const cameraInput = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
   const [sourceUrl, setSourceUrl] = React.useState<string | null>(null)
-  const [sourceName, setSourceName] = React.useState("profile-photo")
+  const [sourceName, setSourceName] = React.useState(fileName)
   const [crop, setCrop] = React.useState<Point>({ x: 0, y: 0 })
   const [zoom, setZoom] = React.useState(1)
   const [rotation, setRotation] = React.useState(0)
@@ -49,7 +58,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
 
     if (sourceUrl) URL.revokeObjectURL(sourceUrl)
     setSourceUrl(URL.createObjectURL(file))
-    setSourceName(file.name.replace(/\.[^.]+$/, "") || "profile-photo")
+    setSourceName(file.name.replace(/\.[^.]+$/, "") || fileName)
     setCrop({ x: 0, y: 0 })
     setZoom(1)
     setRotation(0)
@@ -94,7 +103,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
           disabled={disabled}
           onClick={() => galleryInput.current?.click()}
         >
-          {t("profile.crop.choosePhoto")}
+          {t(`${translationPrefix}.choosePhoto`)}
         </Button>
         <Button
           type="button"
@@ -103,7 +112,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
           className="sm:hidden"
           onClick={() => cameraInput.current?.click()}
         >
-          {t("profile.crop.takePhoto")}
+          {t(`${translationPrefix}.takePhoto`)}
         </Button>
         <input
           ref={galleryInput}
@@ -128,9 +137,9 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
       >
         <DialogContent className="sm:max-w-xl data-open:zoom-in-100 data-closed:zoom-out-100">
           <DialogHeader>
-            <DialogTitle>{t("profile.crop.title")}</DialogTitle>
+            <DialogTitle>{t(`${translationPrefix}.title`)}</DialogTitle>
             <DialogDescription>
-              {t("profile.crop.description")}
+              {t(`${translationPrefix}.description`)}
             </DialogDescription>
           </DialogHeader>
 
@@ -142,7 +151,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
                 zoom={zoom}
                 rotation={rotation}
                 aspect={1}
-                cropShape="round"
+                cropShape={cropShape}
                 showGrid
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -154,7 +163,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
 
           <div className="grid gap-4">
             <Control
-              label={t("profile.crop.zoom")}
+              label={t(`${translationPrefix}.zoom`)}
               value={Math.round(zoom * 100)}
             >
               <Slider
@@ -165,7 +174,10 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
                 onValueChange={([value]) => setZoom(value ?? 1)}
               />
             </Control>
-            <Control label={t("profile.crop.rotation")} value={`${rotation}°`}>
+            <Control
+              label={t(`${translationPrefix}.rotation`)}
+              value={`${rotation}°`}
+            >
               <Slider
                 min={-180}
                 max={180}
@@ -178,7 +190,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
 
           {error ? (
             <p className="text-sm text-destructive">
-              {t("profile.crop.failed")}
+              {t(`${translationPrefix}.failed`)}
             </p>
           ) : null}
 
@@ -189,7 +201,7 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
               onClick={closeCropper}
               disabled={processing}
             >
-              {t("profile.crop.cancel")}
+              {t(`${translationPrefix}.cancel`)}
             </Button>
             <Button
               type="button"
@@ -197,8 +209,8 @@ export function ImageCropInput({ disabled, onChange }: ImageCropInputProps) {
               disabled={processing || !croppedArea}
             >
               {processing
-                ? t("profile.crop.processing")
-                : t("profile.crop.apply")}
+                ? t(`${translationPrefix}.processing`)
+                : t(`${translationPrefix}.apply`)}
             </Button>
           </DialogFooter>
         </DialogContent>

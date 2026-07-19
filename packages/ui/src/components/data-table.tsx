@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-table"
 
 import { Button } from "@workspace/ui/components/button"
+import { Checkbox } from "@workspace/ui/components/checkbox"
 import { Input } from "@workspace/ui/components/input"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -309,23 +310,26 @@ function getDataTableSelectionColumn<TData>(): ColumnDef<TData> {
   return {
     id: "select",
     header: ({ table }) => (
-      <input
+      <Checkbox
         aria-label="Select all rows"
-        type="checkbox"
-        checked={table.getIsAllPageRowsSelected()}
-        ref={(element) => {
-          if (element) element.indeterminate = table.getIsSomePageRowsSelected()
-        }}
-        onChange={(event) => table.toggleAllPageRowsSelected(event.target.checked)}
+        checked={
+          table.getIsAllPageRowsSelected()
+            ? true
+            : table.getIsSomePageRowsSelected()
+              ? "indeterminate"
+              : false
+        }
+        onCheckedChange={(checked) =>
+          table.toggleAllPageRowsSelected(checked === true)
+        }
       />
     ),
     cell: ({ row }) => (
-      <input
+      <Checkbox
         aria-label="Select row"
-        type="checkbox"
         checked={row.getIsSelected()}
         disabled={!row.getCanSelect()}
-        onChange={(event) => row.toggleSelected(event.target.checked)}
+        onCheckedChange={(checked) => row.toggleSelected(checked === true)}
       />
     ),
     enableSorting: false,
