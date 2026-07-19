@@ -15,7 +15,6 @@ import type { Language } from "@/i18n/config"
 import { useMe1 } from "@/lib/api"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { isAdminUser } from "@/lib/auth-routing"
 import { Button } from "@workspace/ui/components/button"
 import {
   Sidebar,
@@ -72,12 +71,6 @@ export function DashboardShell({
     clearUser()
     router.replace(`/${language}/login`)
   }, [clearUser, language, meQuery.isError, router])
-
-  useEffect(() => {
-    if (meQuery.data && !isAdminUser(meQuery.data)) {
-      router.replace(`/${language}`)
-    }
-  }, [language, meQuery.data, router])
 
   function signOut() {
     clearAuthToken()
