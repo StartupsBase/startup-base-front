@@ -12,10 +12,8 @@ import { isValidPhoneNumber } from "react-phone-number-input"
 import { useLogin } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { getPostAuthDestination } from "@/lib/auth-routing"
 import { Input } from "@/components/input"
 import { GoogleLoginButton } from "./google-login-button"
-import { TelegramAuthButton } from "@/components/telegram-auth-button"
 import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
@@ -149,7 +147,13 @@ function LoginForm() {
       setSession(session.user ?? null, emailOrPhone)
 
       const language = pathname.split("/")[1] ?? "ru"
-      router.replace(getPostAuthDestination(language, session.user))
+      const nextPath = new URLSearchParams(window.location.search).get("next")
+      const destination =
+        nextPath?.startsWith(`/${language}/`) && !nextPath.startsWith("//")
+          ? nextPath
+          : `/${language}/dashboard`
+
+      router.replace(destination)
       router.refresh()
     } catch {
       setSubmitError(t("login.errors.loginFailed"))
@@ -263,7 +267,6 @@ function LoginForm() {
           <span className="h-px flex-1 bg-border" />
         </div>
         <GoogleLoginButton />
-        <TelegramAuthButton />
         <p className="text-center text-sm text-muted-foreground">
           {t("login.noAccount")}{" "}
           <Link

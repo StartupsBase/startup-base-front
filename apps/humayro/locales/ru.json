@@ -9,10 +9,10 @@
       "deleteFailed": "Не удалось удалить. Попробуйте снова."
     },
     "home": {
-      "eyebrow": "Мода Узбекистана в одном месте",
-      "title": "Найдите любимую одежду в ближайшем магазине.",
-      "description": "Humayro объединяет Ippodrom и магазины одежды Узбекистана в одном удобном каталоге. Сравнивайте цены, цвета и размеры — заказывайте уверенно.",
-      "primaryAction": "Открыть каталог",
+      "eyebrow": "Ваш следующий любимый образ",
+      "title": "Одежда, которая подходит вам.",
+      "description": "Humayro помогает находить, сортировать и выбирать одежду для любого стиля, сезона и случая.",
+      "primaryAction": "Смотреть одежду",
       "secondaryAction": "Создать аккаунт",
       "bookingDemoAction": "Записаться на демо",
       "loginAction": "Войти",
@@ -23,16 +23,16 @@
       "themeToDark": "Включить тёмную тему",
       "themeToLight": "Включить светлую тему",
       "featureOne": {
-        "title": "Местные магазины",
-        "description": "Ippodrom и другие магазины в одном каталоге."
+        "title": "Подобранные коллекции",
+        "description": "Находите стиль, который подходит вам."
       },
       "featureTwo": {
-        "title": "Точный выбор",
-        "description": "Фильтруйте по цене, цвету и размеру."
+        "title": "Удобная сортировка",
+        "description": "Быстро выбирайте нужную одежду."
       },
       "featureThree": {
-        "title": "Удобный заказ",
-        "description": "Выберите, добавьте в корзину и оформите."
+        "title": "Образы на каждый день",
+        "description": "Одежда для любого случая."
       }
     },
     "profile": {
@@ -89,10 +89,6 @@
       "submitting": "Вход...",
       "orContinue": "или",
       "continueWithGoogle": "Продолжить с Google",
-      "continueWithTelegram": "Продолжить через Telegram",
-      "telegramAuthenticating": "Входим через Telegram...",
-      "telegramFailed": "Не удалось войти через Telegram",
-      "telegramRetry": "Повторить вход через Telegram",
       "googleRedirecting": "Переход в Google...",
       "googleCompleting": "Завершаем вход через Google...",
       "googleFailed": "Не удалось войти через Google.",

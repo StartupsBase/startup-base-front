@@ -9,10 +9,10 @@
       "deleteFailed": "O'chirib bo'lmadi. Qayta urinib ko'ring."
     },
     "home": {
-      "eyebrow": "O'zbekiston modasi bir joyda",
-      "title": "Yoqtirgan libosingizni yaqin do'kondan toping.",
-      "description": "Humayro Ippodrom va O'zbekiston kiyim do'konlarini bitta qulay katalogda jamlaydi. Narx, rang va o'lchamni solishtiring — ishonch bilan buyurtma bering.",
-      "primaryAction": "Katalogni ko'rish",
+      "eyebrow": "Keyingi sevimli libosingiz",
+      "title": "Sizga mos keladigan kiyimlar.",
+      "description": "Humayro har bir uslub, mavsum va lahza uchun kiyimlarni topish, saralash va tanlashni osonlashtiradi.",
+      "primaryAction": "Kiyimlarni ko'rish",
       "secondaryAction": "Hisob yaratish",
       "bookingDemoAction": "Bepul demo — 30 daqiqa",
       "loginAction": "Kirish",
@@ -23,16 +23,16 @@
       "themeToDark": "Qorong'i mavzuni yoqish",
       "themeToLight": "Yorug' mavzuni yoqish",
       "featureOne": {
-        "title": "Mahalliy do'konlar",
-        "description": "Ippodrom va boshqa do'konlar bir katalogda."
+        "title": "Saralangan kolleksiyalar",
+        "description": "O'zingizga mos uslubni toping."
       },
       "featureTwo": {
-        "title": "Aniq tanlov",
-        "description": "Narx, rang va o'lcham bo'yicha tez saralang."
+        "title": "Oson saralash",
+        "description": "Kerakli kiyimlarni tezda tanlang."
       },
       "featureThree": {
-        "title": "Qulay buyurtma",
-        "description": "Tanlang, savatga qo'shing va rasmiylashtiring."
+        "title": "Har kun uchun uslublar",
+        "description": "Har bir vaziyat uchun liboslar."
       }
     },
     "profile": {
@@ -89,10 +89,6 @@
       "submitting": "Kirilmoqda...",
       "orContinue": "yoki",
       "continueWithGoogle": "Google orqali davom etish",
-      "continueWithTelegram": "Telegram orqali davom etish",
-      "telegramAuthenticating": "Telegram orqali kirilmoqda...",
-      "telegramFailed": "Telegram orqali kirib bo'lmadi",
-      "telegramRetry": "Telegram orqali qayta kirish",
       "googleRedirecting": "Google'ga yo'naltirilmoqda...",
       "googleCompleting": "Google orqali kirish yakunlanmoqda...",
       "googleFailed": "Google orqali kirib bo'lmadi.",

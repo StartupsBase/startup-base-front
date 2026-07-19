@@ -13,7 +13,6 @@ import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
 import { PasswordInput } from "@/components/forms/password-input"
-import { TelegramAuthButton } from "@/components/telegram-auth-button"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
@@ -188,12 +187,6 @@ export function RegisterForm({ language }: { language: string }) {
           ? t("register.submitting")
           : t("register.submit")}
       </Button>
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        {t("login.orContinue")}
-        <span className="h-px flex-1 bg-border" />
-      </div>
-      <TelegramAuthButton />
       <p className="text-center text-sm text-muted-foreground">
         {t("register.hasAccount")}{" "}
         <Link
