@@ -375,6 +375,12 @@
       "clickToSelect": "Нажмите на карту, чтобы выбрать адрес.",
       "selected": "Выбранный адрес",
       "locating": "Определение адреса...",
+      "searchPlaceholder": "Найти адрес или место...",
+      "openSearch": "Открыть поиск по карте",
+      "closeSearch": "Закрыть поиск",
+      "searching": "Поиск...",
+      "searchError": "Не удалось выполнить поиск.",
+      "noSearchResults": "Ничего не найдено.",
       "useAddress": "Использовать этот адрес"
     },
     "category": {

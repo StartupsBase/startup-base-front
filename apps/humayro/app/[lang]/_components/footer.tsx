@@ -11,7 +11,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { Logo } from "@/components/logo"
+import { Logo, LogoBrand } from "@/components/logo"
 import type { Language } from "@/i18n/config"
 
 const footerCopy = {
@@ -66,14 +66,7 @@ const Footer = ({ language }: { language: Language }) => {
     <footer className="relative mt-15 overflow-hidden rounded-t-[45px] border-t border-border/70 bg-background px-4 pt-14 sm:px-6 lg:px-10">
       <div className="mx-auto grid w-full max-w-7xl gap-12 pb-16 sm:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1fr] lg:gap-16">
         <div className="max-w-xs">
-          <Link
-            href={`/${language}`}
-            aria-label="Humayro"
-            className="inline-flex items-center gap-2 text-lg font-bold tracking-tight"
-          >
-            <Logo className="size-9" />
-            <span>Humayro</span>
-          </Link>
+          <LogoBrand />
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {copy.description}
           </p>

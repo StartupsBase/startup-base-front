@@ -22,5 +22,7 @@ export interface UserDTO {
   branchId?: number;
   branchName?: string;
   telegramUsername?: string;
+  latitude?: number;
+  longitude?: number;
   roles?: string[];
 }

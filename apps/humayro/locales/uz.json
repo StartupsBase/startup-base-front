@@ -375,6 +375,12 @@
       "clickToSelect": "Manzilni tanlash uchun xaritani bosing.",
       "selected": "Tanlangan manzil",
       "locating": "Manzil aniqlanmoqda...",
+      "searchPlaceholder": "Manzil yoki joyni qidiring...",
+      "openSearch": "Xaritada qidiruvni ochish",
+      "closeSearch": "Qidiruvni yopish",
+      "searching": "Qidirilmoqda...",
+      "searchError": "Qidiruvni amalga oshirib bo'lmadi.",
+      "noSearchResults": "Hech narsa topilmadi.",
       "useAddress": "Ushbu manzilni ishlatish"
     },
     "category": {

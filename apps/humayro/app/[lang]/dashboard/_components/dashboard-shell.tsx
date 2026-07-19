@@ -1,21 +1,20 @@
 "use client"
 
-import { useEffect } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useQueryClient } from "@tanstack/react-query"
-import { useTranslation } from "react-i18next"
 import { Home01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
+import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { LogoBrand } from "@/components/logo"
+import { ThemeToggle } from "@/components/theme-toggle"
+import type { Language } from "@/i18n/config"
 import { useMe1 } from "@/lib/api"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import type { Language } from "@/i18n/config"
-import { Logo } from "@/components/logo"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { UserDropdown } from "../../_components/user-dropdown"
 import { Button } from "@workspace/ui/components/button"
 import {
   Sidebar,
@@ -31,6 +30,7 @@ import {
   SidebarProvider,
 } from "@workspace/ui/components/sidebar"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
+import { UserDropdown } from "../../_components/user-dropdown"
 
 export function DashboardShell({
   children,
@@ -84,16 +84,7 @@ export function DashboardShell({
       <SidebarProvider>
         <Sidebar collapsible="icon" variant="inset">
           <SidebarHeader>
-            <Link
-              href={`/${language}`}
-              aria-label="Humayro"
-              className="flex items-center gap-3 px-2 py-2 font-semibold group-data-[collapsible=icon]:justify-center"
-            >
-              <Logo className="size-8 text-primary transition-all group-data-[collapsible=icon]:size-6" />
-              <span className="group-data-[collapsible=icon]:hidden">
-                Humayro
-              </span>
-            </Link>
+            <LogoBrand />
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
