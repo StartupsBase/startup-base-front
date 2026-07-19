@@ -495,6 +495,33 @@
       "statusShipped": "Yo'lda",
       "statusDelivered": "Yetkazilgan",
       "statusCancelled": "Bekor qilingan"
+    },
+    "productDetails": {
+      "home": "Bosh sahifa",
+      "catalog": "Katalog",
+      "loadFailed": "Mahsulotni yuklab bo'lmadi.",
+      "reviewCount": "{{count}} ta sharh",
+      "chooseVariant": "Variantni tanlang",
+      "defaultVariant": "Standart variant",
+      "inStock": "Mavjud: {{count}}",
+      "secure": "Xavfsiz xarid",
+      "fastDelivery": "Tez yetkazib berish",
+      "support": "Mijozlar yordami",
+      "reviewsEyebrow": "Xaridorlar sharhlari",
+      "reviewsTitle": "Mahsulot haqida fikrlar",
+      "writeReview": "Sharh qoldirish",
+      "rating": "Baho",
+      "reviewPlaceholder": "Mahsulotdan foydalanish tajribangiz haqida yozing...",
+      "submitReview": "Sharhni joylash",
+      "signInToReview": "Sharh qoldirish uchun hisobingizga kiring.",
+      "reviewSaved": "Sharh saqlandi.",
+      "reviewFailed": "Sharhni saqlab bo'lmadi.",
+      "anonymous": "Xaridor",
+      "noComment": "Foydalanuvchi izohsiz baho qoldirgan.",
+      "noReviews": "Bu mahsulot haqida hali sharh yo'q. Birinchi bo'ling!",
+      "similarEyebrow": "Sizga yana yoqishi mumkin",
+      "similarTitle": "O'xshash mahsulotlar",
+      "viewCatalog": "Barcha katalogni ko'rish"
     }
   }
 }

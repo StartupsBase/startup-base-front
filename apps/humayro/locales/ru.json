@@ -495,6 +495,33 @@
       "statusShipped": "В пути",
       "statusDelivered": "Доставлен",
       "statusCancelled": "Отменён"
+    },
+    "productDetails": {
+      "home": "Главная",
+      "catalog": "Каталог",
+      "loadFailed": "Не удалось загрузить товар.",
+      "reviewCount": "{{count}} отзывов",
+      "chooseVariant": "Выберите вариант",
+      "defaultVariant": "Стандартный вариант",
+      "inStock": "В наличии: {{count}}",
+      "secure": "Безопасная покупка",
+      "fastDelivery": "Быстрая доставка",
+      "support": "Поддержка клиентов",
+      "reviewsEyebrow": "Отзывы покупателей",
+      "reviewsTitle": "Что говорят о товаре",
+      "writeReview": "Оставить отзыв",
+      "rating": "Оценка",
+      "reviewPlaceholder": "Расскажите о вашем опыте использования товара...",
+      "submitReview": "Опубликовать отзыв",
+      "signInToReview": "Войдите в аккаунт, чтобы оставить отзыв.",
+      "reviewSaved": "Отзыв сохранён.",
+      "reviewFailed": "Не удалось сохранить отзыв.",
+      "anonymous": "Покупатель",
+      "noComment": "Пользователь оставил оценку без комментария.",
+      "noReviews": "У этого товара пока нет отзывов. Станьте первым!",
+      "similarEyebrow": "Вам также понравится",
+      "similarTitle": "Похожие товары",
+      "viewCatalog": "Смотреть весь каталог"
     }
   }
 }
