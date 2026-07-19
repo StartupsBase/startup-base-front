@@ -128,3 +128,42 @@ body:has(.humayro-top-background) {
   background-size: var(--humayro-top-background-size);
   background-repeat: no-repeat, no-repeat, repeat, no-repeat;
 }
+
+.humayro-orb {
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(8px);
+  opacity: 0.42;
+  animation: humayro-float 14s ease-in-out infinite alternate;
+}
+
+.humayro-orb-one {
+  top: 8rem;
+  left: -8rem;
+  width: 22rem;
+  height: 22rem;
+  background: color-mix(in oklch, var(--primary) 32%, transparent);
+}
+
+.humayro-orb-two {
+  top: 24rem;
+  right: -7rem;
+  width: 18rem;
+  height: 18rem;
+  background: color-mix(in oklch, var(--accent) 70%, transparent);
+  animation-delay: -7s;
+}
+
+@keyframes humayro-float {
+  to {
+    transform: translate3d(2rem, 3rem, 0) scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .humayro-orb {
+    animation: none;
+  }
+}

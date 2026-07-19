@@ -13,6 +13,7 @@ import {
 } from "@/lib/telegram"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { useTheme } from "@/components/theme-provider"
+import { getPostAuthDestination } from "@/lib/auth-routing"
 
 type TelegramStatus = "unavailable" | "authenticating" | "authenticated" | "error"
 
@@ -38,20 +39,6 @@ function authenticate(initData: string) {
   })
 
   return pendingAuthentication
-}
-
-function getPostLoginDestination(pathname: string) {
-  const language = pathname.split("/")[1] ?? "ru"
-  const requestedPath = new URLSearchParams(window.location.search).get("next")
-
-  if (
-    requestedPath?.startsWith(`/${language}/`) &&
-    !requestedPath.startsWith("//")
-  ) {
-    return requestedPath
-  }
-
-  return `/${language}/dashboard`
 }
 
 function isAuthenticationPage(pathname: string) {
@@ -115,7 +102,8 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
         setValue({ webApp, isMiniApp: true, status: "authenticated", error: null })
 
         if (isAuthenticationPage(pathname)) {
-          router.replace(getPostLoginDestination(pathname))
+          const language = pathname.split("/")[1] ?? "ru"
+          router.replace(getPostAuthDestination(language, session.user))
           router.refresh()
         }
       })
