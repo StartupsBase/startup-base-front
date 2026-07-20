@@ -65,7 +65,7 @@ export default async function RootLayout({
             <TelegramProvider>
               <I18nProvider language={lang}>
                 <HumayroLoader language={lang}>
-                  <NextTopLoader color="#008872" />
+                  <NextTopLoader color="#008872" showSpinner={false} />
                   <Header language={lang} />
                   {children}
                   <Footer language={lang} />

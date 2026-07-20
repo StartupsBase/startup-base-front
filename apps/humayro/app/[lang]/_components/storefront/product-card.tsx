@@ -201,12 +201,16 @@ export function ProductCard({
             type="button"
             size="sm"
             aria-label={text.addToCart}
-            disabled={productId == null || isAdding}
+            disabled={productId == null || isAdding || product.totalStock === 0}
             className="mt-3 h-10 w-full rounded-xl font-semibold"
             onClick={() => productId != null && onAddToCart(productId)}
           >
             {isAdding ? (
               <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground/35 border-t-primary-foreground" />
+            ) : product.totalStock === 0 ? (
+              <span className="text-wrap text-destructive">
+                {text.outOfStock}
+              </span>
             ) : (
               <>
                 <HugeiconsIcon icon={ShoppingCart02Icon} className="size-4" />

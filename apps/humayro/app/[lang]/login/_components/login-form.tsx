@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 import { isValidPhoneNumber } from "react-phone-number-input"
 
 import { useLogin } from "@/lib/api"
+import { getPostLoginPath } from "@/lib/auth"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
@@ -151,7 +152,7 @@ function LoginForm() {
       const destination =
         nextPath?.startsWith(`/${language}/`) && !nextPath.startsWith("//")
           ? nextPath
-          : `/${language}/dashboard`
+          : getPostLoginPath(language, session.user?.roles)
 
       router.replace(destination)
       router.refresh()
