@@ -1,30 +1,34 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Controller, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useQueryClient } from "@tanstack/react-query"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { formatPhoneNumberIntl } from "react-phone-number-input"
-import { Home01Icon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
+import { toast } from "sonner"
+import { z } from "zod"
 
-import { type OrganizationDTO, useMe1 } from "@/lib/api"
+import { useMe1, type OrganizationDTO } from "@/lib/api"
 import {
   getGetAll6QueryKey,
+  getGetById6QueryKey,
   useCreate6,
   useDelete6,
   useGetAll6,
   useUpdate7,
 } from "@/lib/api/generated/admin-organization/admin-organization"
+import { useUploadImage } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { LocationPickerDialog } from "./maps/location-picker-dialog"
 import { Button } from "@workspace/ui/components/button"
+import {
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
+} from "@workspace/ui/components/data-table"
 import {
   Dialog,
   DialogContent,
@@ -41,26 +45,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
-import {
-  DataTable,
-  DataTableColumnHeader,
-  type ColumnDef,
-} from "@workspace/ui/components/data-table"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@workspace/ui/components/sidebar"
-import { TooltipProvider } from "@workspace/ui/components/tooltip"
+import { SidebarTrigger } from "@workspace/ui/components/sidebar"
+import { ImageCropInput } from "../../profile/_components/image-crop-input"
+import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
+import { LocationPickerDialog } from "./maps/location-picker-dialog"
 
 const organizationSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required."),
@@ -199,9 +187,20 @@ export function OrganizationsPage({ language }: { language: string }) {
           ) : (
             <Link
               href={`/${language}/dashboard/organizations/${row.original.id}`}
-              className="font-medium text-primary hover:underline"
+              className="flex items-center gap-3 font-medium text-primary hover:underline"
             >
-              {row.getValue<string>("name") || "—"}
+              <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-muted text-sm font-semibold text-muted-foreground">
+                {row.original.logo?.s3Url ? (
+                  <img
+                    src={row.original.logo.s3Url}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  (row.getValue<string>("name") || "?").slice(0, 1)
+                )}
+              </span>
+              <span>{row.getValue<string>("name") || "—"}</span>
             </Link>
           ),
       },
@@ -270,7 +269,7 @@ export function OrganizationsPage({ language }: { language: string }) {
         cell: ({ row }) => <OrganizationActions organization={row.original} />,
       },
     ],
-    [t]
+    [language, t]
   )
 
   if (meQuery.isLoading || !canManageOrganizations) {
@@ -283,7 +282,11 @@ export function OrganizationsPage({ language }: { language: string }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-      <header className="flex items-center justify-between border-b border-border pb-6">
+      <DashboardBreadcrumb
+        language={language}
+        items={[{ label: t("dashboard.organizations") }]}
+      />
+      <header className="mt-6 flex items-center justify-between border-b border-border pb-6">
         <div>
           <SidebarTrigger className="mb-3" />
           <p className="text-sm font-medium text-primary">
@@ -351,18 +354,39 @@ function OrganizationForm({
   const queryClient = useQueryClient()
   const create = useCreate6()
   const update = useUpdate7()
+  const uploadLogo = useUploadImage()
+  const [logo, setLogo] = useState<File | null>(null)
+  const logoPreviewUrl = useMemo(
+    () => (logo ? URL.createObjectURL(logo) : null),
+    [logo]
+  )
   const form = useForm<OrganizationFormValues>({
     resolver: zodResolver(organizationSchema),
     defaultValues: organization
       ? getOrganizationValues(organization)
       : emptyOrganization,
   })
+  const organizationName = useWatch({ control: form.control, name: "name" })
   const editing = organization?.id !== undefined
 
-  async function submit(values: OrganizationFormValues) {
-    const payload = compactOrganizationPayload(values)
+  useEffect(
+    () => () => {
+      if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl)
+    },
+    [logoPreviewUrl]
+  )
 
+  async function submit(values: OrganizationFormValues) {
     try {
+      const uploadedLogo = logo
+        ? await uploadLogo.mutateAsync({ data: { file: logo } })
+        : null
+      const logoId = uploadedLogo?.id ?? organization?.logo?.id
+      const payload = {
+        ...compactOrganizationPayload(values),
+        ...(logoId !== undefined ? { logoId } : {}),
+      }
+
       if (editing && organization.id !== undefined) {
         await update.mutateAsync({
           id: organization.id,
@@ -373,6 +397,11 @@ function OrganizationForm({
       }
 
       await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      if (organization?.id !== undefined) {
+        await queryClient.invalidateQueries({
+          queryKey: getGetById6QueryKey(organization.id),
+        })
+      }
       toast.success(
         t(
           editing
@@ -388,7 +417,8 @@ function OrganizationForm({
     }
   }
 
-  const pending = create.isPending || update.isPending
+  const pending = create.isPending || update.isPending || uploadLogo.isPending
+  const logoUrl = logoPreviewUrl ?? organization?.logo?.s3Url
 
   return (
     <form
@@ -396,6 +426,32 @@ function OrganizationForm({
       onSubmit={form.handleSubmit(submit)}
       noValidate
     >
+      <div className="rounded-2xl border bg-muted/30 p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-background text-2xl font-semibold text-muted-foreground shadow-sm">
+            {logoUrl ? (
+              <img src={logoUrl} alt="" className="size-full object-cover" />
+            ) : (
+              (organizationName || "?").slice(0, 1).toUpperCase()
+            )}
+          </div>
+          <div className="space-y-2">
+            <div>
+              <p className="text-sm font-medium">{t("organization.logo")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("organization.logoDescription")}
+              </p>
+            </div>
+            <ImageCropInput
+              cropShape="rect"
+              disabled={pending}
+              fileName="organization-logo"
+              translationPrefix="organization.logoCrop"
+              onChange={setLogo}
+            />
+          </div>
+        </div>
+      </div>
       <FormField
         label={t("organization.name")}
         error={form.formState.errors.name?.message}

@@ -54,7 +54,9 @@ export function CatalogSection({ language }: { language: Language }) {
   })
 
   const products = productsQuery.data?.content ?? []
-  const favoriteIds = new Set(favoritesQuery.data ?? [])
+  const favoriteIds = new Set(
+    hasToken ? (favoritesQuery.data ?? []) : actions.guestFavoriteIds
+  )
   const sortLabels: Record<CatalogSort, string> = {
     newest: text.newest,
     "price-low": text.priceLow,
@@ -63,7 +65,7 @@ export function CatalogSection({ language }: { language: Language }) {
 
   return (
     <section id="catalog" className="scroll-mt-24 px-4 py-20 sm:px-6 lg:py-28">
-      <div className="mx-auto max-w-[1580px]">
+      <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-bold tracking-[0.2em] text-primary uppercase">
@@ -130,12 +132,14 @@ export function CatalogSection({ language }: { language: Language }) {
         </div>
 
         {productsQuery.isPending ? (
-          <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="space-y-4">
-                <div className="aspect-[4/5] animate-pulse rounded-[1.75rem] bg-muted" />
-                <div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
-                <div className="h-11 animate-pulse rounded bg-muted" />
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div key={index} className="overflow-hidden rounded-2xl border">
+                <div className="aspect-[4/3] animate-pulse bg-muted" />
+                <div className="space-y-3 p-3">
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+                  <div className="h-8 animate-pulse rounded bg-muted" />
+                </div>
               </div>
             ))}
           </div>
@@ -151,7 +155,7 @@ export function CatalogSection({ language }: { language: Language }) {
             {text.noProducts}
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {products.map((product, index) => (
               <ProductCard
                 key={product.id ?? index}

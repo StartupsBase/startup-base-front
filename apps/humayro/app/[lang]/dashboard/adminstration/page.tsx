@@ -12,5 +12,5 @@ export default async function AdministrationRoute({
 
   if (!isLanguage(lang)) notFound()
 
-  return <AdministrationPage />
+  return <AdministrationPage language={lang} />
 }

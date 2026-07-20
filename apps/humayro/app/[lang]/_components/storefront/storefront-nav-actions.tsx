@@ -8,38 +8,46 @@ import type { Language } from "@/i18n/config"
 import { useGetCart } from "@/lib/api/generated/cart/cart"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useHasAuthToken } from "@/lib/use-auth-token"
+import { useGuestStorefront } from "@/lib/guest-storefront"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
-import { useAuthStore } from "@/lib/stores/use-auth-store"
 
 export function StorefrontNavActions({ language }: { language: Language }) {
   const hasToken = useHasAuthToken()
   const text = useStorefrontCopy()
+  const guestStorefront = useGuestStorefront()
   const cartQuery = useGetCart({
     query: { enabled: hasToken, retry: false },
   })
   const favoritesQuery = useGetFavoriteIds({
     query: { enabled: hasToken, retry: false },
   })
-  const user = useAuthStore((state) => state.user)
-
   return (
     <>
       <NavAction
         href={`/${language}/favourites`}
         label={text.favoritesNav}
-        count={favoritesQuery.data?.length}
+        count={
+          hasToken
+            ? favoritesQuery.data?.length
+            : guestStorefront.favoriteIds.length
+        }
       >
         <HugeiconsIcon icon={HeartIcon} className="size-5" />
       </NavAction>
-      {user && (
-        <NavAction
-          href={`/${language}/cart`}
-          label={text.cartNav}
-          count={cartQuery.data?.totalItems}
-        >
-          <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
-        </NavAction>
-      )}
+      <NavAction
+        href={`/${language}/cart`}
+        label={text.cartNav}
+        count={
+          hasToken
+            ? cartQuery.data?.totalItems
+            : guestStorefront.cart.reduce(
+                (total, item) => total + item.quantity,
+                0
+              )
+        }
+      >
+        <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
+      </NavAction>
     </>
   )
 }

@@ -12,34 +12,49 @@ type YandexLocationMapProps = {
 type YandexWindow = Window & { ymaps3?: any }
 
 const tashkent: MapCoordinates = { latitude: 41.2995, longitude: 69.2401 }
+let yandexMapsPromise: Promise<any> | null = null
 
 function loadYandexMaps(apiKey: string) {
   const windowWithYandex = window as YandexWindow
 
   if (windowWithYandex.ymaps3) return Promise.resolve(windowWithYandex.ymaps3)
+  if (yandexMapsPromise) return yandexMapsPromise
 
-  return new Promise<any>((resolve, reject) => {
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[data-yandex-maps="v3"]'
-    )
-    if (existingScript) {
-      existingScript.addEventListener(
-        "load",
-        () => resolve((window as YandexWindow).ymaps3),
-        { once: true }
-      )
-      existingScript.addEventListener("error", reject, { once: true })
-      return
-    }
+  document
+    .querySelector<HTMLScriptElement>('script[data-yandex-maps="v3"]')
+    ?.remove()
 
+  yandexMapsPromise = new Promise<any>((resolve, reject) => {
     const script = document.createElement("script")
     script.src = `https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(apiKey)}&lang=ru_RU`
     script.async = true
     script.dataset.yandexMaps = "v3"
-    script.onload = () => resolve((window as YandexWindow).ymaps3)
-    script.onerror = () => reject(new Error("Unable to load Yandex Maps."))
+    script.onload = () => {
+      const ymaps3 = (window as YandexWindow).ymaps3
+      if (ymaps3) {
+        resolve(ymaps3)
+      } else {
+        reject(new Error("Yandex Maps API did not initialize."))
+      }
+    }
+    script.onerror = () => {
+      reject(
+        new Error(
+          "Yandex rejected the API request. Check the API key and its HTTP Referer restrictions."
+        )
+      )
+    }
     document.head.appendChild(script)
   })
+
+  yandexMapsPromise.catch(() => {
+    yandexMapsPromise = null
+    document
+      .querySelector<HTMLScriptElement>('script[data-yandex-maps="v3"]')
+      ?.remove()
+  })
+
+  return yandexMapsPromise
 }
 
 export function YandexLocationMap({
@@ -48,7 +63,7 @@ export function YandexLocationMap({
 }: YandexLocationMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const onLocationChangeRef = useRef(onLocationChange)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY
 
   useEffect(() => {
@@ -95,7 +110,14 @@ export function YandexLocationMap({
           })
         )
       })
-      .catch(() => setError(true))
+      .catch((cause: unknown) => {
+        if (disposed) return
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Yandex Maps could not be loaded."
+        )
+      })
 
     return () => {
       disposed = true
@@ -114,7 +136,7 @@ export function YandexLocationMap({
   if (error) {
     return (
       <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">
-        Yandex Maps could not be loaded.
+        {error}
       </p>
     )
   }

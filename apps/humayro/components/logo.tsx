@@ -39,7 +39,7 @@ function LogoBrand({ className, ...props }: ComponentProps<"span">) {
       aria-label="Humayro"
       className="flex items-center font-semibold tracking-tight"
     >
-      <Logo className={cn("h-10 w-10", className)} {...props} />
+      {/* <Logo className={cn("h-10 w-10", className)} {...props} /> */}
       <span className="ml-2 text-lg font-bold tracking-tight">Humayro</span>
     </Link>
   )

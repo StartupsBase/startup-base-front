@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/generated/profile/profile"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { ImageCropInput } from "./image-crop-input"
+import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
@@ -32,7 +33,7 @@ const profileSchema = z.object({
 
 type ProfileValues = z.infer<typeof profileSchema>
 
-export function ProfileForm() {
+export function ProfileForm({ language }: { language: string }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
@@ -129,7 +130,11 @@ export function ProfileForm() {
 
   return (
     <div className="mx-auto w-full max-w-3xl p-6 md:p-10">
-      <div className="mb-8">
+      <DashboardBreadcrumb
+        language={language}
+        items={[{ label: t("profile.title") }]}
+      />
+      <div className="mt-6 mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("profile.title")}
         </h1>

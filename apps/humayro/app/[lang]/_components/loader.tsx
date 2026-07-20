@@ -1,13 +1,24 @@
 "use client"
 
-import { CSSProperties, ReactNode, useEffect, useMemo, useState } from "react"
+import {
+  CSSProperties,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import { usePathname } from "next/navigation"
 import { HumayroLoaderLayers } from "./humayro-loader-layers"
 
 type HumayroLoaderProps = {
   children: ReactNode
+  language: string
   duration?: number
   showLoadingText?: boolean
 }
+
+const loaderStorageKey = "humayro:home-loader-shown"
 
 type Particle = {
   x: number
@@ -235,16 +246,42 @@ const flyingLeaves: FlyingLeaf[] = [
 
 export default function HumayroLoader({
   children,
+  language,
   duration = 7600,
   showLoadingText = true,
 }: HumayroLoaderProps) {
-  const [mounted, setMounted] = useState(true)
-  const [visible, setVisible] = useState(true)
+  const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const hasCheckedLoader = useRef(false)
 
   const stableCoreParticles = useMemo(() => coreParticles, [])
   const stableOrbitParticles = useMemo(() => orbitParticles, [])
 
   useEffect(() => {
+    if (pathname !== `/${language}` || hasCheckedLoader.current) return
+
+    const checkTimer = window.setTimeout(() => {
+      if (hasCheckedLoader.current) return
+      hasCheckedLoader.current = true
+
+      try {
+        if (window.localStorage.getItem(loaderStorageKey)) return
+        window.localStorage.setItem(loaderStorageKey, "true")
+      } catch {
+        // If storage is unavailable, still show the loader for this page load.
+      }
+
+      setMounted(true)
+      setVisible(true)
+    }, 0)
+
+    return () => window.clearTimeout(checkTimer)
+  }, [language, pathname])
+
+  useEffect(() => {
+    if (!mounted) return
+
     const fadeTimer = window.setTimeout(
       () => {
         setVisible(false)
@@ -260,7 +297,7 @@ export default function HumayroLoader({
       window.clearTimeout(fadeTimer)
       window.clearTimeout(removeTimer)
     }
-  }, [duration])
+  }, [duration, mounted])
 
   return (
     <>

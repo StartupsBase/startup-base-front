@@ -252,6 +252,21 @@
       "contactEmail": "Aloqa emaili",
       "contactPhone": "Aloqa telefoni",
       "address": "Manzil",
+      "logo": "Tashkilot logotipi",
+      "logoDescription": "Rasm yuklang va logotipning kvadrat maydonini sozlang.",
+      "loadingDetails": "Tashkilot yuklanmoqda...",
+      "logoCrop": {
+        "choosePhoto": "Logotipni tanlash",
+        "takePhoto": "Rasmga olish",
+        "title": "Logotipni sozlash",
+        "description": "Logotip maydonini tanlash uchun rasmni suring va masshtablang.",
+        "zoom": "Masshtab",
+        "rotation": "Burish",
+        "failed": "Rasmga ishlov berib bo'lmadi.",
+        "cancel": "Bekor qilish",
+        "processing": "Ishlov berilmoqda...",
+        "apply": "Logotipni qo'llash"
+      },
       "create": "Tashkilot yaratish",
       "save": "Tashkilotni saqlash",
       "delete": "Tashkilotni o'chirish",
@@ -375,6 +390,12 @@
       "clickToSelect": "Manzilni tanlash uchun xaritani bosing.",
       "selected": "Tanlangan manzil",
       "locating": "Manzil aniqlanmoqda...",
+      "searchPlaceholder": "Manzil yoki joyni qidiring...",
+      "openSearch": "Xaritada qidiruvni ochish",
+      "closeSearch": "Qidiruvni yopish",
+      "searching": "Qidirilmoqda...",
+      "searchError": "Qidiruvni amalga oshirib bo'lmadi.",
+      "noSearchResults": "Hech narsa topilmadi.",
       "useAddress": "Ushbu manzilni ishlatish"
     },
     "category": {
@@ -474,6 +495,33 @@
       "statusShipped": "Yo'lda",
       "statusDelivered": "Yetkazilgan",
       "statusCancelled": "Bekor qilingan"
+    },
+    "productDetails": {
+      "home": "Bosh sahifa",
+      "catalog": "Katalog",
+      "loadFailed": "Mahsulotni yuklab bo'lmadi.",
+      "reviewCount": "{{count}} ta sharh",
+      "chooseVariant": "Variantni tanlang",
+      "defaultVariant": "Standart variant",
+      "inStock": "Mavjud: {{count}}",
+      "secure": "Xavfsiz xarid",
+      "fastDelivery": "Tez yetkazib berish",
+      "support": "Mijozlar yordami",
+      "reviewsEyebrow": "Xaridorlar sharhlari",
+      "reviewsTitle": "Mahsulot haqida fikrlar",
+      "writeReview": "Sharh qoldirish",
+      "rating": "Baho",
+      "reviewPlaceholder": "Mahsulotdan foydalanish tajribangiz haqida yozing...",
+      "submitReview": "Sharhni joylash",
+      "signInToReview": "Sharh qoldirish uchun hisobingizga kiring.",
+      "reviewSaved": "Sharh saqlandi.",
+      "reviewFailed": "Sharhni saqlab bo'lmadi.",
+      "anonymous": "Xaridor",
+      "noComment": "Foydalanuvchi izohsiz baho qoldirgan.",
+      "noReviews": "Bu mahsulot haqida hali sharh yo'q. Birinchi bo'ling!",
+      "similarEyebrow": "Sizga yana yoqishi mumkin",
+      "similarTitle": "O'xshash mahsulotlar",
+      "viewCatalog": "Barcha katalogni ko'rish"
     }
   }
 }

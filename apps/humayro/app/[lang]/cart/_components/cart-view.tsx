@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
+import { useGetAll2 } from "@/lib/api/generated/product/product"
 import {
   getGetCartQueryKey,
   useClear,
@@ -26,11 +27,14 @@ import {
   getLoginHref,
 } from "@/lib/storefront"
 import { useHasAuthToken } from "@/lib/use-auth-token"
+import { useGuestStorefront } from "@/lib/guest-storefront"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
 import { Label } from "@workspace/ui/components/label"
 
 import { EmptyState } from "../../_components/storefront/empty-state"
+import { ProductCard } from "../../_components/storefront/product-card"
+import { useStorefrontActions } from "../../_components/storefront/use-storefront-actions"
 
 const initialCheckout: CheckoutDTO = {
   recipientName: "",
@@ -114,14 +118,7 @@ export function CartView({ language }: { language: Language }) {
   }
 
   if (!hasToken) {
-    return (
-      <EmptyState
-        title={text.cartTitle}
-        description={text.signInRequired}
-        actionLabel={text.signIn}
-        actionHref={getLoginHref(language, `/${language}/cart`)}
-      />
-    )
+    return <GuestCartView language={language} />
   }
 
   if (cartQuery.isPending) {
@@ -278,6 +275,86 @@ export function CartView({ language }: { language: Language }) {
               </Button>
             </form>
           </aside>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+function GuestCartView({ language }: { language: Language }) {
+  const text = useStorefrontCopy()
+  const guestStorefront = useGuestStorefront()
+  const actions = useStorefrontActions(language)
+  const productsQuery = useGetAll2(
+    { active: true, page: 0, size: 100 },
+    { query: { staleTime: 60_000 } }
+  )
+  const cartProductIds = new Set(
+    guestStorefront.cart.map((item) => item.productId)
+  )
+  const products = (productsQuery.data?.content ?? []).filter(
+    (product) => product.id != null && cartProductIds.has(product.id)
+  )
+
+  if (productsQuery.isPending) return <CartSkeleton />
+
+  if (guestStorefront.cart.length === 0) {
+    return (
+      <EmptyState
+        title={text.cartEmptyTitle}
+        description={text.cartEmptyDescription}
+        actionLabel={text.popularProducts}
+        actionHref={`/${language}/#catalog`}
+      />
+    )
+  }
+
+  return (
+    <main className="min-h-screen px-4 py-14 sm:px-6 lg:py-20">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-[-0.04em]">
+              {text.cartTitle}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {text.cartDescription}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link href={getLoginHref(language, `/${language}/cart`)}>
+                {text.signIn}
+              </Link>
+            </Button>
+            <Button variant="ghost" onClick={guestStorefront.clearCart}>
+              {text.clearCart}
+            </Button>
+          </div>
+        </div>
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {products.map((product, index) => (
+            <div key={product.id ?? index} className="relative">
+              <ProductCard
+                product={product}
+                language={language}
+                isFavorite={
+                  product.id != null &&
+                  actions.guestFavoriteIds.includes(product.id)
+                }
+                isAdding={actions.pendingCartId === product.id}
+                isTogglingFavorite={false}
+                onAddToCart={actions.addProductToCart}
+                onToggleFavorite={actions.toggleFavorite}
+              />
+              <span className="absolute top-2 left-2 z-10 rounded-full bg-background/90 px-2 py-1 text-xs font-bold shadow-sm">
+                ×
+                {guestStorefront.cart
+                  .filter((item) => item.productId === product.id)
+                  .reduce((total, item) => total + item.quantity, 0)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </main>

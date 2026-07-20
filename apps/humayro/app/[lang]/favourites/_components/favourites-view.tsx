@@ -4,7 +4,7 @@ import Link from "next/link"
 
 import type { Language } from "@/i18n/config"
 import { useGetFavorites } from "@/lib/api/generated/favorite/favorite"
-import { getLoginHref } from "@/lib/storefront"
+import { useGetAll2 } from "@/lib/api/generated/product/product"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
@@ -20,35 +20,43 @@ export function FavouritesView({ language }: { language: Language }) {
   const favoritesQuery = useGetFavorites({
     query: { enabled: hasToken, retry: false },
   })
+  const guestProductsQuery = useGetAll2(
+    { active: true, page: 0, size: 100 },
+    { query: { enabled: !hasToken, staleTime: 60_000 } }
+  )
 
-  if (!hasToken) {
-    return (
-      <EmptyState
-        icon="heart"
-        title={text.favoritesTitle}
-        description={text.signInRequired}
-        actionLabel={text.signIn}
-        actionHref={getLoginHref(language, `/${language}/favourites`)}
-      />
-    )
-  }
-
-  if (favoritesQuery.isPending) {
+  if (
+    (hasToken && favoritesQuery.isPending) ||
+    (!hasToken && guestProductsQuery.isPending)
+  ) {
     return <PageSkeleton />
   }
 
-  if (favoritesQuery.isError) {
+  if (
+    (hasToken && favoritesQuery.isError) ||
+    (!hasToken && guestProductsQuery.isError)
+  ) {
     return (
       <div className="mx-auto flex min-h-[520px] max-w-xl flex-col items-center justify-center px-4 text-center">
         <p className="text-lg text-destructive">{text.actionError}</p>
-        <Button className="mt-4" onClick={() => favoritesQuery.refetch()}>
+        <Button
+          className="mt-4"
+          onClick={() =>
+            hasToken ? favoritesQuery.refetch() : guestProductsQuery.refetch()
+          }
+        >
           {text.retry}
         </Button>
       </div>
     )
   }
 
-  const products = favoritesQuery.data ?? []
+  const products = hasToken
+    ? (favoritesQuery.data ?? [])
+    : (guestProductsQuery.data?.content ?? []).filter(
+        (product) =>
+          product.id != null && actions.guestFavoriteIds.includes(product.id)
+      )
 
   if (products.length === 0) {
     return (
@@ -79,7 +87,7 @@ export function FavouritesView({ language }: { language: Language }) {
           </Button>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {products.map((product, index) => (
             <ProductCard
               key={product.id ?? index}
