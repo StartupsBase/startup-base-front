@@ -18,14 +18,17 @@ function ThemeToggle({ className }: { className?: string }) {
       type="button"
       variant="outline"
       size="icon"
-      className={cn(className)}
+      className={cn(
+        "xs:size-9 3xl:size-12 size-8 shrink-0 rounded-full sm:size-10 lg:size-9 xl:size-10 2xl:size-11",
+        className
+      )}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={t(isDark ? "home.themeToLight" : "home.themeToDark")}
     >
       <HugeiconsIcon
         icon={isDark ? Sun01Icon : Moon01Icon}
         strokeWidth={1.8}
-        className="size-4"
+        className="xs:size-4 3xl:size-[22px] size-3.5 sm:size-[18px] 2xl:size-5"
       />
     </Button>
   )

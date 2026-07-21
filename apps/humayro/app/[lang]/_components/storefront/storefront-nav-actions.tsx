@@ -22,7 +22,7 @@ export function StorefrontNavActions({ language }: { language: Language }) {
     query: { enabled: hasToken, retry: false },
   })
   return (
-    <>
+    <div className="xs:gap-1 flex shrink-0 items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
       <NavAction
         href={`/${language}/favourites`}
         label={text.favoritesNav}
@@ -32,7 +32,10 @@ export function StorefrontNavActions({ language }: { language: Language }) {
             : guestStorefront.favoriteIds.length
         }
       >
-        <HugeiconsIcon icon={HeartIcon} className="size-5" />
+        <HugeiconsIcon
+          icon={HeartIcon}
+          className="xs:size-4.5 size-4 sm:size-5 2xl:size-5.5"
+        />
       </NavAction>
       <NavAction
         href={`/${language}/cart`}
@@ -46,9 +49,12 @@ export function StorefrontNavActions({ language }: { language: Language }) {
               )
         }
       >
-        <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
+        <HugeiconsIcon
+          icon={ShoppingCart02Icon}
+          className="xs:size-4.5 size-4 sm:size-5 2xl:size-5.5"
+        />
       </NavAction>
-    </>
+    </div>
   )
 }
 
@@ -67,11 +73,12 @@ function NavAction({
     <Link
       href={href}
       aria-label={label}
-      className="relative grid size-9 place-items-center rounded-full transition hover:bg-muted"
+      className="xs:size-9 3xl:h-12 3xl:px-4 3xl:text-base relative flex size-8 shrink-0 items-center justify-center gap-2 rounded-full px-0 text-xs font-medium transition hover:bg-muted sm:size-10 lg:size-9 xl:h-10 xl:w-auto xl:px-3 2xl:h-11 2xl:px-3.5 2xl:text-sm"
     >
       {children}
+      <span className="hidden xl:inline">{label}</span>
       {count != null && count > 0 && (
-        <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-4 font-bold text-primary-foreground">
+        <span className="xs:min-w-4 xs:px-1 xs:text-[10px] xs:leading-4 absolute -top-1 -right-1 grid min-w-3.5 place-items-center rounded-full bg-primary px-0.5 text-[9px] leading-3.5 font-bold text-primary-foreground xl:top-0 xl:right-0 2xl:text-[11px]">
           {count > 99 ? "99+" : count}
         </span>
       )}
