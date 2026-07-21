@@ -281,14 +281,14 @@ export function OrganizationsPage({ language }: { language: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
       <DashboardBreadcrumb
         language={language}
         items={[{ label: t("dashboard.organizations") }]}
       />
-      <header className="mt-6 flex items-center justify-between border-b border-border pb-6">
+      <header className="mt-6 flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3" />
+          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>
@@ -298,7 +298,9 @@ export function OrganizationsPage({ language }: { language: string }) {
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button>{t("organization.new")}</Button>
+            <Button className="w-full sm:w-auto">
+              {t("organization.new")}
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader>

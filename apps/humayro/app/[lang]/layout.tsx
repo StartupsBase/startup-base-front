@@ -1,5 +1,6 @@
 import "leaflet/dist/leaflet.css"
-import { M_PLUS_1_Code, M_PLUS_Rounded_1c } from "next/font/google"
+import type { Metadata } from "next"
+import { M_PLUS_1_Code, M_PLUS_Rounded_1c, Manrope } from "next/font/google"
 import { notFound } from "next/navigation"
 import "react-phone-number-input/style.css"
 
@@ -13,12 +14,14 @@ import { TelegramProvider } from "@/components/telegram-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import NextTopLoader from "nextjs-toploader"
 import { isLanguage, languages } from "@/i18n/config"
+import { getTranslation } from "@/i18n/server"
+import { createPageMetadata, getSiteUrl } from "@/lib/seo"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
   weight: ["400", "700"],
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
   display: "swap",
 })
@@ -30,8 +33,52 @@ const mPlus1Code = M_PLUS_1_Code({
   display: "swap",
 })
 
+const manrope = Manrope({
+  weight: ["500", "600", "700", "800"],
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-manrope",
+  display: "swap",
+})
+
 export function generateStaticParams() {
   return languages.map((lang) => ({ lang }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}): Promise<Metadata> {
+  const { lang } = await params
+  if (!isLanguage(lang)) return {}
+
+  const { t } = await getTranslation(lang)
+  const base = createPageMetadata({
+    language: lang,
+    title: "Humayro",
+    description: t("seo.siteDescription"),
+    keywords: t("seo.keywords", { returnObjects: true }) as string[],
+  })
+
+  return {
+    ...base,
+    metadataBase: getSiteUrl(),
+    title: {
+      default: t("seo.siteTitle"),
+      template: "%s | Humayro",
+    },
+    applicationName: "Humayro",
+    authors: [{ name: "Humayro", url: getSiteUrl() }],
+    creator: "Humayro",
+    publisher: "Humayro",
+    category: "shopping",
+    referrer: "origin-when-cross-origin",
+    formatDetection: {
+      address: false,
+      email: false,
+      telephone: false,
+    },
+  }
 }
 
 export default async function RootLayout({
@@ -55,6 +102,7 @@ export default async function RootLayout({
         "antialiased",
         mPlusRounded1c.variable,
         mPlus1Code.variable,
+        manrope.variable,
         "font-sans"
       )}
     >

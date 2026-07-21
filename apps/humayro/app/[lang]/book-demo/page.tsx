@@ -24,8 +24,19 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { TextAnimate } from "@workspace/ui/components/text-animate"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
 type BookDemoPageProps = {
   params: Promise<{ lang: string }>
+}
+
+export async function generateMetadata({ params }: BookDemoPageProps) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "bookDemo",
+    path: "/book-demo",
+  })
 }
 
 export default async function BookDemoPage({ params }: BookDemoPageProps) {

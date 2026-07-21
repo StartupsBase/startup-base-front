@@ -3,10 +3,19 @@
 import { useEffect, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
+import {
+  Add01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Delete02Icon,
+  ImageAdd01Icon,
+  Video01Icon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 
 import type {
   ProductDTO,
@@ -20,6 +29,7 @@ import {
   useUploadVideo,
 } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { useGetAll4 } from "@/lib/api/generated/category/category"
+import { useGetAll5 as useGetBranches } from "@/lib/api/generated/branch/branch"
 import { useGetAll3 as useGetColors } from "@/lib/api/generated/color/color"
 import {
   getGetAll2QueryKey,
@@ -41,6 +51,13 @@ import {
 } from "@workspace/ui/components/attachment"
 import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@workspace/ui/components/dialog"
 import { Input } from "@workspace/ui/components/input"
 import {
   Select,
@@ -49,6 +66,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import { VideoPlayer } from "@workspace/ui/components/video-player"
 import { cn } from "@workspace/ui/lib/utils"
 
 const MAX_VIDEO_SIZE = 5 * 1024 * 1024
@@ -67,6 +85,10 @@ function createProductSchema(t: Translation) {
       .number({ error: t("product.validation.categoryRequired") })
       .int(t("product.validation.categoryRequired"))
       .positive(t("product.validation.categoryRequired")),
+    branchId: z.coerce
+      .number({ error: t("product.validation.branchRequired") })
+      .int(t("product.validation.branchRequired"))
+      .positive(t("product.validation.branchRequired")),
     basePrice: z.coerce
       .number({ error: t("product.validation.priceInvalid") })
       .nonnegative(t("product.validation.priceNonNegative")),
@@ -110,6 +132,7 @@ function productValues(product?: ProductSource): ProductInputs {
     descriptionRu: detailed?.descriptionRu ?? "",
     descriptionEng: detailed?.descriptionEng ?? "",
     categoryId: product?.categoryId ?? "",
+    branchId: product?.branchId ?? "",
     basePrice: product?.basePrice ?? 0,
     discountPercent: product?.discountPercent ?? 0,
     active: product?.active ?? true,
@@ -148,12 +171,10 @@ export function ProductForm({
   organizationId,
   product,
   onComplete,
-  showAssistant = false,
 }: {
   organizationId: number
   product?: ProductListDTO
   onComplete: () => void
-  showAssistant?: boolean
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
@@ -162,6 +183,7 @@ export function ProductForm({
     query: { enabled: editing, retry: false },
   })
   const categoriesQuery = useGetAll4()
+  const branchesQuery = useGetBranches({ organizationId, size: 100 })
   const colorsQuery = useGetColors()
   const sizesQuery = useGetSizes()
   const create = useCreate2()
@@ -177,11 +199,11 @@ export function ProductForm({
   const [videoUrl, setVideoUrl] = useState<string>()
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [editorVersion, setEditorVersion] = useState(0)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const form = useForm<ProductInputs, unknown, ProductValues>({
     resolver: zodResolver(createProductSchema(t)),
     defaultValues: productValues(product),
   })
-  const previewValues = useWatch({ control: form.control })
 
   useEffect(() => {
     const source = detailsQuery.data ?? product
@@ -201,6 +223,9 @@ export function ProductForm({
 
   const categories = (categoriesQuery.data ?? []).filter(
     (category) => category.organizationId === organizationId
+  )
+  const branches = (branchesQuery.data?.content ?? []).filter(
+    (branch) => branch.active !== false
   )
   const colors = (colorsQuery.data ?? []).filter(
     (color) =>
@@ -223,6 +248,7 @@ export function ProductForm({
         "descriptionRu",
         "descriptionEng",
         "categoryId",
+        "branchId",
         "basePrice",
         "discountPercent",
         "active",
@@ -428,6 +454,7 @@ export function ProductForm({
         : {}),
       categoryId: values.categoryId,
       organizationId,
+      branchId: values.branchId,
       basePrice: values.basePrice,
       discountPercent: values.discountPercent,
       active: values.active,
@@ -485,41 +512,36 @@ export function ProductForm({
       onSubmit={form.handleSubmit(submit)}
       noValidate
     >
-      <div
-        className={cn(
-          "grid gap-8",
-          showAssistant &&
-            step !== steps.length - 1 &&
-            "xl:grid-cols-[minmax(0,1fr)_20rem]"
-        )}
-      >
+      <div className="grid gap-8">
         <div className="grid min-w-0 gap-6">
           <ol
-            className="grid grid-cols-4 gap-2"
+            className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-2 lg:grid-cols-4"
             aria-label={t("product.formSteps")}
           >
             {steps.map((item, index) => (
               <li key={item}>
                 <button
                   type="button"
-                  className="w-full text-left disabled:cursor-default"
-                  disabled={index >= step || pending}
+                  className={cn(
+                    "min-h-16 w-full rounded-xl px-4 py-3 text-left transition",
+                    index === step
+                      ? "bg-background shadow-sm ring-1 ring-border"
+                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                  )}
+                  disabled={pending}
                   onClick={() => setStep(index)}
                 >
                   <span
                     className={cn(
-                      "block h-1.5 rounded-full bg-muted",
-                      index <= step && "bg-primary"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "mt-2 block text-xs text-muted-foreground",
-                      index === step && "font-medium text-foreground",
+                      "block text-sm font-semibold",
+                      index === step && "text-foreground",
                       index < step && "hover:text-foreground"
                     )}
                   >
                     {index + 1}. {t(`product.step.${item}`)}
+                  </span>
+                  <span className="mt-1 block text-xs">
+                    {t(`product.stepDescription.${item}`)}
                   </span>
                 </button>
               </li>
@@ -530,7 +552,9 @@ export function ProductForm({
             <BasicStep
               form={form}
               categories={categories}
+              branches={branches}
               editorVersion={editorVersion}
+              onFillLocalizedFields={fillLocalizedFields}
               t={t}
             />
           ) : null}
@@ -586,18 +610,29 @@ export function ProductForm({
                     category.id === Number(form.getValues("categoryId"))
                 )?.name
               }
+              branchName={
+                branches.find(
+                  (branch) => branch.id === Number(form.getValues("branchId"))
+                )?.name
+              }
               t={t}
             />
           ) : null}
 
           <div
             className={cn(
-              "flex items-center border-t border-border pt-4",
-              step === steps.length - 1
-                ? "justify-end gap-3"
-                : "justify-between"
+              "flex flex-wrap items-center gap-3 border-t border-border pt-4",
+              step === steps.length - 1 ? "justify-end" : "justify-between"
             )}
           >
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => setPreviewOpen(true)}
+            >
+              {t("product.previewProduct")}
+            </Button>
             {step === steps.length - 1 ? (
               <Button
                 type="button"
@@ -628,21 +663,41 @@ export function ProductForm({
             )}
           </div>
         </div>
-        {showAssistant && step !== steps.length - 1 ? (
-          <ProductAssistant
-            values={previewValues}
-            images={images}
-            variantCount={variants.length}
-            categoryName={
-              categories.find(
-                (category) => category.id === Number(previewValues.categoryId)
-              )?.name
-            }
-            onFillLocalizedFields={fillLocalizedFields}
-            t={t}
-          />
-        ) : null}
       </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-h-[94vh] overflow-y-auto p-0 sm:max-w-[min(96vw,1280px)]">
+          <DialogHeader className="border-b px-6 py-5 text-left">
+            <DialogTitle>{t("product.previewProduct")}</DialogTitle>
+            <DialogDescription>
+              {t("product.previewDescription")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-6 lg:p-8">
+            <ReviewStep
+              values={form.getValues() as ProductValues}
+              images={images}
+              videoName={videoName}
+              videoUrl={videoUrl}
+              variants={variants}
+              colors={colors}
+              sizes={sizes}
+              categoryName={
+                categories.find(
+                  (category) =>
+                    category.id === Number(form.getValues("categoryId"))
+                )?.name
+              }
+              branchName={
+                branches.find(
+                  (branch) => branch.id === Number(form.getValues("branchId"))
+                )?.name
+              }
+              t={t}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }
@@ -650,12 +705,16 @@ export function ProductForm({
 function BasicStep({
   form,
   categories,
+  branches,
   editorVersion,
+  onFillLocalizedFields,
   t,
 }: {
   form: ReturnType<typeof useForm<ProductInputs, unknown, ProductValues>>
   categories: Array<{ id?: number; name?: string }>
+  branches: Array<{ id?: number; name?: string; address?: string }>
   editorVersion: number
+  onFillLocalizedFields: () => void
   t: Translation
 }) {
   return (
@@ -679,6 +738,14 @@ function BasicStep({
         >
           <Input {...form.register("nameEng")} />
         </ProductField>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed bg-muted/30 p-4">
+        <p className="max-w-xl text-sm text-muted-foreground">
+          {t("product.fillLocalizedFieldsDescription")}
+        </p>
+        <Button type="button" variant="outline" onClick={onFillLocalizedFields}>
+          {t("product.fillLocalizedFields")}
+        </Button>
       </div>
       <div className="grid gap-5">
         {(["descriptionUz", "descriptionRu", "descriptionEng"] as const).map(
@@ -713,33 +780,63 @@ function BasicStep({
           )
         )}
       </div>
-      <ProductField
-        label={t("product.category")}
-        error={form.formState.errors.categoryId?.message}
-      >
-        <Select
-          value={String(form.watch("categoryId") || "")}
-          onValueChange={(value) =>
-            form.setValue("categoryId", value, {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ProductField
+          label={t("product.category")}
+          error={form.formState.errors.categoryId?.message}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={t("product.selectCategory")} />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) =>
-              category.id !== undefined ? (
-                <SelectItem key={category.id} value={String(category.id)}>
-                  {category.name}
-                </SelectItem>
-              ) : null
-            )}
-          </SelectContent>
-        </Select>
-      </ProductField>
+          <Select
+            value={String(form.watch("categoryId") || "")}
+            onValueChange={(value) =>
+              form.setValue("categoryId", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+              })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("product.selectCategory")} />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) =>
+                category.id !== undefined ? (
+                  <SelectItem key={category.id} value={String(category.id)}>
+                    {category.name}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
+        </ProductField>
+        <ProductField
+          label={t("product.branch")}
+          error={form.formState.errors.branchId?.message}
+        >
+          <Select
+            value={String(form.watch("branchId") || "")}
+            onValueChange={(value) =>
+              form.setValue("branchId", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+              })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("product.selectBranch")} />
+            </SelectTrigger>
+            <SelectContent>
+              {branches.map((branch) =>
+                branch.id !== undefined ? (
+                  <SelectItem key={branch.id} value={String(branch.id)}>
+                    {branch.name}
+                    {branch.address ? ` · ${branch.address}` : ""}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
+        </ProductField>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <ProductField
           label={t("product.basePrice")}
@@ -808,6 +905,13 @@ function MediaStep({
   onRemoveVideo: () => void
   t: Translation
 }) {
+  const imagePosition = (index: number) => {
+    if (index === 0) return t("product.imageFront")
+    if (index === 1) return t("product.imageSide")
+    if (index === 2) return t("product.imageBack")
+    return t("product.imageDetail", { number: index - 2 })
+  }
+
   return (
     <section className="grid gap-6">
       <div className="grid gap-3">
@@ -825,8 +929,13 @@ function MediaStep({
           className="sr-only"
           onChange={(event) => void onImages(event.target.files)}
         />
-        <Attachment state={uploadingImages ? "uploading" : "idle"}>
-          <AttachmentMedia>IMG</AttachmentMedia>
+        <Attachment
+          state={uploadingImages ? "uploading" : "idle"}
+          className="min-h-28 w-full cursor-pointer items-center px-5 hover:border-primary/50 hover:bg-primary/5"
+        >
+          <AttachmentMedia className="size-14 text-primary">
+            <HugeiconsIcon icon={ImageAdd01Icon} className="size-7" />
+          </AttachmentMedia>
           <AttachmentContent>
             <AttachmentTitle>{t("product.uploadImages")}</AttachmentTitle>
             <AttachmentDescription>
@@ -838,28 +947,40 @@ function MediaStep({
             onClick={() => imageInputRef.current?.click()}
           />
         </Attachment>
-        <AttachmentGroup>
+        <AttachmentGroup className="grid grid-cols-1 gap-5 overflow-visible sm:grid-cols-2 xl:grid-cols-3">
           {images.map((image, index) => (
             <Attachment
               key={image.attachmentId}
               orientation="vertical"
-              className={cn(image.main && "border-primary")}
+              className={cn(
+                "w-full! overflow-hidden rounded-3xl p-0 shadow-sm",
+                image.main && "border-primary ring-2 ring-primary/15"
+              )}
             >
-              <AttachmentMedia variant={image.url ? "image" : "icon"}>
+              <AttachmentMedia
+                variant={image.url ? "image" : "icon"}
+                className="aspect-[4/3] w-full! rounded-none opacity-100!"
+              >
                 {image.url ? (
-                  <span
-                    aria-hidden
-                    className="size-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${image.url})` }}
+                  <img
+                    src={image.url}
+                    alt={image.name}
+                    className="size-full object-cover"
                   />
                 ) : (
-                  "IMG"
+                  <HugeiconsIcon icon={ImageAdd01Icon} className="size-9" />
                 )}
               </AttachmentMedia>
-              <AttachmentContent>
-                <AttachmentTitle>{image.name}</AttachmentTitle>
+              <AttachmentContent className="w-full! px-4! pt-4!">
+                <AttachmentTitle className="text-base">
+                  {imagePosition(index)}
+                </AttachmentTitle>
                 <AttachmentDescription>
-                  {image.main ? t("product.mainImage") : `#${index + 1}`}
+                  {image.name} ·{" "}
+                  {t("product.imagePosition", {
+                    position: index + 1,
+                    total: images.length,
+                  })}
                 </AttachmentDescription>
               </AttachmentContent>
               <AttachmentActions>
@@ -867,13 +988,13 @@ function MediaStep({
                   type="button"
                   onClick={() => onRemoveImage(image.attachmentId)}
                 >
-                  ×
+                  <HugeiconsIcon icon={Delete02Icon} className="size-4" />
                 </AttachmentAction>
               </AttachmentActions>
-              <div className="flex w-full gap-1 px-1 pb-1">
+              <div className="flex w-full gap-2 px-4 pb-4">
                 <Button
                   type="button"
-                  size="xs"
+                  size="sm"
                   variant={image.main ? "default" : "outline"}
                   onClick={() => onMainImage(image.attachmentId)}
                 >
@@ -881,21 +1002,21 @@ function MediaStep({
                 </Button>
                 <Button
                   type="button"
-                  size="icon-xs"
+                  size="icon-sm"
                   variant="outline"
                   disabled={index === 0}
                   onClick={() => onMoveImage(index, -1)}
                 >
-                  ←
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
                 </Button>
                 <Button
                   type="button"
-                  size="icon-xs"
+                  size="icon-sm"
                   variant="outline"
                   disabled={index === images.length - 1}
                   onClick={() => onMoveImage(index, 1)}
                 >
-                  →
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
                 </Button>
               </div>
             </Attachment>
@@ -903,12 +1024,17 @@ function MediaStep({
         </AttachmentGroup>
       </div>
 
-      <div className="grid gap-3">
-        <div>
-          <h3 className="font-medium">{t("product.video")}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t("product.videoDescription")}
-          </p>
+      <div className="grid gap-4 rounded-3xl border bg-card p-5 sm:p-6">
+        <div className="flex items-start gap-4">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+            <HugeiconsIcon icon={Video01Icon} className="size-6" />
+          </span>
+          <div>
+            <h3 className="text-lg font-semibold">{t("product.video")}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t("product.videoDescription")}
+            </p>
+          </div>
         </div>
         <input
           ref={videoInputRef}
@@ -919,23 +1045,30 @@ function MediaStep({
           onChange={(event) => void onVideo(event.target.files?.[0])}
         />
         {videoName ? (
-          <Attachment>
-            <AttachmentMedia>VID</AttachmentMedia>
-            <AttachmentContent>
-              <AttachmentTitle>{videoName}</AttachmentTitle>
-              <AttachmentDescription>
-                {videoUrl ? t("product.videoUploaded") : ""}
-              </AttachmentDescription>
-            </AttachmentContent>
-            <AttachmentActions>
-              <AttachmentAction type="button" onClick={onRemoveVideo}>
-                ×
-              </AttachmentAction>
-            </AttachmentActions>
-          </Attachment>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            {videoUrl ? <VideoPlayer src={videoUrl} title={videoName} /> : null}
+            <Attachment className="w-full items-center p-3">
+              <AttachmentMedia className="text-primary">
+                <HugeiconsIcon icon={Video01Icon} className="size-5" />
+              </AttachmentMedia>
+              <AttachmentContent>
+                <AttachmentTitle>{videoName}</AttachmentTitle>
+                <AttachmentDescription>
+                  {videoUrl ? t("product.videoUploaded") : ""}
+                </AttachmentDescription>
+              </AttachmentContent>
+              <AttachmentActions>
+                <AttachmentAction type="button" onClick={onRemoveVideo}>
+                  <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                </AttachmentAction>
+              </AttachmentActions>
+            </Attachment>
+          </div>
         ) : (
           <Attachment state={uploadingVideo ? "uploading" : "idle"}>
-            <AttachmentMedia>VID</AttachmentMedia>
+            <AttachmentMedia className="text-primary">
+              <HugeiconsIcon icon={Video01Icon} className="size-5" />
+            </AttachmentMedia>
             <AttachmentContent>
               <AttachmentTitle>{t("product.uploadVideo")}</AttachmentTitle>
               <AttachmentDescription>
@@ -971,15 +1104,16 @@ function VariantsStep({
   t: Translation
 }) {
   return (
-    <section className="grid gap-4">
-      <div className="flex items-center justify-between">
+    <section className="grid gap-5">
+      <div className="flex flex-col gap-4 rounded-3xl bg-muted/50 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="font-medium">{t("product.variants")}</h3>
+          <h3 className="text-xl font-semibold">{t("product.variants")}</h3>
           <p className="text-sm text-muted-foreground">
             {t("product.variantsDescription")}
           </p>
         </div>
-        <Button type="button" variant="outline" onClick={onAdd}>
+        <Button type="button" onClick={onAdd}>
+          <HugeiconsIcon icon={Add01Icon} className="size-5" />
           {t("product.addVariant")}
         </Button>
       </div>
@@ -988,172 +1122,123 @@ function VariantsStep({
           {t("product.noVariants")}
         </p>
       ) : null}
-      {variants.map((variant, index) => (
-        <div
-          key={variant.id ?? index}
-          className="grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_1fr_110px_130px_auto]"
-        >
-          <select
-            value={variant.colorId}
-            onChange={(event) =>
-              onChange(index, { colorId: event.target.value })
-            }
-            className="h-9 w-full rounded-4xl border border-input bg-input/30 px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <option value="" disabled>
-              {t("product.color")}
-            </option>
-            {colors.map((color) =>
-              color.id !== undefined ? (
-                <option key={color.id} value={String(color.id)}>
-                  {color.name}
-                </option>
-              ) : null
-            )}
-          </select>
-          <select
-            value={variant.sizeId}
-            onChange={(event) =>
-              onChange(index, { sizeId: event.target.value })
-            }
-            className="h-9 w-full rounded-4xl border border-input bg-input/30 px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <option value="" disabled>
-              {t("product.size")}
-            </option>
-            {sizes.map((size) =>
-              size.id !== undefined ? (
-                <option key={size.id} value={String(size.id)}>
-                  {size.value}
-                </option>
-              ) : null
-            )}
-          </select>
-          <Input
-            type="number"
-            min="0"
-            placeholder={t("product.stock")}
-            value={variant.stock}
-            onChange={(event) => onChange(index, { stock: event.target.value })}
-          />
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder={t("product.variantPrice")}
-            value={variant.price}
-            onChange={(event) => onChange(index, { price: event.target.value })}
-          />
-          <div className="flex items-center justify-end gap-2">
-            <Checkbox
-              checked={variant.active}
-              onCheckedChange={(checked) =>
-                onChange(index, { active: checked === true })
-              }
-            />
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="destructive"
-              onClick={() => onRemove(index)}
+      <div className="grid gap-5 xl:grid-cols-2">
+        {variants.map((variant, index) => {
+          const selectedColor = colors.find(
+            (color) => color.id === Number(variant.colorId)
+          )
+          return (
+            <div
+              key={variant.id ?? index}
+              className="rounded-3xl border bg-card p-5 shadow-sm"
             >
-              ×
-            </Button>
-          </div>
-        </div>
-      ))}
-    </section>
-  )
-}
-
-function ProductAssistant({
-  values,
-  images,
-  variantCount,
-  categoryName,
-  onFillLocalizedFields,
-  t,
-}: {
-  values: Partial<ProductInputs>
-  images: ProductImage[]
-  variantCount: number
-  categoryName?: string
-  onFillLocalizedFields: () => void
-  t: Translation
-}) {
-  const mainImage = images.find((image) => image.main) ?? images[0]
-  const basePrice = Number(values.basePrice ?? 0)
-  const discount = Number(values.discountPercent ?? 0)
-  const discountedPrice = basePrice * (1 - discount / 100)
-
-  return (
-    <aside className="self-start xl:sticky xl:top-6">
-      <div className="grid gap-5 rounded-3xl border bg-card p-5 shadow-sm">
-        <div>
-          <p className="text-xs font-semibold tracking-wider text-primary uppercase">
-            {t("product.livePreview")}
-          </p>
-          <h3 className="mt-1 text-lg font-semibold">
-            {values.name || t("product.unnamedProduct")}
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {categoryName ?? t("product.selectCategory")}
-          </p>
-        </div>
-
-        <div
-          className="aspect-square rounded-2xl bg-muted bg-cover bg-center"
-          style={
-            mainImage?.url
-              ? { backgroundImage: `url(${mainImage.url})` }
-              : undefined
-          }
-        >
-          {!mainImage?.url ? (
-            <span className="flex size-full items-center justify-center text-sm text-muted-foreground">
-              {t("product.noPreviewImage")}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-xl font-semibold">
-              {discountedPrice.toLocaleString()}
-            </p>
-            {discount > 0 ? (
-              <p className="text-xs text-muted-foreground line-through">
-                {basePrice.toLocaleString()}
-              </p>
-            ) : null}
-          </div>
-          <span className="rounded-full bg-muted px-2.5 py-1 text-xs">
-            {variantCount} {t("product.variants").toLowerCase()}
-          </span>
-        </div>
-
-        {typeof values.descriptionUz === "string" && values.descriptionUz ? (
-          <div
-            className="line-clamp-4 text-sm text-muted-foreground"
-            dangerouslySetInnerHTML={{ __html: values.descriptionUz }}
-          />
-        ) : null}
-
-        <div className="border-t pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onFillLocalizedFields}
-          >
-            {t("product.fillLocalizedFields")}
-          </Button>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            {t("product.fillLocalizedFieldsDescription")}
-          </p>
-        </div>
+              <div className="mb-5 flex items-center justify-between border-b pb-4">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="size-10 rounded-xl border bg-muted"
+                    style={{ backgroundColor: selectedColor?.hexCode }}
+                  />
+                  <div>
+                    <h4 className="font-semibold">
+                      {t("product.variantNumber", { number: index + 1 })}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedColor?.name || t("product.color")} ·{" "}
+                      {sizes.find((size) => size.id === Number(variant.sizeId))
+                        ?.value || t("product.size")}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  aria-label={t("product.removeVariant")}
+                  onClick={() => onRemove(index)}
+                >
+                  <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                </Button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ProductField label={t("product.color")}>
+                  <select
+                    value={variant.colorId}
+                    onChange={(event) =>
+                      onChange(index, { colorId: event.target.value })
+                    }
+                    className="h-11 w-full max-w-full min-w-0 truncate rounded-xl border border-input bg-background px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  >
+                    <option value="" disabled>
+                      {t("product.color")}
+                    </option>
+                    {colors.map((color) =>
+                      color.id !== undefined ? (
+                        <option key={color.id} value={String(color.id)}>
+                          {color.name}
+                        </option>
+                      ) : null
+                    )}
+                  </select>
+                </ProductField>
+                <ProductField label={t("product.size")}>
+                  <select
+                    value={variant.sizeId}
+                    onChange={(event) =>
+                      onChange(index, { sizeId: event.target.value })
+                    }
+                    className="h-11 w-full max-w-full min-w-0 truncate rounded-xl border border-input bg-background px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  >
+                    <option value="" disabled>
+                      {t("product.size")}
+                    </option>
+                    {sizes.map((size) =>
+                      size.id !== undefined ? (
+                        <option key={size.id} value={String(size.id)}>
+                          {size.value}
+                        </option>
+                      ) : null
+                    )}
+                  </select>
+                </ProductField>
+                <ProductField label={t("product.stock")}>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder={t("product.stock")}
+                    value={variant.stock}
+                    onChange={(event) =>
+                      onChange(index, { stock: event.target.value })
+                    }
+                  />
+                </ProductField>
+                <ProductField label={t("product.variantPrice")}>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder={t("product.variantPrice")}
+                    value={variant.price}
+                    onChange={(event) =>
+                      onChange(index, { price: event.target.value })
+                    }
+                  />
+                </ProductField>
+              </div>
+              <label className="mt-5 flex items-center gap-3 rounded-xl bg-muted/50 p-3 text-sm font-medium">
+                <Checkbox
+                  checked={variant.active}
+                  onCheckedChange={(checked) =>
+                    onChange(index, { active: checked === true })
+                  }
+                />
+                {t("product.variantEnabled")}
+              </label>
+            </div>
+          )
+        })}
       </div>
-    </aside>
+    </section>
   )
 }
 
@@ -1166,6 +1251,7 @@ function ReviewStep({
   colors,
   sizes,
   categoryName,
+  branchName,
   t,
 }: {
   values: ProductValues
@@ -1176,6 +1262,7 @@ function ReviewStep({
   colors: Array<{ id?: number; name?: string; hexCode?: string }>
   sizes: Array<{ id?: number; value?: string }>
   categoryName?: string
+  branchName?: string
   t: Translation
 }) {
   const sortedImages = [...images].sort(
@@ -1212,30 +1299,44 @@ function ReviewStep({
       </div>
 
       <div className="grid overflow-hidden rounded-3xl border bg-card shadow-sm lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
-        <div className="grid min-h-[32rem] grid-cols-2 gap-1 bg-muted p-1">
+        <div className="grid gap-3 bg-background p-5 sm:grid-cols-[76px_minmax(0,1fr)]">
           {sortedImages.length > 0 ? (
-            sortedImages.slice(0, 4).map((image, index) => (
-              <div
-                key={`${image.attachmentId}-${index}`}
-                className={cn(
-                  "min-h-52 bg-background bg-cover bg-center",
-                  sortedImages.length === 1 && "col-span-2 row-span-2"
-                )}
-                style={
-                  image.url
-                    ? { backgroundImage: `url(${image.url})` }
-                    : undefined
-                }
-              >
-                {!image.url ? (
-                  <span className="flex size-full items-center justify-center text-sm text-muted-foreground">
-                    {image.name}
-                  </span>
-                ) : null}
+            <>
+              <div className="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
+                {sortedImages.slice(0, 6).map((image, index) => (
+                  <div
+                    key={`${image.attachmentId}-${index}`}
+                    className={cn(
+                      "size-[68px] shrink-0 overflow-hidden rounded-xl border bg-muted",
+                      index === 0 && "border-primary ring-2 ring-primary/20"
+                    )}
+                  >
+                    {image.url ? (
+                      <img
+                        src={image.url}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                ))}
               </div>
-            ))
+              <div className="order-1 aspect-square overflow-hidden rounded-3xl border bg-muted sm:order-2">
+                {sortedImages[0]?.url ? (
+                  <img
+                    src={sortedImages[0].url}
+                    alt={values.name}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <span className="flex size-full items-center justify-center text-sm text-muted-foreground">
+                    {t("product.noPreviewImage")}
+                  </span>
+                )}
+              </div>
+            </>
           ) : (
-            <div className="col-span-2 flex min-h-[32rem] items-center justify-center text-sm text-muted-foreground">
+            <div className="flex min-h-[32rem] items-center justify-center rounded-3xl bg-muted text-sm text-muted-foreground sm:col-span-2">
               {t("product.noPreviewImage")}
             </div>
           )}
@@ -1245,6 +1346,9 @@ function ReviewStep({
           <div>
             <p className="text-sm font-medium text-primary">
               {categoryName ?? "—"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("product.branch")}: {branchName ?? "—"}
             </p>
             <h3 className="mt-2 text-3xl font-semibold tracking-tight">
               {values.name}
@@ -1385,11 +1489,7 @@ function ReviewStep({
               <dd>{videoName || "—"}</dd>
             </div>
             {videoUrl ? (
-              <video
-                className="mt-2 w-full rounded-xl"
-                controls
-                src={videoUrl}
-              />
+              <VideoPlayer className="mt-2" src={videoUrl} title={videoName} />
             ) : null}
           </dl>
         </div>
@@ -1428,7 +1528,7 @@ function ProductField({
   label: string
 }) {
   return (
-    <div className="grid gap-1.5">
+    <div className="grid min-w-0 gap-1.5">
       <span className="text-sm font-medium">{label}</span>
       {children}
       {error ? <span className="text-xs text-destructive">{error}</span> : null}

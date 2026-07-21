@@ -88,7 +88,7 @@ export default function FaqSection({ lang }: FaqSectionProps) {
         }
 
   return (
-    <section className="px-6 py-20 sm:py-24 md:px-10 ">
+    <section className="px-4 py-16 sm:px-6 sm:py-24 md:px-10">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <header className="max-w-xl">
           <p className="text-xs font-semibold tracking-[0.18em] text-[#16836b] uppercase dark:text-[#79cfba]">
@@ -102,11 +102,7 @@ export default function FaqSection({ lang }: FaqSectionProps) {
           </p>
         </header>
 
-        <Accordion
-          type="single"
-          collapsible
-          className="h-fit"
-        >
+        <Accordion type="single" collapsible className="h-fit">
           {items.map((item, index) => (
             <AccordionItem key={item.question} value={`faq-${index}`}>
               <AccordionTrigger className="px-5 py-5 text-base text-[#17463a] hover:no-underline dark:text-[#e5f4ee]">

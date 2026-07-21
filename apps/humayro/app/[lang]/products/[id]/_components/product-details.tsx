@@ -31,6 +31,7 @@ import type { ProductDTO } from "@/lib/api/model/productDTO"
 import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
 import { Button } from "@workspace/ui/components/button"
+import { VideoPlayer } from "@workspace/ui/components/video-player"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -173,12 +174,21 @@ export function ProductDetails({
         </Breadcrumb>
 
         <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,.92fr)] lg:gap-12">
-          <ProductGallery
-            images={images.map((image) => image.url as string)}
-            name={name}
-            activeImage={activeImage}
-            onActiveImage={setActiveImage}
-          />
+          <div className="min-w-0">
+            <ProductGallery
+              images={images.map((image) => image.url as string)}
+              name={name}
+              activeImage={activeImage}
+              onActiveImage={setActiveImage}
+            />
+            {product.videoUrl ? (
+              <VideoPlayer
+                className="mt-5"
+                src={product.videoUrl}
+                title={`${name} · ${t("productDetails.video")}`}
+              />
+            ) : null}
+          </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">

@@ -1,7 +1,17 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { DashboardShell } from "./_components/dashboard-shell"
 import { isLanguage } from "@/i18n/config"
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    noimageindex: true,
+  },
+}
 
 export default async function DashboardLayout({
   children,

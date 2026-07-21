@@ -36,13 +36,32 @@
       }
     },
     "profile": {
-      "title": "Profil",
-      "description": "Shaxsiy ma'lumotlaringiz va profil rasmingizni yangilang.",
+      "title": "Mening hisobim",
+      "description": "Shaxsiy ma'lumotlaringizni istalgan vaqtda tahrirlashingiz mumkin.",
+      "search": "Qidirish...",
+      "myData": "Mening ma'lumotlarim",
+      "myAddress": "Mening manzilim",
+      "orders": "Buyurtmalar",
+      "subscriptions": "Obunalarim",
+      "notifications": "Bildirishnomalar",
+      "settings": "Sozlamalar",
+      "bonusSystem": "Bonus tizimi",
+      "signOut": "Chiqish",
+      "personalData": "Shaxsiy ma'lumotlar",
+      "loginData": "Hisobga kirish ma'lumotlari",
+      "loginDataDescription": "Bu ma'lumot hisobingizga kirish uchun ishlatiladi.",
+      "nameHint": "Ism va familiyangizni kiriting.",
+      "ageHint": "Yoshingizni kiriting.",
+      "genderHint": "Jinsingizni ko'rsating.",
+      "phoneHint": "Ushbu hisob uchun joriy telefon raqamingiz.",
+      "password": "Parol",
+      "passwordHint": "Hisobingizga kirish uchun ushbu paroldan foydalaning.",
+      "changePassword": "Parolni o'zgartirish",
       "photo": "Profil rasmi",
       "firstname": "Ism",
       "lastname": "Familiya",
       "email": "Email",
-      "emailHint": "Email manzilini hozircha o'zgartirib bo'lmaydi.",
+      "emailHint": "Bu manzil profilingizda ko'rsatiladi.",
       "phone": "Telefon raqami",
       "age": "Yosh",
       "gender": "Jins",
@@ -204,6 +223,7 @@
     },
     "dashboard": {
       "admin": "Humayro administratori",
+      "home": "Boshqaruv",
       "navigation": "Navigatsiya",
       "organizations": "Tashkilotlar",
       "addUser": "Foydalanuvchi qo'shish",
@@ -303,6 +323,10 @@
     "product": {
       "new": "Mahsulot qo'shish",
       "edit": "Mahsulotni tahrirlash",
+      "previewProduct": "Mahsulotni do'konda ko'rish",
+      "previewDescription": "Ko'rib chiqish formadagi joriy ma'lumotlardan foydalanib, mahsulot xaridorga qanday ko'rinishini ko'rsatadi.",
+      "editorEyebrow": "Kengaytirilgan mahsulot muharriri",
+      "editDescription": "Asosiy ma'lumotlar, mediafayllar va variantlarni alohida sahifada tahrirlang. Saqlashdan oldin ko'rib chiqing.",
       "createDescription": "Yangi mahsulot ma'lumotlarini to'ldiring.",
       "backToOrganization": "Tashkilotga qaytish",
       "name": "Mahsulot nomi",
@@ -313,6 +337,8 @@
       "descriptionEng": "Inglizcha tavsif",
       "category": "Kategoriya",
       "selectCategory": "Kategoriyani tanlang",
+      "branch": "Mahsulot filiali",
+      "selectBranch": "Filialni tanlang",
       "basePrice": "Asosiy narx",
       "discountPercent": "Chegirma foizi",
       "stock": "Qoldiq",
@@ -335,12 +361,28 @@
         "variants": "Variantlar",
         "review": "Tekshirish"
       },
+      "stepDescription": {
+        "basic": "Nomi, filiali va narxi",
+        "media": "Galereya va video",
+        "variants": "Ranglar, o'lchamlar va qoldiq",
+        "review": "Saqlashdan oldin tekshirish"
+      },
       "previousStep": "Orqaga",
       "nextStep": "Davom etish",
       "images": "Mahsulot rasmlari",
       "imagesDescription": "Bir yoki bir nechta rasm yuklang, asosiy rasmni tanlang va tartiblang.",
       "uploadImages": "Rasmlarni yuklash",
+      "addMoreImages": "Yana rasmlar qo'shish",
       "imageFormats": "Rasm fayllari",
+      "imageFront": "Old tomondan",
+      "imageSide": "Yon tomondan",
+      "imageBack": "Orqa tomondan",
+      "imageDetail": "Detal {{number}}",
+      "imagePosition": "{{total}} tadan {{position}}-o'rin",
+      "removeImage": "Rasmni o'chirish",
+      "makeMain": "Asosiy qilish",
+      "moveEarlier": "Chapga surish",
+      "moveLater": "O'ngga surish",
       "imagesUploaded": "Rasmlar yuklandi.",
       "mainImage": "Asosiy rasm",
       "main": "Asosiy",
@@ -351,10 +393,15 @@
       "videoTooLarge": "Video hajmi 5 MB dan oshmasligi kerak.",
       "videoTypeInvalid": "Faqat video faylini tanlang.",
       "videoUploaded": "Video yuklandi.",
+      "replaceVideo": "Videoni almashtirish",
+      "removeVideo": "Videoni o'chirish",
       "mediaUploadFailed": "Media faylini yuklab bo'lmadi.",
       "variants": "Mahsulot variantlari",
       "variantsDescription": "Rang, o'lcham, qoldiq va alohida narxni belgilang.",
       "addVariant": "Variant qo'shish",
+      "variantNumber": "{{number}}-variant",
+      "variantEnabled": "Variant xaridorlar uchun mavjud",
+      "removeVariant": "Variantni o'chirish",
       "noVariants": "Variantlar hali qo'shilmagan.",
       "color": "Rang",
       "size": "O'lcham",
@@ -375,6 +422,7 @@
       "validation": {
         "nameRequired": "Mahsulot nomini kiriting.",
         "categoryRequired": "Kategoriyani tanlang.",
+        "branchRequired": "Mahsulot sotiladigan filialni tanlang.",
         "priceInvalid": "Narxni raqam bilan kiriting.",
         "priceNonNegative": "Narx manfiy bo'lishi mumkin emas.",
         "discountInvalid": "Chegirma foizini raqam bilan kiriting.",
@@ -402,10 +450,34 @@
       "title": "Kategoriyalar",
       "backToOrganizations": "Tashkilotlarga qaytish",
       "new": "Kategoriya qo'shish",
+      "addChild": "Ichki kategoriya qo'shish",
+      "addChildDescription": "Yangi kategoriya «{{parent}}» ichida yaratiladi.",
+      "rootCategory": "Yuqori darajadagi kategoriya",
+      "childCategory": "Ichki kategoriya",
+      "products": "Mahsulotlar",
       "edit": "Kategoriyani tahrirlash",
       "createDescription": "Kategoriya ma'lumotlarini to'ldiring.",
       "name": "Kategoriya nomi",
+      "nameRu": "Rus tilidagi nomi",
+      "nameEng": "Ingliz tilidagi nomi",
       "description": "Tavsif",
+      "descriptionUz": "O'zbek tilidagi tavsif",
+      "descriptionRu": "Rus tilidagi tavsif",
+      "descriptionEng": "Ingliz tilidagi tavsif",
+      "identity": "Nomi va tavsifi",
+      "identityDescription": "Har bir til uchun xaridorga tushunarli nom va tavsif kiriting.",
+      "hierarchy": "Katalogdagi joylashuvi",
+      "hierarchyDescription": "Asosiy kategoriyani tanlang yoki kategoriyani yuqori darajada qoldiring.",
+      "sortOrder": "Ko'rsatish tartibi",
+      "dragToReorder": "Tartibni o'zgartirish uchun sudrang",
+      "dragDescription": "Kategoriyalarni bir daraja ichida sudrang. Tartib darhol saqlanadi va vitrinda ishlatiladi.",
+      "categoriesCount": "kategoriya",
+      "orderSaved": "Kategoriyalar tartibi saqlandi.",
+      "orderFailed": "Kategoriyalar tartibini saqlab bo'lmadi.",
+      "willAppearUnder": "Kategoriya quyidagicha joylashadi",
+      "unnamed": "Yangi kategoriya",
+      "noImage": "Rasm yo'q",
+      "imageDescription": "Katalogda xaridorlarga ko'rsatiladigan sifatli kvadrat rasmdan foydalaning.",
       "sizeType": "O'lcham turi",
       "letter": "Harflar",
       "number": "Raqamlar",
@@ -509,9 +581,99 @@
       "statusDelivered": "Yetkazilgan",
       "statusCancelled": "Bekor qilingan"
     },
+    "seo": {
+      "siteTitle": "Humayro — butun oila uchun kiyim va mahsulotlar",
+      "siteDescription": "Humayro internet-do'koni: kiyim-kechak, bolalar va oila uchun mahsulotlar, qulay katalog, xavfsiz xarid va O'zbekiston bo'ylab tez yetkazib berish.",
+      "keywords": [
+        "Humayro",
+        "O'zbekiston internet-do'koni",
+        "kiyim-kechak",
+        "bolalar mahsulotlari",
+        "oilaviy xaridlar"
+      ],
+      "pages": {
+        "home": {
+          "title": "Oila uchun kiyim va mahsulotlar internet-do'koni",
+          "description": "Humayro katalogini kashf eting: butun oila uchun zamonaviy kiyim va mahsulotlar, qulay tanlov, xavfsiz xarid va yetkazib berish."
+        },
+        "blogs": {
+          "title": "Blog",
+          "description": "Obraz g'oyalari, kiyim tanlash bo'yicha foydali maslahatlar va Humayro internet-do'koni yangiliklari."
+        },
+        "bookDemo": {
+          "title": "Stilistning bepul konsultatsiyasi",
+          "description": "Humayro bilan bepul 15 daqiqalik konsultatsiyaga yoziling va uslubingizga mos kiyimlarni tanlang."
+        },
+        "cart": {
+          "title": "Savat",
+          "description": "Tanlangan mahsulotlarni tekshiring va Humayro buyurtmasini rasmiylashtirishga tayyorlang."
+        },
+        "favourites": {
+          "title": "Sevimli mahsulotlar",
+          "description": "Tez taqqoslash va xarid qilish uchun saqlangan Humayro mahsulotlaringiz."
+        },
+        "orders": {
+          "title": "Buyurtmalarim",
+          "description": "Humayro buyurtmalari tarixi va yetkazib berishning joriy holatlari."
+        },
+        "privacy": {
+          "title": "Maxfiylik siyosati",
+          "description": "Humayro foydalanuvchilarning shaxsiy ma'lumotlarini qanday qayta ishlashi va himoya qilishini bilib oling."
+        },
+        "login": {
+          "title": "Hisobga kirish",
+          "description": "Buyurtmalar, sevimlilar va shaxsiy ma'lumotlarni boshqarish uchun Humayro hisobingizga kiring."
+        },
+        "register": {
+          "title": "Ro'yxatdan o'tish",
+          "description": "Buyurtmalarni qulay rasmiylashtirish va sevimlilarni saqlash uchun Humayro hisobini yarating."
+        },
+        "forgotPassword": {
+          "title": "Parolni tiklash",
+          "description": "Humayro hisobingizga kirishni qayta tiklang."
+        },
+        "resetPassword": {
+          "title": "Yangi parol",
+          "description": "Humayro hisobingiz uchun yangi xavfsiz parol o'rnating."
+        },
+        "googleCallback": {
+          "title": "Google orqali kirish",
+          "description": "Google orqali Humayro hisobiga xavfsiz kirishni yakunlash."
+        },
+        "dashboard": {
+          "title": "Boshqaruv paneli",
+          "description": "Humayro foydalanuvchilari va operatsiyalarini boshqarish."
+        },
+        "administration": {
+          "title": "Ma'muriyat",
+          "description": "Humayro ma'lumotnomalari va sozlamalarini boshqarish."
+        },
+        "organizations": {
+          "title": "Tashkilotlar",
+          "description": "Humayro panelida tashkilotlarni boshqarish."
+        },
+        "organization": {
+          "title": "Tashkilot katalogi",
+          "description": "Tashkilot kategoriyalari, mahsulotlari va filiallarini boshqarish."
+        },
+        "newProduct": {
+          "title": "Mahsulot qo'shish",
+          "description": "Yangi mahsulot, uning mediafayllari, variantlari va katalog ma'lumotlarini yaratish."
+        },
+        "editProduct": {
+          "title": "Mahsulotni tahrirlash",
+          "description": "Mahsulot ma'lumotlari, mediafayllari va variantlarini yangilash."
+        },
+        "profile": {
+          "title": "Mening hisobim",
+          "description": "Humayro hisobining shaxsiy ma'lumotlari va sozlamalarini boshqarish."
+        }
+      }
+    },
     "productDetails": {
       "home": "Bosh sahifa",
       "catalog": "Katalog",
+      "video": "Mahsulot videosi",
       "loadFailed": "Mahsulotni yuklab bo'lmadi.",
       "reviewCount": "{{count}} ta sharh",
       "chooseVariant": "Variantni tanlang",

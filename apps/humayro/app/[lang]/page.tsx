@@ -14,6 +14,16 @@ import TeamSection from "./_components/team-section"
 import { CatalogSection } from "./_components/storefront/catalog-section"
 import InfiniteScroll from "@/components/infinite-scroll"
 import Support from "@/components/support"
+import { createTranslatedPageMetadata, getSiteUrl } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({ language: lang, page: "home" })
+}
 
 export default async function Page({ params }: { params: Promise<unknown> }) {
   const { lang } = (await params) as { lang?: string }
@@ -22,9 +32,28 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
     notFound()
   }
   const { t } = await getTranslation(lang)
+  const onlineStoreJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    name: "Humayro",
+    url: new URL(`/${lang}`, getSiteUrl()).toString(),
+    description: t("seo.siteDescription"),
+    logo: new URL("/brand/humayroLight.png", getSiteUrl()).toString(),
+    availableLanguage: ["Russian", "Uzbek"],
+    areaServed: {
+      "@type": "Country",
+      name: "Uzbekistan",
+    },
+  }
 
   return (
     <main className="humayro-top-background relative min-h-1000 text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(onlineStoreJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <DiaTextReveal

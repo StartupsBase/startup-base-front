@@ -5,7 +5,10 @@ import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
 import type { Language } from "@/i18n/config"
 import { useHasAuthToken } from "@/lib/use-auth-token"
-import { useCatalogStore, type CatalogSort } from "@/lib/stores/use-catalog-store"
+import {
+  useCatalogStore,
+  type CatalogSort,
+} from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
@@ -54,6 +57,21 @@ export function CatalogSection({ language }: { language: Language }) {
   })
 
   const products = productsQuery.data?.content ?? []
+  const categories = [...(categoriesQuery.data ?? [])].sort(
+    (a, b) =>
+      (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+      (a.name ?? "").localeCompare(b.name ?? "")
+  )
+  const parentCategories = categories.filter(
+    (category) => category.parentId == null
+  )
+  const selectedCategory = categories.find(
+    (category) => category.id === categoryId
+  )
+  const activeParentId = selectedCategory?.parentId ?? selectedCategory?.id
+  const childCategories = categories.filter(
+    (category) => category.parentId === activeParentId
+  )
   const favoriteIds = new Set(
     hasToken ? (favoritesQuery.data ?? []) : actions.guestFavoriteIds
   )
@@ -79,7 +97,10 @@ export function CatalogSection({ language }: { language: Language }) {
             </p>
           </div>
 
-          <Select value={sort} onValueChange={(value) => setSort(value as CatalogSort)}>
+          <Select
+            value={sort}
+            onValueChange={(value) => setSort(value as CatalogSort)}
+          >
             <SelectTrigger className="h-11 min-w-48 rounded-2xl bg-background">
               <SelectValue />
             </SelectTrigger>
@@ -93,7 +114,7 @@ export function CatalogSection({ language }: { language: Language }) {
           </Select>
         </div>
 
-        <div className="mt-9 flex gap-2 overflow-x-auto pb-2">
+        <div className="mt-9 flex gap-3 overflow-x-auto border-b pb-4">
           <button
             type="button"
             className={cn(
@@ -106,7 +127,7 @@ export function CatalogSection({ language }: { language: Language }) {
           >
             {text.allCategories}
           </button>
-          {categoriesQuery.data?.map((category) => {
+          {parentCategories.map((category) => {
             if (category.id == null) return null
             const name =
               language === "ru"
@@ -119,17 +140,52 @@ export function CatalogSection({ language }: { language: Language }) {
                 type="button"
                 className={cn(
                   "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                  categoryId === category.id
+                  activeParentId === category.id
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background hover:border-primary/50"
                 )}
                 onClick={() => setCategoryId(category.id ?? null)}
               >
+                {category.imageUrl ? (
+                  <img
+                    src={category.imageUrl}
+                    alt=""
+                    className="mr-2 inline-block size-7 rounded-full object-cover"
+                  />
+                ) : null}
                 {name || "—"}
               </button>
             )
           })}
         </div>
+
+        {childCategories.length ? (
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+            {childCategories.map((category) => {
+              if (category.id == null) return null
+              const name =
+                language === "ru"
+                  ? category.nameRu || category.name || category.nameEng
+                  : category.name || category.nameRu || category.nameEng
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={cn(
+                    "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
+                    categoryId === category.id
+                      ? "bg-primary/12 text-primary ring-1 ring-primary/25"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => setCategoryId(category.id ?? null)}
+                >
+                  {name || "—"}
+                </button>
+              )
+            })}
+          </div>
+        ) : null}
 
         {productsQuery.isPending ? (
           <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

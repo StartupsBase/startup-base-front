@@ -9,6 +9,35 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1440px;
   --breakpoint-3xl: 1620px;
+  --font-commerce: var(--font-manrope);
+}
+
+:where(h1, h2, h3, .font-commerce) {
+  font-family: var(--font-manrope), var(--font-sans), sans-serif;
+  font-weight: 650;
+}
+
+/* Mobile is the primary commerce surface: controls stay readable and tappable. */
+@media (max-width: 767px) {
+  :where(
+    [data-slot="button"],
+    [data-slot="input"],
+    [data-slot="select-trigger"],
+    [data-slot="select-item"]
+  ) {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  :where(input, textarea, select) {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 1rem;
+  }
+
+  :where([data-slot="card-title"], [data-slot="dialog-title"]) {
+    font-size: 1.125rem;
+  }
 }
 
 :root {

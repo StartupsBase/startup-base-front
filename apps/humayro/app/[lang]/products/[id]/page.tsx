@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { isLanguage } from "@/i18n/config"
+import { getTranslation } from "@/i18n/server"
+import { createPageMetadata, getSiteUrl } from "@/lib/seo"
+import { getProductName, getProductPrice } from "@/lib/storefront"
 import { ProductDetails } from "./_components/product-details"
 import {
   getProductDetails,
@@ -25,44 +28,44 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id, lang } = await params
   const productId = Number(id)
-  if (!Number.isSafeInteger(productId) || productId <= 0) return {}
+  if (!isLanguage(lang) || !Number.isSafeInteger(productId) || productId <= 0) {
+    return {}
+  }
 
   const product = await getProductDetails(productId)
   if (!product) return {}
-  const title =
-    lang === "ru"
-      ? product.nameRu || product.name || product.nameEng
-      : product.name || product.nameRu || product.nameEng
-  const description = plainText(
-    lang === "ru"
-      ? product.descriptionRu || product.descriptionUz || product.descriptionEng
-      : product.descriptionUz || product.descriptionRu || product.descriptionEng
-  )
-  const image = product.images?.find((item) => item.main)?.url ?? product.images?.[0]?.url
+  const { t } = await getTranslation(lang)
+  const title = getProductName(product, lang)
+  const description =
+    plainText(
+      lang === "ru"
+        ? product.descriptionRu ||
+            product.descriptionUz ||
+            product.descriptionEng
+        : product.descriptionUz ||
+            product.descriptionRu ||
+            product.descriptionEng
+    )?.slice(0, 160) ?? t("seo.siteDescription")
+  const image =
+    product.images?.find((item) => item.main)?.url ?? product.images?.[0]?.url
 
-  return {
+  return createPageMetadata({
+    language: lang,
+    path: `/products/${productId}`,
     title,
-    description: description?.slice(0, 160),
-    openGraph: {
-      title,
-      description: description?.slice(0, 200),
-      images: image ? [image] : undefined,
-      type: "website",
-    },
-  }
+    description,
+    images: image ? [image] : undefined,
+    keywords: [title, product.categoryName, product.organizationName].filter(
+      (value): value is string => Boolean(value)
+    ),
+  })
 }
 
-export default async function ProductDetailsPage({
-  params,
-}: ProductPageProps) {
+export default async function ProductDetailsPage({ params }: ProductPageProps) {
   const { id, lang } = await params
   const productId = Number(id)
 
-  if (
-    !isLanguage(lang) ||
-    !Number.isSafeInteger(productId) ||
-    productId <= 0
-  ) {
+  if (!isLanguage(lang) || !Number.isSafeInteger(productId) || productId <= 0) {
     notFound()
   }
 
@@ -75,14 +78,67 @@ export default async function ProductDetailsPage({
       ? getSimilarProducts(product.categoryId, productId)
       : Promise.resolve([]),
   ])
+  const name = getProductName(product, lang)
+  const description = plainText(
+    lang === "ru"
+      ? product.descriptionRu || product.descriptionUz || product.descriptionEng
+      : product.descriptionUz || product.descriptionRu || product.descriptionEng
+  )
+  const images = (product.images ?? [])
+    .map((image) => image.url)
+    .filter((image): image is string => Boolean(image))
+  const stock = (product.variants ?? []).reduce(
+    (total, variant) => total + Math.max(0, variant.stock ?? 0),
+    0
+  )
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name,
+    description,
+    image: images,
+    sku: String(productId),
+    brand: {
+      "@type": "Brand",
+      name: product.organizationName || "Humayro",
+    },
+    ...(product.ratingCount && product.ratingAvg
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.ratingAvg,
+            reviewCount: product.ratingCount,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      url: new URL(`/${lang}/products/${productId}`, getSiteUrl()).toString(),
+      priceCurrency: "UZS",
+      price: getProductPrice(product),
+      availability:
+        stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  }
 
   return (
-    <ProductDetails
-      language={lang}
-      product={product}
-      productId={productId}
-      reviews={reviews}
-      similarProducts={similarProducts}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <ProductDetails
+        language={lang}
+        product={product}
+        productId={productId}
+        reviews={reviews}
+        similarProducts={similarProducts}
+      />
+    </>
   )
 }

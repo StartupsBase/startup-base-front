@@ -79,7 +79,7 @@ export function AdministrationPage({ language }: { language: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-6 md:p-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:p-6 md:p-10">
       <DashboardBreadcrumb
         language={language}
         items={[{ label: t("administration.title") }]}

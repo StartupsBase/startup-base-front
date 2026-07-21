@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { isLanguage } from "@/i18n/config"
+import { createPageMetadata } from "@/lib/seo"
 import { getProductName } from "@/lib/storefront"
 import { getProductDetails, getProductReviews } from "../product-data"
 
@@ -21,9 +22,22 @@ export async function generateMetadata({
   const product = await getProductDetails(productId)
   if (!product) return {}
 
-  return {
-    title: `${getProductName(product, lang)} — ${lang === "ru" ? "Отзывы" : "Sharhlar"}`,
-  }
+  const productName = getProductName(product, lang)
+  const title = `${productName} — ${lang === "ru" ? "Отзывы" : "Sharhlar"}`
+  const description =
+    lang === "ru"
+      ? `Отзывы покупателей о товаре «${productName}» в интернет-магазине Humayro.`
+      : `Humayro internet-do'konidagi «${productName}» mahsuloti haqida xaridorlar sharhlari.`
+
+  return createPageMetadata({
+    language: lang,
+    path: `/products/${productId}/reviews`,
+    title,
+    description,
+    images: product.images
+      ?.map((image) => image.url)
+      .filter((image): image is string => Boolean(image)),
+  })
 }
 
 export default async function ReviewsPage({ params }: ReviewsPageProps) {

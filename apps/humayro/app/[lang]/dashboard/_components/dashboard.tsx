@@ -194,10 +194,10 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-      <header className="flex items-center justify-between border-b border-border pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
+      <header className="flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3" />
+          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>
@@ -207,7 +207,9 @@ export function Dashboard({ language }: { language: string }) {
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button>{t("dashboard.addUser")}</Button>
+            <Button className="w-full sm:w-auto">
+              {t("dashboard.addUser")}
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -236,7 +238,7 @@ export function Dashboard({ language }: { language: string }) {
               setBranchId("")
             }}
             disabled={organizationsQuery.isLoading}
-            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 w-full max-w-full min-w-0 truncate rounded-4xl border border-input bg-input/30 px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-sm"
           >
             <option value="">{t("dashboard.allOrganizations")}</option>
             {organizationsQuery.data?.map((organization) =>
@@ -251,7 +253,7 @@ export function Dashboard({ language }: { language: string }) {
             value={branchId}
             onChange={(event) => setBranchId(event.target.value)}
             disabled={branchesQuery.isLoading}
-            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 w-full max-w-full min-w-0 truncate rounded-4xl border border-input bg-input/30 px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-sm"
           >
             <option value="">{t("dashboard.allBranches")}</option>
             {branchesQuery.data?.content?.map((branch) =>

@@ -47,7 +47,8 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Toshkent",
       isFounder: true,
       image: "/images/team/umid-sultonov.png",
-      linkedinUrl: "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
+      linkedinUrl:
+        "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },
   ],
   ru: [
@@ -79,7 +80,8 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       location: "Ташкент",
       isFounder: true,
       image: "/images/team/umid-sultonov.png",
-      linkedinUrl: "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
+      linkedinUrl:
+        "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },
   ],
 }
@@ -104,10 +106,10 @@ export default function TeamSection({ lang }: TeamSectionProps) {
         }
 
   return (
-    <section className="px-6 py-20 text-[#f6f4ef] sm:py-24 md:px-10 lg:py-18">
+    <section className="px-4 py-16 text-[#f6f4ef] sm:px-6 sm:py-24 md:px-10 lg:py-18">
       <div className="mx-auto max-w-6xl">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary/70 dark:text-white uppercase">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary/70 uppercase dark:text-white">
             <span className="h-4 w-px" aria-hidden="true" />
             {copy.eyebrow}
           </p>
@@ -152,7 +154,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={`${member.name}: ${copy.linkedIn}`}
-                    className="grid size-10 shrink-0 place-items-center rounded-full border  dark:border-white/10 text-black dark:text-[#9cadc5] transition-colors hover:border-primary hover:text-primary"
+                    className="grid size-10 shrink-0 place-items-center rounded-full border text-black transition-colors hover:border-primary hover:text-primary dark:border-white/10 dark:text-[#9cadc5]"
                   >
                     <HugeiconsIcon
                       icon={Linkedin01Icon}
@@ -164,12 +166,14 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                 <p className="mt-4 min-h-18 text-sm leading-6 text-[#a8b7cb]">
                   {member.description}
                 </p>
-                <p className="mt-3 text-sm text-[#17263d] dark:text-[#7e91ad]">{member.location}</p>
+                <p className="mt-3 text-sm text-[#17263d] dark:text-[#7e91ad]">
+                  {member.location}
+                </p>
                 <Link
                   href={member.linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex items-center gap-1 text-sm font-semibold dark:text-[#edf8f4] text-[#17263d] transition-colors hover:text-primary"
+                  className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#17263d] transition-colors hover:text-primary dark:text-[#edf8f4]"
                 >
                   {copy.linkedIn}
                   <HugeiconsIcon

@@ -2,6 +2,21 @@ import { notFound } from "next/navigation"
 
 import { OrganizationsPage } from "./_components/organizations-page"
 import { isLanguage } from "@/i18n/config"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "organizations",
+    path: "/dashboard/organizations",
+    noIndex: true,
+  })
+}
 
 export default async function OrganizationsDashboardPage({
   params,

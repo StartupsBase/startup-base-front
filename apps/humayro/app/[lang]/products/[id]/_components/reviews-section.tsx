@@ -27,6 +27,14 @@ import {
   type ReviewEntry,
 } from "@/lib/review-entries"
 import { Button } from "@workspace/ui/components/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog"
 
 import { ReviewCard, ReviewStars } from "./review-card"
 
@@ -60,6 +68,7 @@ export function ReviewsSection({
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([])
+  const [reviewOpen, setReviewOpen] = useState(false)
   const reviewMutation = useAddOrUpdate()
   const uploadImages = useUploadImages()
   const entries = useMemo(() => expandReviewEntries(reviews), [reviews])
@@ -180,6 +189,7 @@ export function ReviewsSection({
       setComment("")
       setRating(5)
       clearSelectedImages()
+      setReviewOpen(false)
       toast.success(t("productDetails.reviewSaved"))
     } catch {
       toast.error(t("productDetails.reviewFailed"))
@@ -273,105 +283,122 @@ export function ReviewsSection({
 
         <div className="min-w-0">
           {canReview ? (
-            <form
-              onSubmit={submitReview}
-              className="mb-6 rounded-3xl border bg-card p-5"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-semibold">
+            <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+              <DialogTrigger asChild>
+                <Button className="mb-6 rounded-full">
                   {t("productDetails.writeReview")}
-                </h3>
-                <div
-                  className="flex gap-1"
-                  aria-label={t("productDetails.rating")}
-                >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`text-2xl transition hover:scale-110 ${
-                        value <= rating ? "text-amber-400" : "text-muted"
-                      }`}
-                      onClick={() => setRating(value)}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <textarea
-                value={comment}
-                className="mt-4 min-h-24 w-full resize-none rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                placeholder={t("productDetails.reviewPlaceholder")}
-                onChange={(event) => setComment(event.target.value)}
-              />
-
-              <div className="mt-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="sr-only"
-                  onChange={(event) => handleImageSelection(event.target.files)}
-                />
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 rounded-2xl border border-dashed px-4 py-3 text-left transition hover:border-primary/50 hover:bg-primary/5"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                    <HugeiconsIcon icon={ImageAdd01Icon} className="size-5" />
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold">
-                      {t("productDetails.addReviewImages")}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {t("productDetails.reviewImagesHint", {
-                        count: maxReviewImages,
-                      })}
-                    </span>
-                  </span>
-                </button>
-              </div>
-
-              {selectedImages.length ? (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {selectedImages.map((image) => (
-                    <div
-                      key={image.id}
-                      className="group relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted"
-                    >
-                      <img
-                        src={image.previewUrl}
-                        alt=""
-                        className="size-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-black/65 text-white"
-                        aria-label={t("productDetails.removeReviewImage")}
-                        onClick={() => removeSelectedImage(image.id)}
-                      >
-                        <HugeiconsIcon
-                          icon={Cancel01Icon}
-                          className="size-3.5"
-                        />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="mt-3 flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting
-                    ? t("productDetails.submittingReview")
-                    : t("productDetails.submitReview")}
                 </Button>
-              </div>
-            </form>
+              </DialogTrigger>
+              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>{t("productDetails.writeReview")}</DialogTitle>
+                  <DialogDescription>
+                    {t("productDetails.reviewPlaceholder")}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={submitReview}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="font-semibold">
+                      {t("productDetails.writeReview")}
+                    </h3>
+                    <div
+                      className="flex gap-1"
+                      aria-label={t("productDetails.rating")}
+                    >
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={`text-2xl transition hover:scale-110 ${
+                            value <= rating ? "text-amber-400" : "text-muted"
+                          }`}
+                          onClick={() => setRating(value)}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea
+                    value={comment}
+                    className="mt-4 min-h-24 w-full resize-none rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    placeholder={t("productDetails.reviewPlaceholder")}
+                    onChange={(event) => setComment(event.target.value)}
+                  />
+
+                  <div className="mt-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={(event) =>
+                        handleImageSelection(event.target.files)
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 rounded-2xl border border-dashed px-4 py-3 text-left transition hover:border-primary/50 hover:bg-primary/5"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <HugeiconsIcon
+                          icon={ImageAdd01Icon}
+                          className="size-5"
+                        />
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold">
+                          {t("productDetails.addReviewImages")}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {t("productDetails.reviewImagesHint", {
+                            count: maxReviewImages,
+                          })}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+
+                  {selectedImages.length ? (
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                      {selectedImages.map((image) => (
+                        <div
+                          key={image.id}
+                          className="group relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted"
+                        >
+                          <img
+                            src={image.previewUrl}
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-black/65 text-white"
+                            aria-label={t("productDetails.removeReviewImage")}
+                            onClick={() => removeSelectedImage(image.id)}
+                          >
+                            <HugeiconsIcon
+                              icon={Cancel01Icon}
+                              className="size-3.5"
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <div className="mt-3 flex justify-end">
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting
+                        ? t("productDetails.submittingReview")
+                        : t("productDetails.submitReview")}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           ) : (
             <div className="mb-6 rounded-2xl border border-dashed p-5 text-sm text-muted-foreground">
               {t("productDetails.signInToReview")}
@@ -390,7 +417,7 @@ export function ReviewsSection({
           ) : entries.length ? (
             <div
               ref={carouselRef}
-              className="flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto pb-3 [&::-webkit-scrollbar]:hidden"
+              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {entries.map((review) => (
                 <ReviewCard

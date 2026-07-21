@@ -1,5 +1,12 @@
 "use client"
 
+import {
+  Add01Icon,
+  Delete02Icon,
+  PencilEdit02Icon,
+  ViewIcon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -44,13 +51,13 @@ import {
 import {
   getGetAll2QueryKey as getProductsQueryKey,
   useDelete2 as useDeleteProduct,
+  useGetById2 as useGetProduct,
   useGetAll2 as useGetProducts,
 } from "@/lib/api/generated/product/product"
 import { clearAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
-import { ProductForm } from "./product-form"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
@@ -82,12 +89,18 @@ import {
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
+import { SortableList } from "@workspace/ui/components/sortable-list"
 
 const categorySchema = z.object({
   name: z.string().trim().min(1, "Category name is required."),
-  description: z.string().trim(),
+  nameRu: z.string().trim(),
+  nameEng: z.string().trim(),
+  descriptionUz: z.string().trim(),
+  descriptionRu: z.string().trim(),
+  descriptionEng: z.string().trim(),
   sizeType: z.enum(["LETTER", "NUMBER"]),
   parentId: z.string(),
+  sortOrder: z.number().int().nonnegative(),
   image: z.instanceof(File).optional(),
   active: z.boolean(),
 })
@@ -105,9 +118,14 @@ type CategoryWithImageId = CategoryDTO & { imageId?: number }
 
 const emptyCategory: CategoryFormValues = {
   name: "",
-  description: "",
+  nameRu: "",
+  nameEng: "",
+  descriptionUz: "",
+  descriptionRu: "",
+  descriptionEng: "",
   sizeType: "LETTER",
   parentId: "",
+  sortOrder: 0,
   image: undefined,
   active: true,
 }
@@ -122,9 +140,14 @@ const emptyBranch: BranchFormValues = {
 function getCategoryValues(category?: CategoryDTO): CategoryFormValues {
   return {
     name: category?.name ?? "",
-    description: category?.descriptionUz ?? "",
+    nameRu: category?.nameRu ?? "",
+    nameEng: category?.nameEng ?? "",
+    descriptionUz: category?.descriptionUz ?? "",
+    descriptionRu: category?.descriptionRu ?? "",
+    descriptionEng: category?.descriptionEng ?? "",
     sizeType: category?.sizeType ?? "LETTER",
     parentId: category?.parentId?.toString() ?? "",
+    sortOrder: category?.sortOrder ?? 0,
     image: undefined,
     active: category?.active ?? true,
   }
@@ -162,6 +185,7 @@ export function OrganizationCategoriesPage({
 }) {
   const { t } = useTranslation()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { retry: false } })
   const organizationQuery = useGetById6(organizationId, {
@@ -196,6 +220,8 @@ export function OrganizationCategoriesPage({
   const [createOpen, setCreateOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [createBranchOpen, setCreateBranchOpen] = useState(false)
+  const [orderedCategories, setOrderedCategories] = useState<CategoryDTO[]>([])
+  const reorderCategory = useUpdate5()
 
   useEffect(() => {
     if (!meQuery.isError) return
@@ -217,6 +243,64 @@ export function OrganizationCategoriesPage({
       ),
     [categoriesQuery.data, organizationId]
   )
+
+  useEffect(() => {
+    setOrderedCategories(
+      [...categories].sort(
+        (a, b) =>
+          (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+          (a.name ?? "").localeCompare(b.name ?? "")
+      )
+    )
+  }, [categories])
+
+  async function reorderCategorySiblings(items: CategoryDTO[]) {
+    const nextOrder = new Map(
+      items.flatMap((item, index) =>
+        item.id === undefined ? [] : [[item.id, index] as const]
+      )
+    )
+    setOrderedCategories((current) =>
+      current.map((item) =>
+        item.id !== undefined && nextOrder.has(item.id)
+          ? { ...item, sortOrder: nextOrder.get(item.id) }
+          : item
+      )
+    )
+
+    try {
+      await Promise.all(
+        items.flatMap((item, sortOrder) =>
+          item.id === undefined
+            ? []
+            : [
+                reorderCategory.mutateAsync({
+                  id: item.id,
+                  data: {
+                    name: item.name ?? "",
+                    nameRu: item.nameRu,
+                    nameEng: item.nameEng,
+                    descriptionUz: item.descriptionUz,
+                    descriptionRu: item.descriptionRu,
+                    descriptionEng: item.descriptionEng,
+                    sizeType: item.sizeType ?? "LETTER",
+                    organizationId,
+                    parentId: item.parentId,
+                    imageId: readImageAttachmentId(item),
+                    sortOrder,
+                    active: item.active ?? true,
+                  },
+                }),
+              ]
+        )
+      )
+      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      toast.success(t("category.orderSaved"))
+    } catch {
+      setOrderedCategories(categories)
+      toast.error(t("category.orderFailed"))
+    }
+  }
   const users = useMemo(
     () =>
       (usersQuery.data?.content ?? []).filter(
@@ -282,7 +366,16 @@ export function OrganizationCategoriesPage({
                 className="size-10 rounded-lg object-cover"
               />
             ) : null}
-            <span>{row.getValue<string>("name") || "—"}</span>
+            <div>
+              <span className="font-medium">
+                {row.getValue<string>("name") || "—"}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {row.original.parentId
+                  ? t("category.childCategory")
+                  : t("category.rootCategory")}
+              </span>
+            </div>
           </div>
         ),
       },
@@ -306,6 +399,26 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) =>
           row.getValue<string>("parentName") || t("category.root"),
+      },
+      {
+        accessorKey: "productCount",
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("category.products")}
+          />
+        ),
+        cell: ({ row }) => String(row.original.productCount ?? 0),
+      },
+      {
+        accessorKey: "sortOrder",
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("category.sortOrder")}
+          />
+        ),
+        cell: ({ row }) => String(row.original.sortOrder ?? 0),
       },
       {
         id: "status",
@@ -429,6 +542,13 @@ export function OrganizationCategoriesPage({
         cell: ({ row }) => row.getValue<string>("categoryName") || "—",
       },
       {
+        accessorKey: "branchName",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("product.branch")} />
+        ),
+        cell: ({ row }) => row.getValue<string>("branchName") || "—",
+      },
+      {
         accessorKey: "basePrice",
         header: ({ column }) => (
           <DataTableColumnHeader
@@ -473,11 +593,12 @@ export function OrganizationCategoriesPage({
           <ProductActions
             product={row.original}
             organizationId={organizationId}
+            language={language}
           />
         ),
       },
     ],
-    [organizationId, t]
+    [language, organizationId, t]
   )
 
   if (meQuery.isLoading || !canManageCategories) {
@@ -489,7 +610,7 @@ export function OrganizationCategoriesPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
       <DashboardBreadcrumb
         language={language}
         items={[
@@ -525,7 +646,7 @@ export function OrganizationCategoriesPage({
               )}
             </div>
             <div className="min-w-0">
-              <SidebarTrigger className="mb-2" />
+              <SidebarTrigger className="mb-2 hidden md:inline-flex" />
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-primary">
                   {t("dashboard.organizations")}
@@ -545,7 +666,8 @@ export function OrganizationCategoriesPage({
                 ) : null}
               </div>
               <h1 className="mt-1 truncate text-3xl font-semibold tracking-tight">
-                {organizationQuery.data?.name ?? t("organization.loadingDetails")}
+                {organizationQuery.data?.name ??
+                  t("organization.loadingDetails")}
               </h1>
               {organizationQuery.data?.description ? (
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -577,7 +699,7 @@ export function OrganizationCategoriesPage({
               <DialogTrigger asChild>
                 <Button>{t("category.new")}</Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+              <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
                 <DialogHeader>
                   <DialogTitle>{t("category.new")}</DialogTitle>
                   <DialogDescription>
@@ -631,18 +753,16 @@ export function OrganizationCategoriesPage({
                 [
                   organizationQuery.data.contactEmail,
                   organizationQuery.data.contactPhone
-                    ? formatPhoneNumberIntl(organizationQuery.data.contactPhone) ||
-                      organizationQuery.data.contactPhone
+                    ? formatPhoneNumberIntl(
+                        organizationQuery.data.contactPhone
+                      ) || organizationQuery.data.contactPhone
                     : undefined,
                 ]
                   .filter(Boolean)
                   .join(" · ") || undefined
               }
             />
-            <OrganizationInfo
-              label="INN"
-              value={organizationQuery.data.inn}
-            />
+            <OrganizationInfo label="INN" value={organizationQuery.data.inn} />
             <OrganizationInfo
               label={t("organization.address")}
               value={organizationQuery.data.address}
@@ -688,22 +808,10 @@ export function OrganizationCategoriesPage({
               {t("category.loadFailed")}
             </div>
           ) : (
-            <DataTable
-              columns={columns}
-              data={categories}
-              searchColumn="name"
-              searchPlaceholder={t("category.search")}
-              emptyMessage={t("category.empty")}
-              labels={{
-                resetFilters: t("dashboard.resetFilters"),
-                columns: t("dashboard.columns"),
-                rowsPerPage: t("dashboard.rowsPerPage"),
-                selectedRows: (selected, total) =>
-                  t("dashboard.selectedRows", { selected, total }),
-                page: (page, total) => t("dashboard.page", { page, total }),
-                previous: t("dashboard.previous"),
-                next: t("dashboard.next"),
-              }}
+            <CategoryHierarchyList
+              categories={orderedCategories}
+              disabled={reorderCategory.isPending}
+              onReorder={reorderCategorySiblings}
             />
           )}
         </TabsContent>
@@ -746,19 +854,108 @@ export function OrganizationCategoriesPage({
   )
 }
 
-function OrganizationInfo({
-  label,
-  value,
+function CategoryHierarchyList({
+  categories,
+  disabled,
+  onReorder,
 }: {
-  label: string
-  value?: string
+  categories: CategoryDTO[]
+  disabled: boolean
+  onReorder: (items: CategoryDTO[]) => void | Promise<void>
 }) {
+  const { t } = useTranslation()
+  const roots = categories.filter((category) => category.parentId == null)
+
+  function categoryRow(category: CategoryDTO, depth: number) {
+    const children = categories.filter((item) => item.parentId === category.id)
+
+    return (
+      <div className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="size-12 shrink-0 overflow-hidden rounded-xl border bg-muted">
+              {category.imageUrl ? (
+                <img
+                  src={category.imageUrl}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : null}
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate font-semibold">{category.name || "—"}</p>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  {depth === 0
+                    ? t("category.rootCategory")
+                    : t("category.childCategory")}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("category.products")}: {category.productCount ?? 0} ·{" "}
+                {t("category.sortOrder")}: {category.sortOrder ?? 0} ·{" "}
+                {category.sizeType === "NUMBER"
+                  ? t("category.number")
+                  : t("category.letter")}
+              </p>
+            </div>
+          </div>
+          <CategoryActions category={category} categories={categories} />
+        </div>
+
+        {children.length ? (
+          <div className="mt-3 border-l-2 border-primary/20 pl-4">
+            <SortableList
+              items={children}
+              getId={(item) => item.id ?? `child-${item.name}`}
+              disabled={disabled}
+              moveLabel={t("category.dragToReorder")}
+              onReorder={onReorder}
+              renderItem={(item) => categoryRow(item, depth + 1)}
+            />
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
+  if (!roots.length) {
+    return (
+      <div className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground">
+        {t("category.empty")}
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {t("category.dragDescription")}
+        </p>
+        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">
+          {categories.length} {t("category.categoriesCount")}
+        </span>
+      </div>
+      <SortableList
+        items={roots}
+        getId={(item) => item.id ?? `root-${item.name}`}
+        disabled={disabled}
+        moveLabel={t("category.dragToReorder")}
+        onReorder={onReorder}
+        renderItem={(item) => categoryRow(item, 0)}
+      />
+    </div>
+  )
+}
+
+function OrganizationInfo({ label, value }: { label: string; value?: string }) {
   return (
     <div className="rounded-2xl border bg-card p-4">
       <p className="text-xs font-medium tracking-wide text-muted-foreground">
         {label}
       </p>
-      <p className="mt-2 break-words text-sm font-medium">{value || "—"}</p>
+      <p className="mt-2 text-sm font-medium break-words">{value || "—"}</p>
     </div>
   )
 }
@@ -766,14 +963,15 @@ function OrganizationInfo({
 function ProductActions({
   product,
   organizationId,
+  language,
 }: {
   product: ProductListDTO
   organizationId: number
+  language: string
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const removeProduct = useDeleteProduct()
-  const [editOpen, setEditOpen] = useState(false)
 
   async function remove() {
     if (product.id === undefined) return
@@ -789,43 +987,189 @@ function ProductActions({
   }
 
   return (
-    <div className="flex justify-end gap-2">
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+    <div className="flex justify-end gap-1">
+      {product.id !== undefined ? (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              title={t("product.previewProduct")}
+            >
+              <HugeiconsIcon icon={ViewIcon} className="size-4" />
+              <span className="sr-only">{t("product.previewProduct")}</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="h-[94vh] overflow-hidden p-0 sm:max-w-[96vw]">
+            <DialogHeader className="border-b px-6 py-4 text-left">
+              <DialogTitle>{t("product.previewProduct")}</DialogTitle>
+              <DialogDescription>{product.name}</DialogDescription>
+            </DialogHeader>
+            <ProductDetailsPreview productId={product.id} language={language} />
+          </DialogContent>
+        </Dialog>
+      ) : null}
+      {product.id !== undefined ? (
+        <Button asChild variant="ghost" size="icon" title={t("product.edit")}>
+          <Link
+            href={`/${language}/dashboard/organizations/${organizationId}/products/${product.id}/edit`}
+          >
+            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+            <span className="sr-only">{t("product.edit")}</span>
+          </Link>
+        </Button>
+      ) : null}
+      <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("product.edit")}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive"
+            title={t("product.delete")}
+          >
+            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+            <span className="sr-only">{t("product.delete")}</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("product.edit")}</DialogTitle>
-            <DialogDescription>{product.name}</DialogDescription>
+            <DialogTitle>{t("product.delete")}</DialogTitle>
+            <DialogDescription>{t("product.deleteConfirm")}</DialogDescription>
           </DialogHeader>
-          <ProductForm
-            organizationId={organizationId}
-            product={product}
-            onComplete={() => setEditOpen(false)}
-          />
+          <DialogFooter>
+            <Button
+              variant="destructive"
+              disabled={removeProduct.isPending}
+              onClick={remove}
+            >
+              <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+              {t("product.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("product.delete")}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="grid w-64 gap-3">
-          <p className="text-sm">{t("product.deleteConfirm")}</p>
-          <Button
-            variant="destructive"
-            size="sm"
-            disabled={removeProduct.isPending}
-            onClick={remove}
-          >
-            {t("product.delete")}
-          </Button>
-        </PopoverContent>
-      </Popover>
+    </div>
+  )
+}
+
+function ProductDetailsPreview({
+  productId,
+  language,
+}: {
+  productId: number
+  language: string
+}) {
+  const { t } = useTranslation()
+  const productQuery = useGetProduct(productId)
+  const product = productQuery.data
+
+  if (productQuery.isLoading) {
+    return <div className="m-6 h-[70vh] animate-pulse rounded-3xl bg-muted" />
+  }
+  if (!product) {
+    return <p className="p-8 text-destructive">{t("product.loadFailed")}</p>
+  }
+
+  const images = (product.images ?? [])
+    .sort((a, b) => Number(b.main) - Number(a.main))
+    .flatMap((image) => (image.url ? [image.url] : []))
+  const name =
+    language === "ru"
+      ? product.nameRu || product.name || product.nameEng
+      : product.name || product.nameRu || product.nameEng
+  const description =
+    language === "ru"
+      ? product.descriptionRu || product.descriptionUz || product.descriptionEng
+      : product.descriptionUz || product.descriptionRu || product.descriptionEng
+  const price = product.discountedPrice ?? product.basePrice
+  const formatter = new Intl.NumberFormat(language === "ru" ? "ru-RU" : "uz-UZ")
+
+  return (
+    <div className="h-[calc(94vh-82px)] overflow-y-auto bg-background p-6 lg:p-10">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,.95fr)]">
+        <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)]">
+          <div className="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
+            {images.slice(0, 6).map((url) => (
+              <div
+                key={url}
+                className="size-[68px] shrink-0 overflow-hidden rounded-xl border bg-muted"
+              >
+                <img src={url} alt="" className="size-full object-cover" />
+              </div>
+            ))}
+          </div>
+          <div className="order-1 aspect-square overflow-hidden rounded-3xl border bg-muted sm:order-2">
+            {images[0] ? (
+              <img
+                src={images[0]}
+                alt={name ?? ""}
+                className="size-full object-cover"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center text-7xl font-bold text-primary/20">
+                {name?.charAt(0) ?? "?"}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <section className="py-2">
+          <div className="flex flex-wrap gap-2 text-sm font-medium text-primary">
+            <span>{product.categoryName || "—"}</span>
+            <span>·</span>
+            <span>{product.branchName || "—"}</span>
+          </div>
+          <h2 className="mt-3 text-4xl font-bold tracking-tight">
+            {name || "—"}
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            ★ {product.ratingAvg?.toFixed(1) ?? "0.0"} ·{" "}
+            {product.ratingCount ?? 0}
+          </p>
+          <div className="mt-7 flex items-baseline gap-3">
+            <strong className="text-3xl">
+              {price == null ? "—" : `${formatter.format(price)} so'm`}
+            </strong>
+            {(product.discountPercent ?? 0) > 0 ? (
+              <span className="text-lg text-muted-foreground line-through">
+                {`${formatter.format(product.basePrice ?? 0)} so'm`}
+              </span>
+            ) : null}
+          </div>
+          {description ? (
+            <div
+              className="prose prose-sm dark:prose-invert mt-8 max-w-none text-muted-foreground"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
+          ) : null}
+
+          <div className="mt-8 border-t pt-6">
+            <h3 className="text-lg font-semibold">{t("product.variants")}</h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {(product.variants ?? []).map((variant, index) => (
+                <div
+                  key={variant.id ?? index}
+                  className="rounded-2xl border bg-muted/30 p-4"
+                >
+                  <p className="font-medium">
+                    {[variant.colorName, variant.sizeValue]
+                      .filter(Boolean)
+                      .join(" · ") || "—"}
+                  </p>
+                  <div className="mt-2 flex justify-between text-sm text-muted-foreground">
+                    <span>
+                      {t("product.stock")}: {variant.stock ?? 0}
+                    </span>
+                    <span>
+                      {`${formatter.format(variant.effectivePrice ?? variant.price ?? product.basePrice ?? 0)} so'm`}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }
@@ -886,7 +1230,7 @@ function BranchForm({
 
   return (
     <form
-      className="grid gap-4"
+      className="grid gap-7"
       onSubmit={form.handleSubmit(submit)}
       noValidate
     >
@@ -979,7 +1323,7 @@ function BranchActions({
             {t("branch.edit")}
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
           <DialogHeader>
             <DialogTitle>{t("branch.edit")}</DialogTitle>
             <DialogDescription>{branch.name}</DialogDescription>
@@ -1016,11 +1360,13 @@ function BranchActions({
 function CategoryForm({
   category,
   categories,
+  initialParentId,
   organizationId,
   onComplete,
 }: {
   category?: CategoryDTO
   categories: CategoryDTO[]
+  initialParentId?: number
   organizationId: number
   onComplete: () => void
 }) {
@@ -1031,13 +1377,52 @@ function CategoryForm({
   const upload = useUpload()
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
-    defaultValues: category ? getCategoryValues(category) : emptyCategory,
+    defaultValues: category
+      ? getCategoryValues(category)
+      : {
+          ...emptyCategory,
+          parentId: initialParentId?.toString() ?? "",
+        },
   })
   const editing = category?.id !== undefined
+  const selectedImage = form.watch("image")
+  const imagePreviewUrl = useMemo(
+    () => (selectedImage ? URL.createObjectURL(selectedImage) : undefined),
+    [selectedImage]
+  )
+  const excludedParentIds = useMemo(() => {
+    const excluded = new Set<number>()
+    if (category?.id === undefined) return excluded
+    excluded.add(category.id)
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const item of categories) {
+        if (
+          item.id !== undefined &&
+          item.parentId !== undefined &&
+          excluded.has(item.parentId) &&
+          !excluded.has(item.id)
+        ) {
+          excluded.add(item.id)
+          changed = true
+        }
+      }
+    }
+    return excluded
+  }, [categories, category?.id])
+
+  useEffect(
+    () => () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+    },
+    [imagePreviewUrl]
+  )
 
   async function submit(values: CategoryFormValues) {
     try {
-      let imageId: number | undefined
+      let imageId =
+        editing && category ? readImageAttachmentId(category) : undefined
       if (values.image) {
         const attachment = await upload.mutateAsync({
           data: { file: values.image },
@@ -1049,11 +1434,22 @@ function CategoryForm({
 
       const data = {
         name: values.name,
-        ...(values.description ? { descriptionUz: values.description } : {}),
+        ...(values.nameRu ? { nameRu: values.nameRu } : {}),
+        ...(values.nameEng ? { nameEng: values.nameEng } : {}),
+        ...(values.descriptionUz
+          ? { descriptionUz: values.descriptionUz }
+          : {}),
+        ...(values.descriptionRu
+          ? { descriptionRu: values.descriptionRu }
+          : {}),
+        ...(values.descriptionEng
+          ? { descriptionEng: values.descriptionEng }
+          : {}),
         sizeType: values.sizeType,
         organizationId,
         ...(values.parentId ? { parentId: Number(values.parentId) } : {}),
         ...(imageId !== undefined ? { imageId } : {}),
+        sortOrder: values.sortOrder,
       }
 
       const savedCategory =
@@ -1094,68 +1490,141 @@ function CategoryForm({
       onSubmit={form.handleSubmit(submit)}
       noValidate
     >
-      <CategoryField
-        label={t("category.name")}
-        error={form.formState.errors.name?.message}
-      >
-        <Input placeholder={t("category.name")} {...form.register("name")} />
-      </CategoryField>
-      <CategoryField
-        label={t("category.description")}
-        error={form.formState.errors.description?.message}
-      >
-        <Input
-          placeholder={t("category.description")}
-          {...form.register("description")}
-        />
-      </CategoryField>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-3xl border bg-card p-5">
+        <div>
+          <h3 className="text-lg font-semibold">{t("category.identity")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("category.identityDescription")}
+          </p>
+        </div>
         <CategoryField
-          label={t("category.sizeType")}
-          error={form.formState.errors.sizeType?.message}
+          label={t("category.name")}
+          error={form.formState.errors.name?.message}
         >
-          <select
-            className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm"
-            {...form.register("sizeType")}
-          >
-            <option value="LETTER">{t("category.letter")}</option>
-            <option value="NUMBER">{t("category.number")}</option>
-          </select>
+          <Input placeholder={t("category.name")} {...form.register("name")} />
         </CategoryField>
-        <CategoryField
-          label={t("category.parent")}
-          error={form.formState.errors.parentId?.message}
-        >
-          <select
-            className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm"
-            {...form.register("parentId")}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CategoryField label={t("category.nameRu")}>
+            <Input {...form.register("nameRu")} />
+          </CategoryField>
+          <CategoryField label={t("category.nameEng")}>
+            <Input {...form.register("nameEng")} />
+          </CategoryField>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {(["descriptionUz", "descriptionRu", "descriptionEng"] as const).map(
+            (field) => (
+              <CategoryField key={field} label={t(`category.${field}`)}>
+                <textarea
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  {...form.register(field)}
+                />
+              </CategoryField>
+            )
+          )}
+        </div>
+      </section>
+
+      <section className="grid gap-4 rounded-3xl border bg-card p-5">
+        <div>
+          <h3 className="text-lg font-semibold">{t("category.hierarchy")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("category.hierarchyDescription")}
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CategoryField
+            label={t("category.sizeType")}
+            error={form.formState.errors.sizeType?.message}
           >
-            <option value="">{t("category.root")}</option>
-            {categories
-              .filter((item) => item.id !== category?.id)
-              .map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-          </select>
+            <select
+              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
+              {...form.register("sizeType")}
+            >
+              <option value="LETTER">{t("category.letter")}</option>
+              <option value="NUMBER">{t("category.number")}</option>
+            </select>
+          </CategoryField>
+          <CategoryField
+            label={t("category.parent")}
+            error={form.formState.errors.parentId?.message}
+          >
+            <select
+              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
+              {...form.register("parentId")}
+            >
+              <option value="">{t("category.root")}</option>
+              {categories
+                .filter(
+                  (item) =>
+                    item.id !== undefined && !excludedParentIds.has(item.id)
+                )
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.parentId ? `↳ ${item.parentName} / ` : ""}
+                    {item.name}
+                  </option>
+                ))}
+            </select>
+          </CategoryField>
+        </div>
+        <CategoryField label={t("category.sortOrder")}>
+          <Input
+            type="number"
+            min={0}
+            {...form.register("sortOrder", { valueAsNumber: true })}
+          />
         </CategoryField>
-      </div>
-      <CategoryField
-        label={t("category.image")}
-        error={form.formState.errors.image?.message}
-      >
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={(event) =>
-            form.setValue("image", event.target.files?.[0], {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-      </CategoryField>
+        <div className="rounded-2xl bg-muted/50 p-4 text-sm">
+          <span className="text-muted-foreground">
+            {t("category.willAppearUnder")}:{" "}
+          </span>
+          <strong>
+            {categories.find(
+              (item) => item.id === Number(form.watch("parentId"))
+            )?.name ?? t("category.root")}
+          </strong>
+          <span className="text-muted-foreground"> → </span>
+          <strong>{form.watch("name") || t("category.unnamed")}</strong>
+        </div>
+      </section>
+
+      <section className="grid gap-4 rounded-3xl border bg-card p-5 sm:grid-cols-[180px_minmax(0,1fr)]">
+        <div className="aspect-square overflow-hidden rounded-2xl border bg-muted">
+          {imagePreviewUrl || category?.imageUrl ? (
+            <img
+              src={imagePreviewUrl ?? category?.imageUrl}
+              alt=""
+              className="size-full object-cover"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center text-sm text-muted-foreground">
+              {t("category.noImage")}
+            </div>
+          )}
+        </div>
+        <div className="self-center">
+          <CategoryField
+            label={t("category.image")}
+            error={form.formState.errors.image?.message}
+          >
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(event) =>
+                form.setValue("image", event.target.files?.[0], {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            />
+          </CategoryField>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t("category.imageDescription")}
+          </p>
+        </div>
+      </section>
       {editing ? (
         <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
           <input
@@ -1205,6 +1674,7 @@ function CategoryActions({
   const removeCategory = useDelete4()
   const removeAttachment = useDelete8()
   const [editOpen, setEditOpen] = useState(false)
+  const [childOpen, setChildOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   async function remove() {
@@ -1236,14 +1706,39 @@ function CategoryActions({
   const pending = removeCategory.isPending || removeAttachment.isPending
 
   return (
-    <div className="flex justify-end gap-2">
+    <div className="flex justify-end gap-1">
+      {category.id !== undefined ? (
+        <Dialog open={childOpen} onOpenChange={setChildOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" title={t("category.addChild")}>
+              <HugeiconsIcon icon={Add01Icon} className="size-4" />
+              <span className="sr-only">{t("category.addChild")}</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
+            <DialogHeader>
+              <DialogTitle>{t("category.addChild")}</DialogTitle>
+              <DialogDescription>
+                {t("category.addChildDescription", { parent: category.name })}
+              </DialogDescription>
+            </DialogHeader>
+            <CategoryForm
+              categories={categories}
+              initialParentId={category.id}
+              organizationId={category.organizationId ?? 0}
+              onComplete={() => setChildOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      ) : null}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("category.edit")}
+          <Button variant="ghost" size="icon" title={t("category.edit")}>
+            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+            <span className="sr-only">{t("category.edit")}</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
           <DialogHeader>
             <DialogTitle>{t("category.edit")}</DialogTitle>
             <DialogDescription>{category.name}</DialogDescription>
@@ -1258,8 +1753,14 @@ function CategoryActions({
       </Dialog>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("category.delete")}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive"
+            title={t("category.delete")}
+          >
+            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+            <span className="sr-only">{t("category.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-72 gap-3">

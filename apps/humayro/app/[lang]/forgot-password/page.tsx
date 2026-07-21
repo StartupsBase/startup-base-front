@@ -4,6 +4,21 @@ import { ForgotPasswordForm } from "./_components/forgot-password-form"
 import { LogoBrand } from "@/components/logo"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "forgotPassword",
+    path: "/forgot-password",
+    noIndex: true,
+  })
+}
 
 export default async function ForgotPasswordPage({
   params,

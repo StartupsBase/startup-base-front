@@ -4,6 +4,21 @@ import { LogoBrand } from "@/components/logo"
 import { ResetPasswordForm } from "./_components/reset-password-form"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "resetPassword",
+    path: "/reset-password",
+    noIndex: true,
+  })
+}
 
 export default async function ResetPasswordPage({
   params,
