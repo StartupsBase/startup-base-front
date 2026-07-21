@@ -31,6 +31,7 @@ export * from './categoryCreateDTO';
 export * from './categoryCreateDTOSizeType';
 export * from './categoryDTO';
 export * from './categoryDTOSizeType';
+export * from './categoryMoveDTO';
 export * from './categoryUpdateDTO';
 export * from './categoryUpdateDTOSizeType';
 export * from './chat';

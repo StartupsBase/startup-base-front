@@ -5,12 +5,14 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
+import type { AttachmentDTO } from './attachmentDTO';
 
 export interface ReviewDTO {
   id?: number;
   userName?: string;
   rating?: number;
   comment?: string;
+  attachments?: AttachmentDTO[];
   createdAt?: string;
   mine?: boolean;
 }

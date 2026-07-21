@@ -9,6 +9,7 @@
 export type GetAll2Params = {
 active?: boolean;
 organizationId?: number;
+branchId?: number;
 categoryId?: number;
 search?: string;
 minPrice?: number;

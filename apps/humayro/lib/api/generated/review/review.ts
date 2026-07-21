@@ -110,6 +110,64 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAddOrUpdateMutationOptions(options), queryClient);
     }
+    export const addOrUpdateBulk = (
+    reviewCreateDTO: BodyType<ReviewCreateDTO[]>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<ReviewDTO[]>(
+      {url: `/api/reviews/bulk`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: reviewCreateDTO, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAddOrUpdateBulkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addOrUpdateBulk>>, TError,{data: BodyType<ReviewCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addOrUpdateBulk>>, TError,{data: BodyType<ReviewCreateDTO[]>}, TContext> => {
+
+const mutationKey = ['addOrUpdateBulk'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addOrUpdateBulk>>, {data: BodyType<ReviewCreateDTO[]>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  addOrUpdateBulk(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddOrUpdateBulkMutationResult = NonNullable<Awaited<ReturnType<typeof addOrUpdateBulk>>>
+    export type AddOrUpdateBulkMutationBody = BodyType<ReviewCreateDTO[]>
+    export type AddOrUpdateBulkMutationError = ErrorType<unknown>
+
+    export const useAddOrUpdateBulk = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addOrUpdateBulk>>, TError,{data: BodyType<ReviewCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addOrUpdateBulk>>,
+        TError,
+        {data: BodyType<ReviewCreateDTO[]>},
+        TContext
+      > => {
+      return useMutation(getAddOrUpdateBulkMutationOptions(options), queryClient);
+    }
     export const getByProduct = (
     productId: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal

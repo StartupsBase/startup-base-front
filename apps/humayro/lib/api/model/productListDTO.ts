@@ -15,6 +15,8 @@ export interface ProductListDTO {
   categoryName?: string;
   organizationId?: number;
   organizationName?: string;
+  branchId?: number;
+  branchName?: string;
   basePrice?: number;
   discountPercent?: number;
   discountedPrice?: number;

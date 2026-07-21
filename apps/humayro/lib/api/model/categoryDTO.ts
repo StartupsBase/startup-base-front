@@ -21,6 +21,7 @@ export interface CategoryDTO {
   organizationName?: string;
   parentId?: number;
   parentName?: string;
+  sortOrder?: number;
   active?: boolean;
   productCount?: number;
 }
