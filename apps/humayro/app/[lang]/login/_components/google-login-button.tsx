@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 
 import { Button } from "@workspace/ui/components/button"
-import { getApiBaseUrl } from "@/lib/api-url"
 import { googleReturnPathKey } from "@/lib/auth"
 
 function getSafeReturnPath(pathname: string, search: string) {
@@ -15,7 +15,7 @@ function getSafeReturnPath(pathname: string, search: string) {
   return requestedPath?.startsWith(`/${language}/`) &&
     !requestedPath.startsWith("//")
     ? requestedPath
-    : `/${language}/dashboard`
+    : null
 }
 
 export function GoogleLoginButton() {
@@ -23,13 +23,25 @@ export function GoogleLoginButton() {
   const pathname = usePathname()
   const [redirecting, setRedirecting] = useState(false)
 
-  function signInWithGoogle() {
+  async function signInWithGoogle() {
+    const returnPath = getSafeReturnPath(pathname, window.location.search)
+
+    if (returnPath) {
+      sessionStorage.setItem(googleReturnPathKey, returnPath)
+    } else {
+      sessionStorage.removeItem(googleReturnPathKey)
+    }
+
     setRedirecting(true)
-    sessionStorage.setItem(
-      googleReturnPathKey,
-      getSafeReturnPath(pathname, window.location.search)
-    )
-    window.location.assign(`${getApiBaseUrl()}/api/auth/google`)
+
+    try {
+      await prepareGoogleCallbackWorker()
+      const language = pathname.split("/")[1] ?? "ru"
+      window.location.assign(`/${language}/auth/google/start`)
+    } catch {
+      setRedirecting(false)
+      toast.error(t("login.googleFailed"))
+    }
   }
 
   return (
@@ -46,6 +58,41 @@ export function GoogleLoginButton() {
         : t("login.continueWithGoogle")}
     </Button>
   )
+}
+
+async function prepareGoogleCallbackWorker() {
+  if (!("serviceWorker" in navigator)) {
+    throw new Error("Service workers are not supported")
+  }
+
+  await navigator.serviceWorker.register("/google-oauth-sw.js?v=1", {
+    scope: "/",
+    updateViaCache: "none",
+  })
+  await navigator.serviceWorker.ready
+
+  if (navigator.serviceWorker.controller) return
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      navigator.serviceWorker.removeEventListener(
+        "controllerchange",
+        handleControllerChange
+      )
+      reject(new Error("Google callback worker did not activate"))
+    }, 5000)
+
+    function handleControllerChange() {
+      window.clearTimeout(timeout)
+      resolve()
+    }
+
+    navigator.serviceWorker.addEventListener(
+      "controllerchange",
+      handleControllerChange,
+      { once: true }
+    )
+  })
 }
 
 function GoogleIcon() {

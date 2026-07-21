@@ -28,7 +28,7 @@ export function UserDropdown({ language }: { language: string }) {
   const setUser = useAuthStore((state) => state.setUser)
   const clear = useAuthStore((state) => state.clear)
   const pathname = usePathname()
-  const meQuery = useMe1({ query: { enabled, retry: false,  } })
+  const meQuery = useMe1({ query: { enabled, retry: false } })
   const currentUser = meQuery.data ?? user
   const name = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
@@ -59,8 +59,17 @@ export function UserDropdown({ language }: { language: string }) {
 
   if (!currentUser) {
     return (
-      <Button asChild variant="ghost">
-        <Link href={`/${language}/login`}>{t("home.loginAction")}</Link>
+      <Button
+        asChild
+        variant="ghost"
+        className="xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-xs 3xl:h-12 3xl:text-base h-8 shrink-0 rounded-full px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
+      >
+        <Link href={`/${language}/login`}>
+          <span className="max-[339px]:sr-only">{t("home.loginAction")}</span>
+          <span aria-hidden="true" className="hidden max-[339px]:inline">
+            ↗
+          </span>
+        </Link>
       </Button>
     )
   }
@@ -71,13 +80,13 @@ export function UserDropdown({ language }: { language: string }) {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 max-w-44 justify-start gap-2 truncate px-2 text-xs"
+          className="xs:h-9 xs:max-w-20 xs:gap-1.5 xs:px-2 xs:text-[11px] 2xs:max-w-24 2xs:text-xs 3xl:h-12 3xl:max-w-48 3xl:text-base h-8 max-w-16 justify-start gap-1 truncate rounded-full px-1.5 text-[10px] sm:h-10 sm:max-w-36 sm:gap-2 sm:px-3 sm:text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
         >
           {currentUser.photo?.s3Url ? (
             <img
               src={currentUser.photo.s3Url}
               alt=""
-              className="size-5 rounded-full object-cover"
+              className="xs:size-[18px] size-4 shrink-0 rounded-full object-cover sm:size-5 2xl:size-6"
             />
           ) : null}
           {name || contact || t("home.account")}
@@ -106,9 +115,7 @@ export function UserDropdown({ language }: { language: string }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${language}/orders`}>
-            {t("storefront.myOrders")}
-          </Link>
+          <Link href={`/${language}/orders`}>{t("storefront.myOrders")}</Link>
         </DropdownMenuItem>
         {pathname !== `/${language}/dashboard` && (
           <DropdownMenuItem asChild>

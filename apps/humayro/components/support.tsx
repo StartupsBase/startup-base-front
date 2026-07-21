@@ -6,7 +6,7 @@ import React from "react"
 
 const Support = () => {
   return (
-    <Button asChild className="fixed right-5 bottom-25 z-10 h-[56px] w-[56px] animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80">
+    <Button asChild className="fixed right-5 bottom-25 z-10 h-[56px] w-[56px] animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80 [&_svg]:h-5! [&_svg]:w-5!">
       <Link
         href="tg://resolve?domain=Akmalov_07_01"
         target="_blank"

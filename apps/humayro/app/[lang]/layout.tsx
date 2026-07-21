@@ -13,7 +13,6 @@ import { TelegramProvider } from "@/components/telegram-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import NextTopLoader from "nextjs-toploader"
 import { isLanguage, languages } from "@/i18n/config"
-import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import "../theme.css"
 
@@ -65,7 +64,7 @@ export default async function RootLayout({
             <TelegramProvider>
               <I18nProvider language={lang}>
                 <HumayroLoader language={lang}>
-                  <NextTopLoader color="#008872" />
+                  <NextTopLoader color="#008872" showSpinner={false} />
                   <Header language={lang} />
                   {children}
                   <Footer language={lang} />

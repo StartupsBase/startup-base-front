@@ -37,10 +37,18 @@ function LogoBrand({ className, ...props }: ComponentProps<"span">) {
     <Link
       href="/"
       aria-label="Humayro"
-      className="flex items-center font-semibold tracking-tight"
+      className={cn(
+        "flex min-w-0 shrink-0 items-center font-semibold tracking-tight",
+        className
+      )}
     >
-      {/* <Logo className={cn("h-10 w-10", className)} {...props} /> */}
-      <span className="ml-2 text-lg font-bold tracking-tight">Humayro</span>
+      <Logo
+        className="xs:size-8 2xs:size-9 3xl:size-12 size-7 sm:size-10 lg:size-9 xl:size-10 2xl:size-11"
+        {...props}
+      />
+      <span className="xs:ml-2 xs:text-[15px] 2xs:text-base 3xl:text-[22px] ml-1.5 truncate text-sm font-bold tracking-tight sm:text-lg lg:text-base xl:text-lg 2xl:text-xl">
+        Humayro
+      </span>
     </Link>
   )
 }

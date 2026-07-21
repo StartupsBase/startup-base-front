@@ -135,7 +135,7 @@ export function CatalogSection({ language }: { language: Language }) {
           <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 10 }).map((_, index) => (
               <div key={index} className="overflow-hidden rounded-2xl border">
-                <div className="aspect-[4/3] animate-pulse bg-muted" />
+                <div className="aspect-4/3 animate-pulse bg-muted" />
                 <div className="space-y-3 p-3">
                   <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
                   <div className="h-8 animate-pulse rounded bg-muted" />

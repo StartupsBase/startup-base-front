@@ -148,12 +148,10 @@ const Footer = ({ language }: { language: Language }) => {
           aria-label={copy.backToTop}
           title={copy.backToTop}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed right-5 bottom-5 z-50 grid size-11 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          className="fixed right-5 bottom-5 z-50 grid size-11 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none [&_svg]:h-6! [&_svg]:w-6!"
         >
           <HugeiconsIcon
             icon={ArrowUp01Icon}
-            className="size-5"
-            strokeWidth={2}
           />
         </button>
       )}

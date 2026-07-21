@@ -8,7 +8,7 @@ import {
   languageFlags,
   languageLabels,
   languages,
-  type Language
+  type Language,
 } from "@/i18n/config"
 import {
   DropdownMenu,
@@ -59,19 +59,28 @@ function LanguageSwitcher({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className={cn("cursor-pointer", className)}>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
-          <div className="flex items-center justify-center overflow-hidden rounded-full">
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={languageLabels[language]}
+          className={cn(
+            "flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-gray-100 p-1 transition-colors duration-200 hover:bg-gray-200",
+            "xs:size-9 2xs:p-1.5 3xl:size-12 sm:size-10 lg:size-9 xl:size-10 2xl:size-11",
+            "dark:bg-gray-800 dark:hover:bg-gray-700",
+            className
+          )}
+        >
+          <span className="flex size-full items-center justify-center overflow-hidden rounded-full">
             <Image
               width={40}
-              quality={1000}
+              quality={90}
               height={40}
               src={languageFlags[language]}
               alt={languageLabels[language]}
-              className="h-full w-full rounded-full object-cover"
+              className="size-full rounded-full object-cover"
             />
-          </div>
-        </div>
+          </span>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="min-w-32 rounded-md border shadow-lg dark:shadow-xl"
