@@ -66,6 +66,25 @@ export function useGuestStorefront() {
     clearCart() {
       writeState({ ...readState(), cart: [] })
     },
+    removeFromCart(variantId: number) {
+      const current = readState()
+      writeState({
+        ...current,
+        cart: current.cart.filter((item) => item.variantId !== variantId),
+      })
+    },
+    updateCartQuantity(variantId: number, quantity: number) {
+      const current = readState()
+      writeState({
+        ...current,
+        cart:
+          quantity <= 0
+            ? current.cart.filter((item) => item.variantId !== variantId)
+            : current.cart.map((item) =>
+                item.variantId === variantId ? { ...item, quantity } : item
+              ),
+      })
+    },
     addToCart(productId: number, variantId: number, quantity = 1) {
       const current = readState()
       const existing = current.cart.find((item) => item.variantId === variantId)

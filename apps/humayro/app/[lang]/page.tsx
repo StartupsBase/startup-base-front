@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
   const { t } = await getTranslation(lang)
 
   return (
-    <main className="humayro-top-background min-h-1000 text-foreground relative">
+    <main className="humayro-top-background relative min-h-1000 text-foreground">
       <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
         <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
           <DiaTextReveal
