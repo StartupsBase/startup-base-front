@@ -107,7 +107,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
 
   return (
     <section className="px-4 py-16 text-[#f6f4ef] sm:px-6 sm:py-24 md:px-10 lg:py-18">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-5xl">
         <header className="mx-auto max-w-3xl text-center">
           <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary/70 uppercase dark:text-white">
             <span className="h-4 w-px" aria-hidden="true" />
@@ -121,10 +121,16 @@ export default function TeamSection({ lang }: TeamSectionProps) {
           </p>
         </header>
 
-        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
+        <div
+          className="-mx-2 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scrollbar-none sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0 lg:gap-6 [&::-webkit-scrollbar]:hidden"
+          aria-label={copy.eyebrow}
+        >
           {members.map((member) => (
-            <article key={member.name} className="group">
-              <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-[#17263d]">
+            <article
+              key={member.name}
+              className="group w-[86%] max-w-85 shrink-0 snap-center first:snap-start md:w-auto md:max-w-none"
+            >
+              <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-[#17263d] lg:rounded-3xl">
                 {member.isFounder && (
                   <span className="absolute top-3 left-3 z-10 rounded-full bg-primary/60 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-white uppercase shadow-lg">
                     {lang === "ru" ? "Основатель" : "Asoschi"}
@@ -134,7 +140,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                   src={member.image}
                   alt={`${member.name} portreti`}
                   fill
-                  sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw"
+                  sizes="(min-width: 1024px) 320px, (min-width: 768px) 30vw, 86vw"
                   className="object-cover object-center transition duration-500 group-hover:scale-[1.03]"
                 />
               </div>
@@ -142,7 +148,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
               <div className="pt-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="text-2xl font-semibold tracking-[-0.04em] text-[#17263d] dark:text-[#edf8f4]">
+                    <h3 className="text-xl font-semibold tracking-[-0.04em] text-[#17263d] dark:text-[#edf8f4] lg:text-2xl">
                       {member.name}
                     </h3>
                     <p className="mt-1 text-[11px] font-semibold tracking-[0.12em] text-primary/80 uppercase">
@@ -163,7 +169,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                     />
                   </Link>
                 </div>
-                <p className="mt-4 min-h-18 text-sm leading-6 text-[#a8b7cb]">
+                <p className="mt-4 text-sm leading-6 text-[#a8b7cb] md:min-h-24 lg:min-h-18">
                   {member.description}
                 </p>
                 <p className="mt-3 text-sm text-[#17263d] dark:text-[#7e91ad]">

@@ -36,16 +36,16 @@ export default function Header({ language }: { language: Language }) {
 
   return (
     <header
-      className={`sticky top-0 z-50 mx-auto flex items-center justify-between border transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] sm:top-2 dark:border-none ${
+      className={`sticky top-0 z-50 mx-auto flex items-center justify-between border-0 transition-[width,max-width,border-radius,background-color,backdrop-filter] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] sm:top-2 ${
         isSticky
-          ? "w-[calc(100%-0.5rem)] rounded-2xl bg-white/15 p-2 backdrop-blur sm:w-[calc(100%-4rem)] sm:max-w-345 sm:rounded-4xl dark:bg-primary/15"
-          : "w-full rounded-none border-x-0 border-t-0 bg-white/15 p-2 shadow-none backdrop-blur sm:w-[calc(100%-2rem)] sm:max-w-[1580px] sm:border-none sm:bg-transparent sm:backdrop-blur-none dark:bg-primary/15 sm:dark:bg-transparent"
+          ? "w-[calc(100%-1rem)] rounded-2xl bg-background/15 p-2 backdrop-blur-xl sm:w-[calc(100%-4rem)] sm:max-w-345 sm:rounded-4xl dark:bg-[#00483e]/25"
+          : "w-full rounded-none bg-transparent p-2 sm:w-[calc(100%-2rem)] sm:max-w-[1580px]"
       } `}
     >
-      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-1 sm:flex sm:justify-between sm:gap-0 sm:px-4">
+      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-1 sm:px-2 lg:flex lg:justify-between lg:gap-3 lg:px-4">
         <LogoBrand className="max-[299px]:[&>span]:sr-only" />
 
-        <div className="col-span-2 row-start-2 flex min-w-0 items-center gap-2 sm:col-auto sm:row-auto sm:w-auto">
+        <div className="col-span-2 row-start-2 flex min-w-0 items-center gap-2 lg:col-auto lg:row-auto lg:flex-1">
           <Button
             aria-label="Katalog"
             className="flex size-9 shrink-0 items-center justify-center rounded-[10px] px-0 sm:h-11 sm:w-auto sm:rounded-[12px] sm:px-4"
@@ -55,7 +55,7 @@ export default function Header({ language }: { language: Language }) {
           </Button>
           <AdvancedSearch language={language} />
         </div>
-        <div className="xs:gap-1 col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-0.5 sm:col-auto sm:row-auto sm:gap-2">
+        <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-1 sm:gap-1.5 lg:col-auto lg:row-auto lg:gap-2">
           <LanguageSwitcher language={language} />
           <ThemeToggle />
           <StorefrontNavActions language={language} />

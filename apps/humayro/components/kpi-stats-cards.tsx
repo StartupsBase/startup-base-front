@@ -1,6 +1,3 @@
-import React from "react"
-import { UserIcon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { NumberTicker } from "@workspace/ui/components/number-ticker"
 
 const KpiCardsOptions = [
@@ -43,27 +40,30 @@ const KpiCardsOptions = [
 
 const KpiStatsCards = () => {
   return (
-    <div className="mx-auto grid w-full max-w-6xl grid-cols-5 gap-3 px-6 pt-5 pb-23 mt-5 md:px-10">
+    <div className="mx-auto mt-5 grid w-full max-w-6xl grid-cols-2 gap-x-4 gap-y-6 px-4 py-10 sm:grid-cols-3 sm:gap-6 sm:px-6 md:px-10 lg:grid-cols-5 lg:gap-4 lg:pb-24">
       {KpiCardsOptions.map((card) => (
         <div
           key={card.id}
-          className="relative aspect-square w-full rounded-full border p-5 text-center"
-          style={
-            card.top
-              ? { transform: `translateY(${card.top * 0.25}rem)` }
-              : undefined
-          }
+          className={`relative mx-auto aspect-square w-full max-w-[190px] rounded-full border border-border/70 p-3 text-center sm:p-4 lg:p-3 xl:p-5 ${
+            card.id === 5 ? "col-span-2 sm:col-span-1" : ""
+          } ${card.top ? "lg:translate-y-12" : ""}`}
         >
-          <p className="absolute top-1/4 right-1/4 w-fit rounded-full bg-green-500 px-2.5 text-[10px]">
+          <p className="absolute top-[9%] right-[10%] w-fit rounded-full bg-green-500 px-2 py-0.5 text-[10px] leading-4 font-semibold text-white sm:px-2.5 sm:text-xs">
             {card.percentage}%
           </p>
           <div className="flex h-full flex-col items-center justify-center">
             <NumberTicker
               value={card.value}
-              className="text-[22px] font-bold"
+              className="whitespace-nowrap text-lg font-bold xs:text-xl 2xs:text-[22px] sm:text-2xl lg:text-xl xl:text-2xl"
             />
-            <h4 className="text-[15px] font-medium">{card.title}</h4>
-            <h4 className="text-[10px] font-medium">{card.subtitle}</h4>
+            <h4 className="mt-1 max-w-[90%] text-xs leading-tight font-medium 2xs:text-sm sm:text-base lg:text-sm xl:text-base">
+              {card.title}
+            </h4>
+            {card.subtitle ? (
+              <p className="mt-1 max-w-[85%] text-[10px] leading-tight font-medium text-muted-foreground sm:text-xs lg:text-[11px]">
+                {card.subtitle}
+              </p>
+            ) : null}
           </div>
         </div>
       ))}
