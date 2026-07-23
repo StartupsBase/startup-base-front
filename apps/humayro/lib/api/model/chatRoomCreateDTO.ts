@@ -5,9 +5,8 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { User } from './user';
 
-export interface ChatMember {
-  status?: string;
-  user?: User;
+export interface ChatRoomCreateDTO {
+  organizationId: number;
+  branchId?: number;
 }
