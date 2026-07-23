@@ -176,7 +176,7 @@ export function HyperText({
             key={index}
             className={cn("font-mono", letter === " " ? "w-3" : "")}
           >
-            {letter.tocapitalize()}
+            {letter.toUpperCase()}
           </motion.span>
         ))}
       </AnimatePresence>

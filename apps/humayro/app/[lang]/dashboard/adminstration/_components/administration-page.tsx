@@ -269,7 +269,7 @@ function ColorForm({
     try {
       const data = {
         name: name.trim(),
-        hexCode: hexCode.tocapitalize(),
+        hexCode: hexCode.toUpperCase(),
         organizationId,
       }
       if (color?.id !== undefined)

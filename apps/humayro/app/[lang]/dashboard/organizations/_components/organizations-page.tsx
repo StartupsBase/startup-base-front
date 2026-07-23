@@ -434,7 +434,7 @@ function OrganizationForm({
             {logoUrl ? (
               <img src={logoUrl} alt="" className="size-full object-cover" />
             ) : (
-              (organizationName || "?").slice(0, 1).tocapitalize()
+              (organizationName || "?").slice(0, 1).toUpperCase()
             )}
           </div>
           <div className="space-y-2">

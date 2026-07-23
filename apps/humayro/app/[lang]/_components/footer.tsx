@@ -14,7 +14,10 @@ import { useEffect, useState } from "react"
 
 import { LogoBrand } from "@/components/logo"
 import type { Language } from "@/i18n/config"
-import { HUMAYRO_PLAY_MARKET_URL } from "@/lib/constants"
+import {
+  HUMAYRO_PLAY_MARKET_URL,
+  HUMAYRO_TELEGRAM_BOT_URL,
+} from "@/lib/constants"
 
 const footerCopy = {
   uz: {
@@ -98,7 +101,15 @@ const Footer = ({ language }: { language: Language }) => {
               {copy.follow}
             </p>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <HugeiconsIcon icon={TelegramIcon} className="size-5" />
+              <Link
+                href={HUMAYRO_TELEGRAM_BOT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                className="grid size-9 place-items-center rounded-full border transition hover:border-[#229ED9]/40 hover:bg-[#229ED9]/10 hover:text-[#229ED9]"
+              >
+                <HugeiconsIcon icon={TelegramIcon} className="size-5" />
+              </Link>
               <HugeiconsIcon icon={InstagramIcon} className="size-5" />
               <HugeiconsIcon icon={WhatsappIcon} className="size-5" />
             </div>

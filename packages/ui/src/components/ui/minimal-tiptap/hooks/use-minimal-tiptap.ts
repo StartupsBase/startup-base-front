@@ -259,7 +259,7 @@ export const useMinimalTiptapEditor = ({
       attributes: {
         autocomplete: "off",
         autocorrect: "off",
-        autocapitalize: "off",
+        autoUpperCase: "off",
         class: cn("focus:outline-hidden", editorClassName),
       },
     },

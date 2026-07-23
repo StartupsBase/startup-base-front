@@ -49,7 +49,7 @@ export function ColorPicker({
 }) {
   const { t } = useTranslation()
   const normalizedValue = normalizeHex(value)
-  const [draft, setDraft] = React.useState(value.tocapitalize())
+  const [draft, setDraft] = React.useState(value.toUpperCase())
 
   function selectColor(nextValue: string) {
     const normalizedColor = normalizeHex(nextValue)
@@ -59,7 +59,7 @@ export function ColorPicker({
 
   function updateDraft(nextValue: string) {
     const withHash = nextValue.startsWith("#") ? nextValue : `#${nextValue}`
-    const nextDraft = withHash.slice(0, 7).tocapitalize()
+    const nextDraft = withHash.slice(0, 7).toUpperCase()
     setDraft(nextDraft)
     if (hexPattern.test(nextDraft)) onChange(nextDraft)
   }
@@ -79,7 +79,7 @@ export function ColorPicker({
             style={{ backgroundColor: normalizedValue }}
           />
           <span className="font-mono text-sm tracking-wide">
-            {value.tocapitalize()}
+            {value.toUpperCase()}
           </span>
         </Button>
       </PopoverTrigger>
@@ -138,6 +138,6 @@ export function ColorPicker({
 }
 
 function normalizeHex(value: string) {
-  const capitalizeValue = value.tocapitalize()
+  const capitalizeValue = value.toUpperCase()
   return hexPattern.test(capitalizeValue) ? capitalizeValue : "#000000"
 }
