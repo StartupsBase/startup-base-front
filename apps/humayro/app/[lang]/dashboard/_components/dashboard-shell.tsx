@@ -4,6 +4,7 @@ import {
   Building03Icon,
   Home01Icon,
   Logout02Icon,
+  PlayStoreIcon,
   Settings02Icon,
   UserCircleIcon,
 } from "@hugeicons/core-free-icons"
@@ -20,6 +21,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import type { Language } from "@/i18n/config"
 import { useMe1 } from "@/lib/api"
 import { clearAuthToken } from "@/lib/auth-client"
+import { HUMAYRO_PLAY_MARKET_URL } from "@/lib/constants"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import {
   Sidebar,
@@ -68,6 +70,8 @@ export function DashboardShell({
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
     .join(" ")
+  const playMarketLabel =
+    language === "uz" ? "Google Play'da mavjud" : "Доступно в Google Play"
 
   useEffect(() => {
     if (meQuery.data) setUser(meQuery.data)
@@ -100,9 +104,9 @@ export function DashboardShell({
         <Sidebar
           collapsible="icon"
           variant="inset"
-          className="[&_[data-slot=sidebar-inner]]:rounded-2xl [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border/80 [&_[data-slot=sidebar-inner]]:shadow-[0_18px_50px_-36px_rgba(0,0,0,.65)] [&_[data-slot=sidebar-inner]]:m-2"
+          className="[&_[data-slot=sidebar-inner]]:m-2 [&_[data-slot=sidebar-inner]]:rounded-2xl [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border/80 [&_[data-slot=sidebar-inner]]:shadow-[0_18px_50px_-36px_rgba(0,0,0,.65)]"
         >
-          <SidebarHeader className="min-h-20 justify-center px-3 py-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 rounded-2xl">
+          <SidebarHeader className="min-h-20 justify-center rounded-2xl px-3 py-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
             <div className="group-data-[collapsible=icon]:hidden">
               <LogoBrand />
             </div>
@@ -190,6 +194,25 @@ export function DashboardShell({
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter className="gap-3 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip={sidebarTooltip(playMarketLabel)}
+              className="h-12 rounded-2xl border border-primary/20 bg-primary/8 px-2.5 font-semibold text-primary shadow-sm group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! hover:border-primary/35 hover:bg-primary/14 hover:text-primary"
+            >
+              <a
+                href={HUMAYRO_PLAY_MARKET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                  <HugeiconsIcon icon={PlayStoreIcon} className="size-5!" />
+                </span>
+                <span className="text-[15px] font-bold group-data-[collapsible=icon]:hidden">
+                  {playMarketLabel}
+                </span>
+              </a>
+            </SidebarMenuButton>
             <p className="truncate px-2 text-sm font-medium text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
               {userName || meQuery.data?.email || t("dashboard.loadingAccount")}
             </p>

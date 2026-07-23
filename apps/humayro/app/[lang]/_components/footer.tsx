@@ -3,6 +3,7 @@
 import {
   ArrowUp01Icon,
   InstagramIcon,
+  PlayStoreIcon,
   TelegramIcon,
   WhatsappIcon,
 } from "@hugeicons/core-free-icons"
@@ -11,8 +12,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { Logo, LogoBrand } from "@/components/logo"
+import { LogoBrand } from "@/components/logo"
 import type { Language } from "@/i18n/config"
+import { HUMAYRO_PLAY_MARKET_URL } from "@/lib/constants"
 
 const footerCopy = {
   uz: {
@@ -27,6 +29,7 @@ const footerCopy = {
     signIn: "Kirish",
     follow: "Bizni kuzating",
     backToTop: "Yuqoriga qaytish",
+    playMarket: "Google Play'da mavjud",
   },
   ru: {
     description: "Открывайте свой стиль и легко управляйте гардеробом.",
@@ -39,6 +42,7 @@ const footerCopy = {
     signIn: "Войти",
     follow: "Мы в соцсетях",
     backToTop: "Наверх",
+    playMarket: "Доступно в Google Play",
   },
 } as const
 
@@ -70,8 +74,27 @@ const Footer = ({ language }: { language: Language }) => {
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {copy.description}
           </p>
+          <Link
+            href={HUMAYRO_PLAY_MARKET_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={copy.playMarket}
+            className="mt-5 inline-flex min-h-13 items-center gap-3 rounded-2xl border border-border/70 bg-foreground px-3.5 py-2.5 text-background shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-background/12">
+              <HugeiconsIcon icon={PlayStoreIcon} className="size-5" />
+            </span>
+            <span className="text-left">
+              <span className="block text-[10px] leading-none font-semibold tracking-[0.16em] opacity-70">
+                HUMAYRO
+              </span>
+              <span className="mt-1 block text-sm leading-none font-bold">
+                {copy.playMarket}
+              </span>
+            </span>
+          </Link>
           <div className="mt-6">
-            <p className="mb-3 text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+            <p className="mb-3 text-xs font-semibold tracking-[0.16em] text-muted-foreground capitalize">
               {copy.follow}
             </p>
             <div className="flex items-center gap-3 text-muted-foreground">
@@ -148,11 +171,9 @@ const Footer = ({ language }: { language: Language }) => {
           aria-label={copy.backToTop}
           title={copy.backToTop}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed right-5 bottom-5 z-50 grid size-11 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none [&_svg]:h-6! [&_svg]:w-6!"
+          className="fixed right-5 bottom-24 z-50 grid size-11 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none lg:bottom-5 [&_svg]:h-6! [&_svg]:w-6!"
         >
-          <HugeiconsIcon
-            icon={ArrowUp01Icon}
-          />
+          <HugeiconsIcon icon={ArrowUp01Icon} />
         </button>
       )}
     </footer>

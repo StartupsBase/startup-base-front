@@ -213,7 +213,7 @@ export function ReviewsSection({
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+          <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
             {t("productDetails.reviewsEyebrow")}
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight">

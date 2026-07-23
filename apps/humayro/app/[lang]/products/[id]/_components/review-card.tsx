@@ -38,7 +38,7 @@ export function ReviewCard({
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">
-              {userName.charAt(0).toUpperCase()}
+              {userName.charAt(0).tocapitalize()}
             </span>
             <div className="min-w-0">
               <h3 className="truncate text-sm font-semibold">{userName}</h3>

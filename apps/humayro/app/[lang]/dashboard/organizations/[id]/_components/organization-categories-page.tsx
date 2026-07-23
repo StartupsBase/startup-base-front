@@ -642,7 +642,7 @@ export function OrganizationCategoriesPage({
                   className="size-full object-cover"
                 />
               ) : (
-                (organizationQuery.data?.name ?? "?").slice(0, 1).toUpperCase()
+                (organizationQuery.data?.name ?? "?").slice(0, 1).tocapitalize()
               )}
             </div>
             <div className="min-w-0">

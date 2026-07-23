@@ -57,7 +57,7 @@ interface HyperTextProps extends Omit<MotionProps, "children"> {
   startOnView?: boolean
   /** Whether to trigger animation on hover */
   animateOnHover?: boolean
-  /** Custom character set for scramble effect. Defaults to uppercase alphabet */
+  /** Custom character set for scramble effect. Defaults to capitalize alphabet */
   characterSet?: CharacterSet
 }
 
@@ -176,7 +176,7 @@ export function HyperText({
             key={index}
             className={cn("font-mono", letter === " " ? "w-3" : "")}
           >
-            {letter.toUpperCase()}
+            {letter.tocapitalize()}
           </motion.span>
         ))}
       </AnimatePresence>

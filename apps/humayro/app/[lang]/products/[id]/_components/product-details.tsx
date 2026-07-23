@@ -376,7 +376,7 @@ export function ProductDetails({
         />
         {similarProducts.length ? (
           <section className="mt-16 border-t pt-12 lg:mt-24">
-            <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+            <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
               {t("productDetails.similarEyebrow")}
             </p>
             <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -474,7 +474,7 @@ function ProductGallery({
           ))
         ) : (
           <div className="flex size-full items-center justify-center bg-linear-to-br from-primary/5 to-primary/15 text-8xl font-bold text-primary/25">
-            {name.charAt(0).toUpperCase()}
+            {name.charAt(0).tocapitalize()}
           </div>
         )}
       </div>

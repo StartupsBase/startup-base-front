@@ -102,7 +102,7 @@ export function ProductCard({
           ))
         ) : (
           <div className="flex size-full items-center justify-center bg-linear-to-br from-primary/5 to-primary/15 text-4xl font-bold text-primary/35">
-            {name.charAt(0).toLocaleUpperCase()}
+            {name.charAt(0).toLocalecapitalize()}
           </div>
         )}
 

@@ -23,7 +23,7 @@ const YouTubeVideo = () => {
 
   return (
     <div className="mx-auto w-full max-w-[1072px]">
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-[0_24px_70px_-48px_rgba(0,0,0,.9)] sm:rounded-2xl">
         {!isPlaying ? (
           <button
             type="button"
@@ -39,8 +39,8 @@ const YouTubeVideo = () => {
 
             <div className="absolute inset-0 bg-black/25 transition-colors duration-300 group-hover:bg-black/35" />
 
-            <div className="absolute top-1/2 left-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 shadow-xl transition-all duration-300 group-hover:scale-110">
-            <HugeiconsIcon icon={PlayIcon} />
+            <div className="absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 shadow-xl transition-all duration-300 group-hover:scale-110 sm:size-20">
+              <HugeiconsIcon icon={PlayIcon} className="size-5 sm:size-7" />
             </div>
           </button>
         ) : (

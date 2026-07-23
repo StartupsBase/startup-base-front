@@ -109,7 +109,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
     <section className="px-4 py-16 text-[#f6f4ef] sm:px-6 sm:py-24 md:px-10 lg:py-18">
       <div className="mx-auto max-w-6xl">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary/70 uppercase dark:text-white">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary/70 capitalize dark:text-white">
             <span className="h-4 w-px" aria-hidden="true" />
             {copy.eyebrow}
           </p>
@@ -126,7 +126,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
             <article key={member.name} className="group">
               <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-[#17263d]">
                 {member.isFounder && (
-                  <span className="absolute top-3 left-3 z-10 rounded-full bg-primary/60 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-white uppercase shadow-lg">
+                  <span className="absolute top-3 left-3 z-10 rounded-full bg-primary/60 px-3 py-1 text-[10px] font-bold tracking-[0.12em] text-white capitalize shadow-lg">
                     {lang === "ru" ? "Основатель" : "Asoschi"}
                   </span>
                 )}
@@ -145,7 +145,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
                     <h3 className="text-2xl font-semibold tracking-[-0.04em] text-[#17263d] dark:text-[#edf8f4]">
                       {member.name}
                     </h3>
-                    <p className="mt-1 text-[11px] font-semibold tracking-[0.12em] text-primary/80 uppercase">
+                    <p className="mt-1 text-[11px] font-semibold tracking-[0.12em] text-primary/80 capitalize">
                       {member.role}
                     </p>
                   </div>

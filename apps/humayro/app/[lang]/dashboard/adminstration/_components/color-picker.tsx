@@ -49,7 +49,7 @@ export function ColorPicker({
 }) {
   const { t } = useTranslation()
   const normalizedValue = normalizeHex(value)
-  const [draft, setDraft] = React.useState(value.toUpperCase())
+  const [draft, setDraft] = React.useState(value.tocapitalize())
 
   function selectColor(nextValue: string) {
     const normalizedColor = normalizeHex(nextValue)
@@ -59,7 +59,7 @@ export function ColorPicker({
 
   function updateDraft(nextValue: string) {
     const withHash = nextValue.startsWith("#") ? nextValue : `#${nextValue}`
-    const nextDraft = withHash.slice(0, 7).toUpperCase()
+    const nextDraft = withHash.slice(0, 7).tocapitalize()
     setDraft(nextDraft)
     if (hexPattern.test(nextDraft)) onChange(nextDraft)
   }
@@ -79,7 +79,7 @@ export function ColorPicker({
             style={{ backgroundColor: normalizedValue }}
           />
           <span className="font-mono text-sm tracking-wide">
-            {value.toUpperCase()}
+            {value.tocapitalize()}
           </span>
         </Button>
       </PopoverTrigger>
@@ -125,7 +125,7 @@ export function ColorPicker({
             value={draft}
             onChange={(event) => updateDraft(event.target.value)}
             className={cn(
-              "font-mono uppercase",
+              "font-mono capitalize",
               draft && !hexPattern.test(draft) && "border-destructive"
             )}
             placeholder="#000000"
@@ -138,6 +138,6 @@ export function ColorPicker({
 }
 
 function normalizeHex(value: string) {
-  const uppercaseValue = value.toUpperCase()
-  return hexPattern.test(uppercaseValue) ? uppercaseValue : "#000000"
+  const capitalizeValue = value.tocapitalize()
+  return hexPattern.test(capitalizeValue) ? capitalizeValue : "#000000"
 }

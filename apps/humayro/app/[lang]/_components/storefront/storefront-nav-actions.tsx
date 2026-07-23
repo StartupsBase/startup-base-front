@@ -10,8 +10,15 @@ import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useGuestStorefront } from "@/lib/guest-storefront"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
+import { cn } from "@workspace/ui/lib/utils"
 
-export function StorefrontNavActions({ language }: { language: Language }) {
+export function StorefrontNavActions({
+  language,
+  compact = false,
+}: {
+  language: Language
+  compact?: boolean
+}) {
   const hasToken = useHasAuthToken()
   const text = useStorefrontCopy()
   const guestStorefront = useGuestStorefront()
@@ -31,6 +38,7 @@ export function StorefrontNavActions({ language }: { language: Language }) {
             ? favoritesQuery.data?.length
             : guestStorefront.favoriteIds.length
         }
+        compact={compact}
       >
         <HugeiconsIcon
           icon={HeartIcon}
@@ -48,6 +56,7 @@ export function StorefrontNavActions({ language }: { language: Language }) {
                 0
               )
         }
+        compact={compact}
       >
         <HugeiconsIcon
           icon={ShoppingCart02Icon}
@@ -62,23 +71,37 @@ function NavAction({
   href,
   label,
   count,
+  compact,
   children,
 }: {
   href: string
   label: string
   count?: number
+  compact: boolean
   children: React.ReactNode
 }) {
   return (
     <Link
       href={href}
       aria-label={label}
-      className="xs:size-9 3xl:h-12 3xl:px-4 3xl:text-base relative flex size-8 shrink-0 items-center justify-center gap-2 rounded-full px-0 text-xs font-medium transition hover:bg-muted sm:size-10 lg:size-9 xl:h-10 xl:w-auto xl:px-3 2xl:h-11 2xl:px-3.5 2xl:text-sm"
+      className={cn(
+        "relative flex shrink-0 items-center justify-center gap-2 rounded-full px-0 text-xs font-medium transition hover:bg-muted",
+        compact
+          ? "size-11"
+          : "xs:size-9 3xl:h-12 3xl:px-4 3xl:text-base size-8 sm:size-10 lg:size-9 xl:h-10 xl:w-auto xl:px-3 2xl:h-11 2xl:px-3.5 2xl:text-sm"
+      )}
     >
       {children}
       <span className="hidden xl:inline">{label}</span>
       {count != null && count > 0 && (
-        <span className="xs:min-w-4 xs:px-1 xs:text-[10px] xs:leading-4 absolute -top-1 -right-1 grid min-w-3.5 place-items-center rounded-full bg-primary px-0.5 text-[9px] leading-3.5 font-bold text-primary-foreground xl:top-0 xl:right-0 2xl:text-[11px]">
+        <span
+          className={cn(
+            "absolute -top-1 -right-1 grid min-w-3.5 place-items-center rounded-full bg-primary px-0.5 text-[9px] leading-3.5 font-bold text-primary-foreground",
+            compact
+              ? "min-w-4 px-1 text-[10px] leading-4"
+              : "xs:min-w-4 xs:px-1 xs:text-[10px] xs:leading-4 xl:top-0 xl:right-0 2xl:text-[11px]"
+          )}
+        >
           {count > 99 ? "99+" : count}
         </span>
       )}

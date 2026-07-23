@@ -61,7 +61,7 @@ export function AllReviews({
               />
             ) : null}
             <div className="min-w-0">
-              <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+              <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
                 {t("productDetails.reviewsEyebrow")}
               </p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-balance sm:text-3xl">

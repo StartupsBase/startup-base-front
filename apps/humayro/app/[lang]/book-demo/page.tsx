@@ -176,7 +176,7 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
               <div className="absolute -top-10 -right-7 size-40 rounded-full bg-[#f7e5cd]/80" />
               <div className="relative flex min-h-45 items-end justify-between rounded-[1.45rem] bg-[#baa283] p-5">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.16em] text-[#fff8ed]/75 uppercase">
+                  <p className="text-xs font-bold tracking-[0.16em] text-[#fff8ed]/75 capitalize">
                     {copy.cardLabel}
                   </p>
                   <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#fffaf2]">
