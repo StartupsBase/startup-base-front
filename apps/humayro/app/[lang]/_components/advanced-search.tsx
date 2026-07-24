@@ -125,7 +125,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
               ))}
             </div>
           ) : (
-            <div className="xs:grid-cols-2 xs:gap-2.5 3xl:gap-5 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:gap-4 2xl:grid-cols-5">
+            <div className="xs:grid-cols-2 xs:gap-2.5 3xl:gap-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:gap-4 2xl:grid-cols-5">
               {products.map((product, index) => (
                 <ProductCard
                   key={product.id ?? index}

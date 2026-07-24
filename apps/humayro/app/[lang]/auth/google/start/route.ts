@@ -33,6 +33,9 @@ export async function GET(
       throw new Error("Unexpected Google authorization URL")
     }
 
+    googleUrl.searchParams.delete("login_hint")
+    googleUrl.searchParams.delete("authuser")
+    googleUrl.searchParams.delete("hd")
     googleUrl.searchParams.set("prompt", "select_account")
     return NextResponse.redirect(googleUrl)
   } catch {
