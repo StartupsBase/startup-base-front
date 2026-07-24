@@ -78,6 +78,13 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -90,6 +97,8 @@ import {
 } from "@workspace/ui/components/data-table"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 import { SortableList } from "@workspace/ui/components/sortable-list"
+
+const ROOT_CATEGORY = "__root_category__"
 
 const categorySchema = z.object({
   name: z.string().trim().min(1, "Category name is required."),
@@ -1538,35 +1547,73 @@ function CategoryForm({
             label={t("category.sizeType")}
             error={form.formState.errors.sizeType?.message}
           >
-            <select
-              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
-              {...form.register("sizeType")}
-            >
-              <option value="LETTER">{t("category.letter")}</option>
-              <option value="NUMBER">{t("category.number")}</option>
-            </select>
+            <Controller
+              control={form.control}
+              name="sizeType"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    ref={field.ref}
+                    aria-label={t("category.sizeType")}
+                    className="h-11 w-full rounded-xl bg-background"
+                    onBlur={field.onBlur}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LETTER">
+                      {t("category.letter")}
+                    </SelectItem>
+                    <SelectItem value="NUMBER">
+                      {t("category.number")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </CategoryField>
           <CategoryField
             label={t("category.parent")}
             error={form.formState.errors.parentId?.message}
           >
-            <select
-              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
-              {...form.register("parentId")}
-            >
-              <option value="">{t("category.root")}</option>
-              {categories
-                .filter(
-                  (item) =>
-                    item.id !== undefined && !excludedParentIds.has(item.id)
-                )
-                .map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.parentId ? `↳ ${item.parentName} / ` : ""}
-                    {item.name}
-                  </option>
-                ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <Select
+                  value={field.value || ROOT_CATEGORY}
+                  onValueChange={(nextValue) =>
+                    field.onChange(nextValue === ROOT_CATEGORY ? "" : nextValue)
+                  }
+                >
+                  <SelectTrigger
+                    ref={field.ref}
+                    aria-label={t("category.parent")}
+                    className="h-11 w-full rounded-xl bg-background"
+                    onBlur={field.onBlur}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ROOT_CATEGORY}>
+                      {t("category.root")}
+                    </SelectItem>
+                    {categories
+                      .filter(
+                        (item) =>
+                          item.id !== undefined &&
+                          !excludedParentIds.has(item.id)
+                      )
+                      .map((item) => (
+                        <SelectItem key={item.id} value={String(item.id)}>
+                          {item.parentId ? `↳ ${item.parentName} / ` : ""}
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </CategoryField>
         </div>
         <CategoryField label={t("category.sortOrder")}>

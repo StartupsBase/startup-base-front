@@ -113,7 +113,7 @@ export function DashboardShell({
             <Link
               href={`/${language}`}
               aria-label="Humayro"
-              className="hidden size-11 place-items-center rounded-2xl bg-background shadow-sm ring-1 ring-sidebar-border transition group-data-[collapsible=icon]:grid hover:scale-[1.03]"
+              className="hidden size-11 place-items-center rounded-2xl bg-primary shadow-sm ring-1 ring-primary/30 transition group-data-[collapsible=icon]:grid hover:scale-[1.03]"
             >
               <Logo className="size-9" />
             </Link>
@@ -232,8 +232,8 @@ export function DashboardShell({
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="min-w-0 overflow-x-clip md:my-3 md:mr-3 md:rounded-[2rem]! md:border md:border-border/70 md:shadow-[0_24px_70px_-48px_rgba(0,0,0,.7)]">
-          <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-4 md:justify-end md:border-b-0 md:px-6">
+        <SidebarInset className="w-0 max-w-full min-w-0 overflow-x-hidden md:my-3 md:mr-3 md:rounded-[2rem]! md:border md:border-border/70 md:shadow-[0_24px_70px_-48px_rgba(0,0,0,.7)]">
+          <header className="sticky top-0 z-40 flex h-16 w-full max-w-full min-w-0 items-center justify-between border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-4 md:justify-end md:border-b-0 md:px-6">
             <LogoBrand className="md:hidden" />
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <LanguageSwitcher language={language} className="size-10" />
@@ -241,7 +241,9 @@ export function DashboardShell({
               <UserDropdown language={language} />
             </div>
           </header>
-          <main className="min-w-0 pb-24 md:pb-0">{children}</main>
+          <main className="w-full max-w-full min-w-0 overflow-x-hidden pb-24 md:pb-0">
+            {children}
+          </main>
           <nav
             aria-label={t("dashboard.navigation")}
             className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-24px_rgba(0,0,0,.55)] backdrop-blur-xl md:hidden"

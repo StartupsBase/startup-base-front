@@ -45,7 +45,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
+
+const ALL_ORGANIZATIONS = "__all_organizations__"
+const ALL_BRANCHES = "__all_branches__"
+const GENDER_UNSPECIFIED = "__gender_unspecified__"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -231,39 +242,64 @@ export function Dashboard({ language }: { language: string }) {
             placeholder={t("dashboard.search")}
             className="w-full sm:w-64"
           />
-          <select
-            value={organizationId}
-            onChange={(event) => {
-              setOrganizationId(event.target.value)
+          <Select
+            value={organizationId || ALL_ORGANIZATIONS}
+            onValueChange={(nextValue) => {
+              setOrganizationId(
+                nextValue === ALL_ORGANIZATIONS ? "" : nextValue
+              )
               setBranchId("")
             }}
             disabled={organizationsQuery.isLoading}
-            className="h-11 w-full max-w-full min-w-0 truncate rounded-4xl border border-input bg-input/30 px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-sm"
           >
-            <option value="">{t("dashboard.allOrganizations")}</option>
-            {organizationsQuery.data?.map((organization) =>
-              organization.id !== undefined ? (
-                <option key={organization.id} value={organization.id}>
-                  {organization.name}
-                </option>
-              ) : null
-            )}
-          </select>
-          <select
-            value={branchId}
-            onChange={(event) => setBranchId(event.target.value)}
+            <SelectTrigger
+              aria-label={t("dashboard.allOrganizations")}
+              className="h-11 w-full sm:w-auto sm:max-w-64"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_ORGANIZATIONS}>
+                {t("dashboard.allOrganizations")}
+              </SelectItem>
+              {organizationsQuery.data?.map((organization) =>
+                organization.id !== undefined ? (
+                  <SelectItem
+                    key={organization.id}
+                    value={String(organization.id)}
+                  >
+                    {organization.name}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
+          <Select
+            value={branchId || ALL_BRANCHES}
+            onValueChange={(nextValue) =>
+              setBranchId(nextValue === ALL_BRANCHES ? "" : nextValue)
+            }
             disabled={branchesQuery.isLoading}
-            className="h-11 w-full max-w-full min-w-0 truncate rounded-4xl border border-input bg-input/30 px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-sm"
           >
-            <option value="">{t("dashboard.allBranches")}</option>
-            {branchesQuery.data?.content?.map((branch) =>
-              branch.id !== undefined ? (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ) : null
-            )}
-          </select>
+            <SelectTrigger
+              aria-label={t("dashboard.allBranches")}
+              className="h-11 w-full sm:w-auto sm:max-w-64"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_BRANCHES}>
+                {t("dashboard.allBranches")}
+              </SelectItem>
+              {branchesQuery.data?.content?.map((branch) =>
+                branch.id !== undefined ? (
+                  <SelectItem key={branch.id} value={String(branch.id)}>
+                    {branch.name}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
         </div>
         {usersQuery.isLoading || meQuery.isLoading ? (
           <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
@@ -393,17 +429,30 @@ function UserActions({ user }: { user: UserDTO }) {
               onChange={(event) => setPhone(event.target.value)}
               placeholder={t("register.phone")}
             />
-            <select
-              value={gender}
-              onChange={(event) =>
-                setGender(event.target.value as "" | "MALE" | "FEMALE")
+            <Select
+              value={gender || GENDER_UNSPECIFIED}
+              onValueChange={(nextValue) =>
+                setGender(
+                  nextValue === GENDER_UNSPECIFIED
+                    ? ""
+                    : (nextValue as "MALE" | "FEMALE")
+                )
               }
-              className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm"
             >
-              <option value="">{t("register.genderUnspecified")}</option>
-              <option value="MALE">{t("register.male")}</option>
-              <option value="FEMALE">{t("register.female")}</option>
-            </select>
+              <SelectTrigger
+                aria-label={t("register.genderUnspecified")}
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={GENDER_UNSPECIFIED}>
+                  {t("register.genderUnspecified")}
+                </SelectItem>
+                <SelectItem value="MALE">{t("register.male")}</SelectItem>
+                <SelectItem value="FEMALE">{t("register.female")}</SelectItem>
+              </SelectContent>
+            </Select>
             <label className="text-sm font-medium">
               {t("dashboard.profilePhoto")}
               <Input

@@ -77,7 +77,7 @@ function CountrySelect({
           name={name}
           onBlur={onBlur}
           onFocus={onFocus}
-          className="flex h-auto w-auto shrink-0 items-center gap-1 rounded-md bg-transparent p-0 outline-none disabled:cursor-not-allowed cursor-pointer disabled:opacity-50"
+          className="flex h-auto w-auto shrink-0 cursor-pointer items-center gap-1 rounded-md bg-transparent p-0 outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <CountryIcon
             aria-hidden
@@ -170,7 +170,7 @@ function PhoneInput({ className, onChange, value, ...props }: PhoneInputProps) {
       value={value || undefined}
       onChange={(phoneNumber) => onChange(phoneNumber ?? "")}
       className={cn(
-        "flex h-11 w-full items-center gap-2 rounded-4xl border border-input bg-input/30 px-3 transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+        "flex h-11 w-full max-w-full min-w-0 items-center gap-2 rounded-4xl border border-input bg-input/30 px-3 transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
         "[&_.PhoneInputCountryIcon--border]:shadow-none [&_.PhoneInputInput]:h-auto [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:px-0 [&_.PhoneInputInput]:focus-visible:ring-0",
         className
       )}

@@ -12,21 +12,12 @@ function Logo({ className, ...props }: ComponentProps<"span">) {
       {...props}
     >
       <Image
-        src="/brand/humayroLight.svg"
-        alt=""
-        fill
-        sizes="(min-width: 1536px) 68px, (min-width: 640px) 58px, 48px"
-        quality={100}
-        className="scale-[1.42] object-cover dark:hidden"
-      />
-
-      <Image
         src="/brand/humayroDark.svg"
         alt=""
         fill
         sizes="(min-width: 1536px) 68px, (min-width: 640px) 58px, 48px"
         quality={100}
-        className="hidden scale-[1.42] object-cover dark:block"
+        className="object-contain p-0.5 invert"
       />
     </span>
   )

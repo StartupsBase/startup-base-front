@@ -96,11 +96,12 @@ export function ImageCropInput({
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
         <Button
           type="button"
           variant="outline"
           disabled={disabled}
+          className="h-auto min-h-11 w-full max-w-full px-4 py-2 text-center whitespace-normal sm:w-auto"
           onClick={() => galleryInput.current?.click()}
         >
           {t(`${translationPrefix}.choosePhoto`)}
@@ -109,7 +110,7 @@ export function ImageCropInput({
           type="button"
           variant="outline"
           disabled={disabled}
-          className="sm:hidden"
+          className="h-auto min-h-11 w-full max-w-full px-4 py-2 text-center whitespace-normal sm:hidden"
           onClick={() => cameraInput.current?.click()}
         >
           {t(`${translationPrefix}.takePhoto`)}
