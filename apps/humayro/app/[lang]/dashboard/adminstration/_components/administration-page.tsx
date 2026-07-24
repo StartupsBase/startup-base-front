@@ -49,11 +49,19 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs"
+import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 
 export function AdministrationPage({ language }: { language: string }) {
   const { t } = useTranslation()
@@ -84,7 +92,8 @@ export function AdministrationPage({ language }: { language: string }) {
         language={language}
         items={[{ label: t("administration.title") }]}
       />
-      <div className="mt-6 mb-8">
+      <SidebarTrigger className="mb-3 mt-6 hidden md:inline-flex" />
+      <div className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("administration.title")}
         </h1>
@@ -517,20 +526,27 @@ function SizeForm({ size, onSaved }: { size?: SizeDTO; onSaved: () => void }) {
         />
       </Field>
       <Field label={t("administration.sizes.type")}>
-        <select
+        <Select
           value={type}
-          onChange={(event) =>
-            setType(event.target.value as "LETTER" | "NUMBER")
+          onValueChange={(nextValue) =>
+            setType(nextValue as "LETTER" | "NUMBER")
           }
-          className="h-11 rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none"
         >
-          <option value="LETTER">
-            {t("administration.sizes.types.LETTER")}
-          </option>
-          <option value="NUMBER">
-            {t("administration.sizes.types.NUMBER")}
-          </option>
-        </select>
+          <SelectTrigger
+            aria-label={t("administration.sizes.type")}
+            className="h-11 w-full px-4"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="LETTER">
+              {t("administration.sizes.types.LETTER")}
+            </SelectItem>
+            <SelectItem value="NUMBER">
+              {t("administration.sizes.types.NUMBER")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </Field>
       <Field label={t("administration.sizes.sortOrder")}>
         <Input
@@ -579,23 +595,25 @@ function OrganizationSelect({
   )
 
   return (
-    <select
-      value={value}
-      onChange={(event) =>
-        onChange(event.target.value ? Number(event.target.value) : "")
-      }
+    <Select
+      value={value === "" ? undefined : String(value)}
+      onValueChange={(nextValue) => onChange(Number(nextValue))}
       disabled={disabled || organizationsQuery.isLoading}
-      className="h-11 rounded-4xl border border-input bg-input/30 px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <option value="" disabled>
-        {t("administration.selectOrganization")}
-      </option>
-      {organizations.map((organization) => (
-        <option key={organization.id} value={organization.id}>
-          {organization.name}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger
+        aria-label={t("administration.selectOrganization")}
+        className="h-11 w-full px-4"
+      >
+        <SelectValue placeholder={t("administration.selectOrganization")} />
+      </SelectTrigger>
+      <SelectContent>
+        {organizations.map((organization) => (
+          <SelectItem key={organization.id} value={String(organization.id)}>
+            {organization.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

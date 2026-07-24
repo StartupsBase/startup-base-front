@@ -10,7 +10,7 @@ const Support = () => {
   return (
     <Button
       asChild
-      className="fixed right-5 bottom-25 z-10 h-[56px] w-[56px] animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80 [&_svg]:h-5! [&_svg]:w-5!"
+      className="fixed right-5 bottom-40 lg:bottom-25 z-10 w-12 h-12 lg:h-14 lg:w-14 animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80 [&_svg]:h-5! [&_svg]:w-5!"
     >
       <Link
         href={HUMAYRO_TELEGRAM_BOT_URL}

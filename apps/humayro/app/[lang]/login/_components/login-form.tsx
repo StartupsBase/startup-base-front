@@ -20,7 +20,7 @@ import {
 } from "@/lib/constants"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
-import { GoogleLoginButton } from "./google-login-button"
+import { GoogleLoginButton } from "@/components/forms/google-login-button"
 import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"

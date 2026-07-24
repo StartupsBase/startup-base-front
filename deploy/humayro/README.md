@@ -71,8 +71,29 @@ host key collected during CI.
 
 Pull requests run lint, TypeScript, and the production build. A push to `main`
 publishes an image addressed by its digest. Successful `main` builds copy the
-Compose manifest and deployment script to the VPS, wait for the new container
-health check, and roll back to the previous image if needed.
+Compose manifest, deployment script, and current Nginx configs to the VPS, wait
+for the new container health check, and roll back to the previous image if
+needed.
+
+When the OAuth callback opens as raw JSON, the VPS is still using an older
+Nginx config that sends `/api/auth/google/callback` to the backend. Install the
+current config once and reload Nginx:
+
+```bash
+sudo install -m 0644 /opt/humayro-front/nginx.conf /etc/nginx/sites-available/humayro.conf
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+The Google OAuth client and the backend must both use this exact redirect URI:
+
+```text
+https://humayro.uz/api/auth/google/callback
+```
+
+Add it under **Authorized redirect URIs** in Google Cloud Console. Even a
+different protocol, subdomain, path, or trailing slash causes
+`redirect_uri_mismatch`.
 
 The workflow can also be started manually from **Actions > Humayro CI/CD**.
 

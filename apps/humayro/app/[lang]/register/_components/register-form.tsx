@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next"
 import { useRegister } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import { GoogleLoginButton } from "@/components/forms/google-login-button"
 import { Input } from "@/components/input"
 import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
@@ -94,26 +95,39 @@ export function RegisterForm({ language }: { language: string }) {
   }
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <div className="grid gap-5 sm:grid-cols-2 sm:gap-4">
         <Field
           label={t("register.firstname")}
           error={form.formState.errors.firstname?.message}
         >
-          <Input autoComplete="given-name" {...form.register("firstname")} />
+          <Input
+            autoComplete="given-name"
+            className={controlClassName}
+            {...form.register("firstname")}
+          />
         </Field>
         <Field
           label={t("register.lastname")}
           error={form.formState.errors.lastname?.message}
         >
-          <Input autoComplete="family-name" {...form.register("lastname")} />
+          <Input
+            autoComplete="family-name"
+            className={controlClassName}
+            {...form.register("lastname")}
+          />
         </Field>
       </div>
       <Field
         label={t("register.email")}
         error={form.formState.errors.email?.message}
       >
-        <Input type="email" autoComplete="email" {...form.register("email")} />
+        <Input
+          type="email"
+          autoComplete="email"
+          className={controlClassName}
+          {...form.register("email")}
+        />
       </Field>
       <Field
         label={t("register.phone")}
@@ -128,6 +142,7 @@ export function RegisterForm({ language }: { language: string }) {
               onChange={field.onChange}
               onBlur={field.onBlur}
               name={field.name}
+              className={controlClassName}
             />
           )}
         />
@@ -142,7 +157,7 @@ export function RegisterForm({ language }: { language: string }) {
               value={field.value}
               onValueChange={field.onChange}
             >
-              <SelectTrigger onBlur={field.onBlur} className="h-11 w-full px-4">
+              <SelectTrigger onBlur={field.onBlur} className={controlClassName}>
                 <SelectValue placeholder={t("register.genderUnspecified")} />
               </SelectTrigger>
               <SelectContent>
@@ -160,6 +175,7 @@ export function RegisterForm({ language }: { language: string }) {
         <PasswordInput
           valid={password.length >= 6}
           autoComplete="new-password"
+          className={controlClassName}
           {...form.register("password")}
         />
       </Field>
@@ -170,16 +186,17 @@ export function RegisterForm({ language }: { language: string }) {
         <PasswordInput
           valid={confirmPassword.length >= 6 && confirmPassword === password}
           autoComplete="new-password"
+          className={controlClassName}
           {...form.register("confirmPassword")}
         />
       </Field>
       {form.formState.errors.root?.message ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-5 text-destructive">
           {form.formState.errors.root.message}
         </p>
       ) : null}
       <Button
-        className="w-full"
+        className="h-12 w-full rounded-2xl bg-[#08bfa4] text-sm font-bold text-[#00251f] shadow-[0_12px_30px_rgba(8,191,164,.18)] hover:bg-[#20cdb4] hover:shadow-[0_14px_34px_rgba(8,191,164,.24)] focus-visible:ring-[#54dbc8]/35 dark:bg-[#08bfa4] dark:text-[#001b17] dark:hover:bg-[#28d2ba]"
         type="submit"
         disabled={registerMutation.isPending}
       >
@@ -187,11 +204,17 @@ export function RegisterForm({ language }: { language: string }) {
           ? t("register.submitting")
           : t("register.submit")}
       </Button>
-      <p className="text-center text-sm text-muted-foreground">
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border/80" />
+        {t("login.orContinue")}
+        <span className="h-px flex-1 bg-border/80" />
+      </div>
+      <GoogleLoginButton />
+      <p className="pt-0.5 text-center text-sm text-muted-foreground">
         {t("register.hasAccount")}{" "}
         <Link
           href={`/${language}/login`}
-          className="font-medium text-primary hover:underline"
+          className="font-semibold text-primary underline-offset-4 hover:underline dark:text-[#3bd6c0]"
         >
           {t("register.signIn")}
         </Link>
@@ -199,6 +222,9 @@ export function RegisterForm({ language }: { language: string }) {
     </form>
   )
 }
+
+const controlClassName =
+  "h-12 w-full rounded-2xl border-border/80 bg-background/55 px-4 text-sm shadow-none transition-[border-color,background-color,box-shadow] hover:border-primary/25 focus-visible:border-primary/60 focus-visible:bg-background focus-visible:ring-4 focus-visible:ring-primary/10 dark:border-white/12 dark:bg-white/[0.045] dark:hover:border-[#49cdb9]/30 dark:focus-visible:border-[#49cdb9]/65 dark:focus-visible:bg-white/[0.065] dark:focus-visible:ring-[#20cdb4]/12"
 
 function Field({
   label,
@@ -210,10 +236,14 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-medium">{label}</span>
+    <label className="group/field block space-y-2">
+      <span className="text-sm font-semibold text-foreground/85 transition-colors group-focus-within/field:text-primary dark:text-white/80 dark:group-focus-within/field:text-[#5ee3cf]">
+        {label}
+      </span>
       {children}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <p className="text-xs leading-5 text-destructive">{error}</p>
+      ) : null}
     </label>
   )
 }
