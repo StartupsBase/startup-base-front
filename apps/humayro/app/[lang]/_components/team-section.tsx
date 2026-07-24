@@ -122,7 +122,7 @@ export default function TeamSection({ lang }: TeamSectionProps) {
         </header>
 
         <div
-          className="-mx-2 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scrollbar-none sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0 lg:gap-6 [&::-webkit-scrollbar]:hidden"
+          className="-mr-2 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto pr-4 pb-4 scrollbar-none sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0 lg:gap-6 [&::-webkit-scrollbar]:hidden"
           aria-label={copy.eyebrow}
         >
           {members.map((member) => (
