@@ -116,19 +116,20 @@ export function AdvancedSearch({ language }: { language: Language }) {
           ) : !productsQuery.isPending && products.length === 0 ? (
             <SearchMessage>{text.searchEmpty}</SearchMessage>
           ) : productsQuery.isPending ? (
-            <div className="xs:grid-cols-2 xs:gap-2.5 3xl:gap-5 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:gap-4 2xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="aspect-[3/4] animate-pulse rounded-2xl bg-muted/70"
+                  className="aspect-[4/3] animate-pulse rounded-xl bg-muted/70"
                 />
               ))}
             </div>
           ) : (
-            <div className="xs:grid-cols-2 xs:gap-2.5 3xl:gap-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:gap-4 2xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
               {products.map((product, index) => (
                 <ProductCard
                   key={product.id ?? index}
+                  compact
                   product={product}
                   language={language}
                   isFavorite={product.id != null && favoriteIds.has(product.id)}

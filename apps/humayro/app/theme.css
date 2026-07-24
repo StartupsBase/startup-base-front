@@ -245,3 +245,9 @@ body:has(.humayro-top-background) {
   background-size: var(--humayro-top-background-size);
   background-repeat: no-repeat, no-repeat, repeat, no-repeat;
 }
+
+@media (max-width: 1023px) {
+  body:has([data-mobile-storefront-nav]) {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}

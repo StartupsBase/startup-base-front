@@ -125,7 +125,7 @@ export function ColorPicker({
             value={draft}
             onChange={(event) => updateDraft(event.target.value)}
             className={cn(
-              "font-mono uppercase",
+              "font-mono capitalize",
               draft && !hexPattern.test(draft) && "border-destructive"
             )}
             placeholder="#000000"
@@ -138,6 +138,6 @@ export function ColorPicker({
 }
 
 function normalizeHex(value: string) {
-  const uppercaseValue = value.toUpperCase()
-  return hexPattern.test(uppercaseValue) ? uppercaseValue : "#000000"
+  const capitalizeValue = value.toUpperCase()
+  return hexPattern.test(capitalizeValue) ? capitalizeValue : "#000000"
 }

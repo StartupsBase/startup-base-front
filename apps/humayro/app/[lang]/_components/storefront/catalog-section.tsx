@@ -86,7 +86,7 @@ export function CatalogSection({ language }: { language: Language }) {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-bold tracking-[0.2em] text-primary uppercase">
+            <p className="text-sm font-bold tracking-[0.2em] text-primary capitalize">
               {text.catalogEyebrow}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">

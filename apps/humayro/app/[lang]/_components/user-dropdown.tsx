@@ -1,5 +1,7 @@
 "use client"
 
+import { UserCircleIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -18,8 +20,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
+import { cn } from "@workspace/ui/lib/utils"
 
-export function UserDropdown({ language }: { language: string }) {
+export function UserDropdown({
+  language,
+  compact = false,
+}: {
+  language: string
+  compact?: boolean
+}) {
   const queryClient = useQueryClient()
   const { t } = useTranslation()
   const [enabled, setEnabled] = useState(!!hasAuthToken())
@@ -36,7 +45,11 @@ export function UserDropdown({ language }: { language: string }) {
   const contact = identifier ?? currentUser?.email ?? currentUser?.phone
 
   useEffect(() => {
-    setEnabled(hasAuthToken())
+    const frame = window.requestAnimationFrame(() => {
+      setEnabled(hasAuthToken())
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [])
 
   useEffect(() => {
@@ -62,13 +75,22 @@ export function UserDropdown({ language }: { language: string }) {
       <Button
         asChild
         variant="ghost"
-        className="xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-xs 3xl:h-12 3xl:text-base h-8 shrink-0 rounded-full px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
+        className={cn(
+          "shrink-0 rounded-full",
+          compact
+            ? "size-11 px-0"
+            : "xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-xs 3xl:h-12 3xl:text-base h-8 px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
+        )}
       >
-        <Link href={`/${language}/login`}>
-          <span className="max-[339px]:sr-only">{t("home.loginAction")}</span>
-          <span aria-hidden="true" className="hidden max-[339px]:inline">
-            ↗
-          </span>
+        <Link
+          href={`/${language}/login`}
+          aria-label={compact ? t("home.loginAction") : undefined}
+        >
+          {compact ? (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
+          ) : (
+            t("home.loginAction")
+          )}
         </Link>
       </Button>
     )
@@ -80,16 +102,31 @@ export function UserDropdown({ language }: { language: string }) {
         <Button
           variant="outline"
           size="sm"
-          className="xs:h-9 xs:max-w-20 xs:gap-1.5 xs:px-2 xs:text-[11px] 2xs:max-w-24 2xs:text-xs 3xl:h-12 3xl:max-w-48 3xl:text-base h-8 max-w-16 justify-start gap-1 truncate rounded-full px-1.5 text-[10px] sm:h-10 sm:max-w-36 sm:gap-2 sm:px-3 sm:text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
+          aria-label={
+            compact ? name || contact || t("home.account") : undefined
+          }
+          className={cn(
+            "truncate rounded-full",
+            compact
+              ? "size-11 justify-center px-0"
+              : "xs:h-9 xs:max-w-20 xs:gap-1.5 xs:px-2 xs:text-[11px] 2xs:max-w-24 2xs:text-xs 3xl:h-12 3xl:max-w-48 3xl:text-base h-8 max-w-16 justify-start gap-1 px-1.5 text-[10px] sm:h-10 sm:max-w-36 sm:gap-2 sm:px-3 sm:text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
+          )}
         >
           {currentUser.photo?.s3Url ? (
             <img
               src={currentUser.photo.s3Url}
               alt=""
-              className="xs:size-[18px] size-4 shrink-0 rounded-full object-cover sm:size-5 2xl:size-6"
+              className={cn(
+                "shrink-0 rounded-full object-cover",
+                compact
+                  ? "size-6"
+                  : "xs:size-[18px] size-4 sm:size-5 2xl:size-6"
+              )}
             />
+          ) : compact ? (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
           ) : null}
-          {name || contact || t("home.account")}
+          {!compact ? name || contact || t("home.account") : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 shadow-none">

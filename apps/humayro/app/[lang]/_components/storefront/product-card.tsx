@@ -18,6 +18,7 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 type ProductCardProps = {
+  compact?: boolean
   product: ProductListDTO
   language: Language
   isFavorite: boolean
@@ -28,6 +29,7 @@ type ProductCardProps = {
 }
 
 export function ProductCard({
+  compact = false,
   product,
   language,
   isFavorite,
@@ -75,9 +77,17 @@ export function ProductCard({
   }
 
   return (
-    <article className="group min-w-0 overflow-hidden rounded-2xl border bg-card shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg">
+    <article
+      className={cn(
+        "group min-w-0 overflow-hidden border bg-card shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg",
+        compact ? "rounded-xl" : "rounded-2xl"
+      )}
+    >
       <div
-        className="relative aspect-square overflow-hidden bg-muted"
+        className={cn(
+          "relative overflow-hidden bg-muted",
+          compact ? "aspect-[4/3]" : "aspect-square"
+        )}
         onPointerEnter={() => setIsHovered(true)}
         onPointerMove={updateImageFromPointer}
         onPointerLeave={() => {
@@ -158,10 +168,17 @@ export function ProductCard({
         ) : null}
       </div>
 
-      <div className="p-3">
+      <div className={compact ? "p-2" : "p-3"}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="line-clamp-2 min-h-11 text-[15px] leading-[1.4] font-semibold">
+            <h3
+              className={cn(
+                "font-semibold",
+                compact
+                  ? "line-clamp-1 text-xs leading-5"
+                  : "line-clamp-2 min-h-11 text-[15px] leading-[1.4]"
+              )}
+            >
               {productId != null ? (
                 <Link
                   href={`/${language}/products/${productId}`}
@@ -173,11 +190,13 @@ export function ProductCard({
                 name
               )}
             </h3>
-            <p className="mt-1 truncate text-[11px] text-muted-foreground">
-              {[product.categoryName, product.organizationName]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
+            {!compact ? (
+              <p className="mt-1 truncate text-[11px] text-muted-foreground">
+                {[product.categoryName, product.organizationName]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            ) : null}
           </div>
           {product.ratingAvg != null ? (
             <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
@@ -186,9 +205,14 @@ export function ProductCard({
           ) : null}
         </div>
 
-        <div className="mt-3">
+        <div className={compact ? "mt-1.5" : "mt-3"}>
           <div className="min-w-0">
-            <p className="font-commerce truncate text-base font-bold text-primary">
+            <p
+              className={cn(
+                "font-commerce truncate font-bold text-primary",
+                compact ? "text-xs" : "text-base"
+              )}
+            >
               {formatStorefrontPrice(price, language)}
             </p>
             {hasDiscount && product.basePrice != null ? (
@@ -202,7 +226,10 @@ export function ProductCard({
             size="sm"
             aria-label={text.addToCart}
             disabled={productId == null || isAdding || product.totalStock === 0}
-            className="mt-3 h-10 w-full rounded-xl font-semibold"
+            className={cn(
+              "w-full rounded-xl font-semibold",
+              compact ? "mt-2 h-8 px-2 text-xs" : "mt-3 h-10"
+            )}
             onClick={() => productId != null && onAddToCart(productId)}
           >
             {isAdding ? (

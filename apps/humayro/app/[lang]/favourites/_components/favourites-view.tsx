@@ -72,7 +72,7 @@ export function FavouritesView({ language }: { language: Language }) {
 
   return (
     <main className="min-h-screen px-4 py-16 sm:px-6 lg:py-24">
-      <div className="mx-auto max-w-[1580px]">
+      <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div>
             <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl">

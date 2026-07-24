@@ -2,9 +2,15 @@
 
 import {
   CheckIcon,
+  CopyLinkIcon,
+  Facebook02Icon,
   HeartIcon,
+  InstagramIcon,
   ShoppingCart02Icon,
+  TelegramIcon,
+  TwitterIcon,
   Upload06Icon,
+  WhatsappIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -31,6 +37,14 @@ import type { ProductDTO } from "@/lib/api/model/productDTO"
 import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
 import { Button } from "@workspace/ui/components/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover"
 import { VideoPlayer } from "@workspace/ui/components/video-player"
 import {
   Breadcrumb,
@@ -76,7 +90,7 @@ export function ProductDetails({
   const [selectedVariantId, setSelectedVariantId] = useState<number>()
   const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
-  const [copy, setCopy] = useState("")
+  const [copied, setCopied] = useState(false)
   const reviewEntries = expandReviewEntries(reviewsQuery.data ?? [])
   const reviewRating = reviewEntries.length
     ? reviewEntries.reduce((sum, review) => sum + review.rating, 0) /
@@ -133,18 +147,38 @@ export function ProductDetails({
     }
   }
 
-  const handleCopy = async () => {
-    const url = `http://localhost:3000/ru/products/${productId}`
-
+  const copyProductLink = async () => {
     try {
-      await navigator.clipboard.writeText(url)
-      toast.success("Havola nusxalandi")
-      setCopy(url)
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success(t("productDetails.linkCopied"))
+      setCopied(true)
       window.setTimeout(() => {
-        setCopy("")
-      }, 1000)
+        setCopied(false)
+      }, 1500)
+      return true
     } catch {
-      toast.error("Havolani nusxalab bo‘lmadi")
+      toast.error(t("productDetails.linkCopyFailed"))
+      return false
+    }
+  }
+
+  function openShareUrl(platform: "telegram" | "whatsapp" | "facebook" | "x") {
+    const url = encodeURIComponent(window.location.href)
+    const shareText = encodeURIComponent(name)
+    const targets = {
+      telegram: `https://t.me/share/url?url=${url}&text=${shareText}`,
+      whatsapp: `https://wa.me/?text=${shareText}%20${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      x: `https://twitter.com/intent/tweet?url=${url}&text=${shareText}`,
+    }
+
+    window.open(targets[platform], "_blank", "noopener,noreferrer")
+  }
+
+  async function shareOnInstagram() {
+    if (await copyProductLink()) {
+      toast.info(t("productDetails.instagramShareHint"))
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")
     }
   }
 
@@ -211,7 +245,7 @@ export function ProductDetails({
                   size="icon"
                   variant="outline"
                   className={cn(
-                    "size-12 rounded-xl",
+                    "size-12 rounded-full",
                     isFavorite &&
                       "border-primary bg-primary text-primary-foreground"
                   )}
@@ -223,18 +257,60 @@ export function ProductDetails({
                     className={cn("size-5", isFavorite && "fill-current")}
                   />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className={cn("size-12 cursor-pointer rounded-xl")}
-                  onClick={handleCopy}
-                >
-                  {copy ? (
-                    <HugeiconsIcon icon={CheckIcon} />
-                  ) : (
-                    <HugeiconsIcon icon={Upload06Icon} />
-                  )}
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="size-12 cursor-pointer rounded-full"
+                      aria-label={t("productDetails.shareProduct")}
+                    >
+                      <HugeiconsIcon icon={Upload06Icon} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80">
+                    <PopoverHeader>
+                      <PopoverTitle>
+                        {t("productDetails.shareProduct")}
+                      </PopoverTitle>
+                      <PopoverDescription>
+                        {t("productDetails.shareProductDescription")}
+                      </PopoverDescription>
+                    </PopoverHeader>
+                    <div className="grid grid-cols-3 gap-2">
+                      <ShareOption
+                        icon={TelegramIcon}
+                        label="Telegram"
+                        onClick={() => openShareUrl("telegram")}
+                      />
+                      <ShareOption
+                        icon={WhatsappIcon}
+                        label="WhatsApp"
+                        onClick={() => openShareUrl("whatsapp")}
+                      />
+                      <ShareOption
+                        icon={InstagramIcon}
+                        label="Instagram"
+                        onClick={shareOnInstagram}
+                      />
+                      <ShareOption
+                        icon={Facebook02Icon}
+                        label="Facebook"
+                        onClick={() => openShareUrl("facebook")}
+                      />
+                      <ShareOption
+                        icon={TwitterIcon}
+                        label="X"
+                        onClick={() => openShareUrl("x")}
+                      />
+                      <ShareOption
+                        icon={copied ? CheckIcon : CopyLinkIcon}
+                        label={t("productDetails.copyLink")}
+                        onClick={copyProductLink}
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-3">
@@ -376,7 +452,7 @@ export function ProductDetails({
         />
         {similarProducts.length ? (
           <section className="mt-16 border-t pt-12 lg:mt-24">
-            <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+            <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
               {t("productDetails.similarEyebrow")}
             </p>
             <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -487,5 +563,28 @@ function ProductPromise({ title }: { title: string }) {
     <p className="px-2 text-[11px] font-medium text-muted-foreground">
       {title}
     </p>
+  )
+}
+
+function ShareOption({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: typeof TelegramIcon
+  label: string
+  onClick: () => void | Promise<unknown>
+}) {
+  return (
+    <button
+      type="button"
+      className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border p-3 text-xs font-medium transition hover:border-primary/35 hover:bg-primary/5 hover:text-primary"
+      onClick={onClick}
+    >
+      <span className="grid size-9 place-items-center rounded-full bg-muted">
+        <HugeiconsIcon icon={icon} className="size-5" />
+      </span>
+      <span className="max-w-full truncate">{label}</span>
+    </button>
   )
 }

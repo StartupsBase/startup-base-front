@@ -9,12 +9,14 @@ import { useTranslation } from "react-i18next"
 import type { Language } from "@/i18n/config"
 import type { ProductDTO } from "@/lib/api/model/productDTO"
 import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
+import { useGetByProduct } from "@/lib/api/generated/review/review"
 import { expandReviewEntries } from "@/lib/review-entries"
 import { getProductName } from "@/lib/storefront"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { ReviewCard, ReviewStars } from "../../_components/review-card"
+import { useReviewDeletion } from "../../_components/use-review-deletion"
 
 export function AllReviews({
   language,
@@ -29,7 +31,21 @@ export function AllReviews({
 }) {
   const { t } = useTranslation()
   const [onlyWithPhotos, setOnlyWithPhotos] = useState(false)
-  const entries = useMemo(() => expandReviewEntries(reviews), [reviews])
+  const reviewsQuery = useGetByProduct(productId, {
+    query: { initialData: reviews, retry: 1, staleTime: 30_000 },
+  })
+  const currentReviews = useMemo(
+    () => reviewsQuery.data ?? [],
+    [reviewsQuery.data]
+  )
+  const entries = useMemo(
+    () => expandReviewEntries(currentReviews),
+    [currentReviews]
+  )
+  const { deleteReview, isDeleting } = useReviewDeletion({
+    productId,
+    reviews: currentReviews,
+  })
   const visibleEntries = onlyWithPhotos
     ? entries.filter((review) => review.images.length)
     : entries
@@ -61,7 +77,7 @@ export function AllReviews({
               />
             ) : null}
             <div className="min-w-0">
-              <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+              <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
                 {t("productDetails.reviewsEyebrow")}
               </p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
@@ -137,6 +153,8 @@ export function AllReviews({
                   review={review}
                   language={language}
                   className="min-h-48"
+                  deleting={isDeleting}
+                  onDelete={deleteReview}
                 />
               ))}
             </div>

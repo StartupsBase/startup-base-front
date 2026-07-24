@@ -36,7 +36,8 @@ import {
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
 
-import { ReviewCard, ReviewStars } from "./review-card"
+import { RatingInput, ReviewCard } from "./review-card"
+import { useReviewDeletion } from "./use-review-deletion"
 
 const maxReviewImages = 6
 const maxReviewImageSize = 8 * 1024 * 1024
@@ -72,18 +73,10 @@ export function ReviewsSection({
   const reviewMutation = useAddOrUpdate()
   const uploadImages = useUploadImages()
   const entries = useMemo(() => expandReviewEntries(reviews), [reviews])
-  const ratingDistribution = useMemo(
-    () =>
-      [5, 4, 3, 2, 1].map((value) => ({
-        value,
-        count: entries.filter((review) => Math.round(review.rating) === value)
-          .length,
-      })),
-    [entries]
-  )
-  const average = entries.length
-    ? entries.reduce((sum, review) => sum + review.rating, 0) / entries.length
-    : 0
+  const { deleteReview, isDeleting } = useReviewDeletion({
+    productId,
+    reviews,
+  })
   const isSubmitting = reviewMutation.isPending || uploadImages.isPending
 
   useEffect(() => {
@@ -175,12 +168,23 @@ export function ReviewsSection({
         images,
         ...(comment.trim() ? { comment: comment.trim() } : {}),
       }
+      const nextEntries = [...previousEntries, newEntry]
+      const aggregateRating = Math.round(
+        nextEntries.reduce((sum, entry) => sum + entry.rating, 0) /
+          nextEntries.length
+      )
+      const attachmentIds = nextEntries.flatMap((entry) =>
+        entry.images.flatMap((image) =>
+          image.attachmentId == null ? [] : [image.attachmentId]
+        )
+      )
 
       await reviewMutation.mutateAsync({
         data: {
           productId,
-          rating,
-          comment: serializeReviewEntries([...previousEntries, newEntry]),
+          rating: Math.min(5, Math.max(1, aggregateRating)),
+          comment: serializeReviewEntries(nextEntries),
+          ...(attachmentIds.length ? { attachmentIds } : {}),
         },
       })
       await queryClient.invalidateQueries({
@@ -213,7 +217,7 @@ export function ReviewsSection({
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+          <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
             {t("productDetails.reviewsEyebrow")}
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight">
@@ -254,187 +258,146 @@ export function ReviewsSection({
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="rounded-3xl border bg-card p-6">
-          <div className="flex items-end gap-2">
-            <span className="text-5xl font-bold">{average.toFixed(1)}</span>
-            <span className="pb-1 text-sm text-muted-foreground">/ 5</span>
-          </div>
-          <ReviewStars rating={average} className="mt-3" />
-          <div className="mt-6 space-y-2">
-            {ratingDistribution.map((item) => (
-              <div key={item.value} className="flex items-center gap-2 text-xs">
-                <span className="w-3">{item.value}</span>
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{
-                      width: `${entries.length ? (item.count / entries.length) * 100 : 0}%`,
-                    }}
+      <div className="mt-8 min-w-0">
+        {canReview ? (
+          <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+            <DialogTrigger asChild>
+              <Button className="mb-6 rounded-full">
+                {t("productDetails.writeReview")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>{t("productDetails.writeReview")}</DialogTitle>
+                <DialogDescription>
+                  {t("productDetails.reviewPlaceholder")}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={submitReview}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="font-semibold">
+                    {t("productDetails.writeReview")}
+                  </h3>
+                  <RatingInput
+                    label={t("productDetails.rating")}
+                    value={rating}
+                    onChange={setRating}
                   />
                 </div>
-                <span className="w-5 text-right text-muted-foreground">
-                  {item.count}
-                </span>
-              </div>
+                <textarea
+                  value={comment}
+                  className="mt-4 min-h-24 w-full resize-none rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  placeholder={t("productDetails.reviewPlaceholder")}
+                  onChange={(event) => setComment(event.target.value)}
+                />
+
+                <div className="mt-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="sr-only"
+                    onChange={(event) =>
+                      handleImageSelection(event.target.files)
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-2xl border border-dashed px-4 py-3 text-left transition hover:border-primary/50 hover:bg-primary/5"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <HugeiconsIcon icon={ImageAdd01Icon} className="size-5" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold">
+                        {t("productDetails.addReviewImages")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("productDetails.reviewImagesHint", {
+                          count: maxReviewImages,
+                        })}
+                      </span>
+                    </span>
+                  </button>
+                </div>
+
+                {selectedImages.length ? (
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                    {selectedImages.map((image) => (
+                      <div
+                        key={image.id}
+                        className="group relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted"
+                      >
+                        <img
+                          src={image.previewUrl}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-black/65 text-white"
+                          aria-label={t("productDetails.removeReviewImage")}
+                          onClick={() => removeSelectedImage(image.id)}
+                        >
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            className="size-3.5"
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="mt-3 flex justify-end">
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting
+                      ? t("productDetails.submittingReview")
+                      : t("productDetails.submitReview")}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <div className="mb-6 rounded-2xl border border-dashed p-5 text-sm text-muted-foreground">
+            {t("productDetails.signInToReview")}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex gap-4 overflow-hidden">
+            {[1, 2].map((item) => (
+              <div
+                key={item}
+                className="h-52 min-w-[min(360px,85vw)] animate-pulse rounded-2xl bg-muted"
+              />
             ))}
           </div>
-        </aside>
-
-        <div className="min-w-0">
-          {canReview ? (
-            <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
-              <DialogTrigger asChild>
-                <Button className="mb-6 rounded-full">
-                  {t("productDetails.writeReview")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-                <DialogHeader>
-                  <DialogTitle>{t("productDetails.writeReview")}</DialogTitle>
-                  <DialogDescription>
-                    {t("productDetails.reviewPlaceholder")}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={submitReview}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="font-semibold">
-                      {t("productDetails.writeReview")}
-                    </h3>
-                    <div
-                      className="flex gap-1"
-                      aria-label={t("productDetails.rating")}
-                    >
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className={`text-2xl transition hover:scale-110 ${
-                            value <= rating ? "text-amber-400" : "text-muted"
-                          }`}
-                          onClick={() => setRating(value)}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <textarea
-                    value={comment}
-                    className="mt-4 min-h-24 w-full resize-none rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    placeholder={t("productDetails.reviewPlaceholder")}
-                    onChange={(event) => setComment(event.target.value)}
-                  />
-
-                  <div className="mt-3">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="sr-only"
-                      onChange={(event) =>
-                        handleImageSelection(event.target.files)
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-3 rounded-2xl border border-dashed px-4 py-3 text-left transition hover:border-primary/50 hover:bg-primary/5"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                        <HugeiconsIcon
-                          icon={ImageAdd01Icon}
-                          className="size-5"
-                        />
-                      </span>
-                      <span>
-                        <span className="block text-sm font-semibold">
-                          {t("productDetails.addReviewImages")}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {t("productDetails.reviewImagesHint", {
-                            count: maxReviewImages,
-                          })}
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-
-                  {selectedImages.length ? (
-                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                      {selectedImages.map((image) => (
-                        <div
-                          key={image.id}
-                          className="group relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted"
-                        >
-                          <img
-                            src={image.previewUrl}
-                            alt=""
-                            className="size-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-black/65 text-white"
-                            aria-label={t("productDetails.removeReviewImage")}
-                            onClick={() => removeSelectedImage(image.id)}
-                          >
-                            <HugeiconsIcon
-                              icon={Cancel01Icon}
-                              className="size-3.5"
-                            />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div className="mt-3 flex justify-end">
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting
-                        ? t("productDetails.submittingReview")
-                        : t("productDetails.submitReview")}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <div className="mb-6 rounded-2xl border border-dashed p-5 text-sm text-muted-foreground">
-              {t("productDetails.signInToReview")}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex gap-4 overflow-hidden">
-              {[1, 2].map((item) => (
-                <div
-                  key={item}
-                  className="h-52 min-w-[min(360px,85vw)] animate-pulse rounded-2xl bg-muted"
-                />
-              ))}
-            </div>
-          ) : entries.length ? (
-            <div
-              ref={carouselRef}
-              className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {entries.map((review) => (
-                <ReviewCard
-                  key={`${review.sourceReviewId}-${review.id}`}
-                  review={review}
-                  language={language}
-                  compact
-                  className="min-w-[min(360px,85vw)] snap-start"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground">
-              {t("productDetails.noReviews")}
-            </div>
-          )}
-        </div>
+        ) : entries.length ? (
+          <div
+            ref={carouselRef}
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {entries.map((review) => (
+              <ReviewCard
+                key={`${review.sourceReviewId}-${review.id}`}
+                review={review}
+                language={language}
+                compact
+                className="min-w-[min(360px,85vw)] snap-start"
+                deleting={isDeleting}
+                onDelete={deleteReview}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground">
+            {t("productDetails.noReviews")}
+          </div>
+        )}
       </div>
     </section>
   )

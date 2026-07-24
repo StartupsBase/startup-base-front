@@ -1,5 +1,7 @@
 "use client"
 
+import { TelegramIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -12,6 +14,10 @@ import { isValidPhoneNumber } from "react-phone-number-input"
 import { useLogin } from "@/lib/api"
 import { getPostLoginPath } from "@/lib/auth"
 import { saveAuthToken } from "@/lib/auth-client"
+import {
+  HUMAYRO_TELEGRAM_BOT_URL,
+  HUMAYRO_TELEGRAM_BOT_USERNAME,
+} from "@/lib/constants"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Input } from "@/components/input"
 import { GoogleLoginButton } from "@/components/forms/google-login-button"
@@ -268,6 +274,29 @@ function LoginForm() {
           <span className="h-px flex-1 bg-border" />
         </div>
         <GoogleLoginButton />
+        <Button
+          asChild
+          type="button"
+          variant="outline"
+          className="h-auto min-h-11 w-full rounded-xl border-[#229ED9]/35 bg-[#229ED9]/5 py-2.5 text-[#168AC1] hover:bg-[#229ED9]/10 hover:text-[#168AC1] dark:text-[#53BDEB]"
+        >
+          <Link
+            href={HUMAYRO_TELEGRAM_BOT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <HugeiconsIcon icon={TelegramIcon} className="size-5" />
+            <span className="flex flex-col items-start leading-tight">
+              <span>{t("login.continueWithTelegram")}</span>
+              <span className="text-[11px] font-normal opacity-75">
+                @{HUMAYRO_TELEGRAM_BOT_USERNAME}
+              </span>
+            </span>
+          </Link>
+        </Button>
+        <p className="-mt-2 text-center text-xs text-muted-foreground">
+          {t("login.telegramLoginHint")}
+        </p>
         <p className="text-center text-sm text-muted-foreground">
           {t("login.noAccount")}{" "}
           <Link

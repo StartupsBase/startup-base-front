@@ -1286,7 +1286,7 @@ function ReviewStep({
     <section className="grid gap-6">
       <div>
         <div>
-          <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+          <p className="text-xs font-semibold tracking-wider text-primary capitalize">
             {t("product.livePreview")}
           </p>
           <h2 className="mt-1 text-2xl font-semibold">
