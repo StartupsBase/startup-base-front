@@ -4,11 +4,16 @@ import { Button } from "@workspace/ui/components/button"
 import Link from "next/link"
 import React from "react"
 
+import { HUMAYRO_TELEGRAM_BOT_URL } from "@/lib/constants"
+
 const Support = () => {
   return (
-    <Button asChild className="fixed right-5 bottom-25 z-10 h-[56px] w-[56px] animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80">
+    <Button
+      asChild
+      className="fixed right-5 bottom-40 lg:bottom-25 z-10 w-12 h-12 lg:h-14 lg:w-14 animate-bounce cursor-pointer place-items-center justify-center rounded-full border bg-[#0088cc] text-white transition-colors hover:bg-[#0088cc]/80 [&_svg]:h-5! [&_svg]:w-5!"
+    >
       <Link
-        href="tg://resolve?domain=Akmalov_07_01"
+        href={HUMAYRO_TELEGRAM_BOT_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Telegram"

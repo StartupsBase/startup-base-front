@@ -6,6 +6,21 @@ import { LogoBrand } from "@/components/logo"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { notFound } from "next/navigation"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "login",
+    path: "/login",
+    noIndex: true,
+  })
+}
 
 export default async function LoginPage({
   params,

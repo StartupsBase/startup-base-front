@@ -27,6 +27,7 @@ import type {
 import type {
   CategoryCreateDTO,
   CategoryDTO,
+  CategoryMoveDTO,
   CategoryUpdateDTO,
   GetAll4Params
 } from '../../model';
@@ -399,4 +400,121 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCreate4MutationOptions(options), queryClient);
+    }
+    export const createBulk1 = (
+    categoryCreateDTO: BodyType<CategoryCreateDTO[]>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<CategoryDTO[]>(
+      {url: `/api/categories/create/list`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryCreateDTO, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCreateBulk1MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBulk1>>, TError,{data: BodyType<CategoryCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBulk1>>, TError,{data: BodyType<CategoryCreateDTO[]>}, TContext> => {
+
+const mutationKey = ['createBulk1'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBulk1>>, {data: BodyType<CategoryCreateDTO[]>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBulk1(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBulk1MutationResult = NonNullable<Awaited<ReturnType<typeof createBulk1>>>
+    export type CreateBulk1MutationBody = BodyType<CategoryCreateDTO[]>
+    export type CreateBulk1MutationError = ErrorType<unknown>
+
+    export const useCreateBulk1 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBulk1>>, TError,{data: BodyType<CategoryCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createBulk1>>,
+        TError,
+        {data: BodyType<CategoryCreateDTO[]>},
+        TContext
+      > => {
+      return useMutation(getCreateBulk1MutationOptions(options), queryClient);
+    }
+    export const move = (
+    id: number,
+    categoryMoveDTO: BodyType<CategoryMoveDTO>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<CategoryDTO>(
+      {url: `/api/categories/${id}/move`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryMoveDTO, signal
+    },
+      options);
+    }
+
+
+
+
+export const getMoveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof move>>, TError,{id: number;data: BodyType<CategoryMoveDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof move>>, TError,{id: number;data: BodyType<CategoryMoveDTO>}, TContext> => {
+
+const mutationKey = ['move'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof move>>, {id: number;data: BodyType<CategoryMoveDTO>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  move(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MoveMutationResult = NonNullable<Awaited<ReturnType<typeof move>>>
+    export type MoveMutationBody = BodyType<CategoryMoveDTO>
+    export type MoveMutationError = ErrorType<unknown>
+
+    export const useMove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof move>>, TError,{id: number;data: BodyType<CategoryMoveDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof move>>,
+        TError,
+        {id: number;data: BodyType<CategoryMoveDTO>},
+        TContext
+      > => {
+      return useMutation(getMoveMutationOptions(options), queryClient);
     }

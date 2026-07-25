@@ -1,6 +1,8 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -281,14 +283,14 @@ export function OrganizationsPage({ language }: { language: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
       <DashboardBreadcrumb
         language={language}
         items={[{ label: t("dashboard.organizations") }]}
       />
-      <header className="mt-6 flex items-center justify-between border-b border-border pb-6">
+      <header className="mt-6 flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3" />
+          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>
@@ -298,7 +300,9 @@ export function OrganizationsPage({ language }: { language: string }) {
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button>{t("organization.new")}</Button>
+            <Button className="w-full sm:w-auto">
+              {t("organization.new")}
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader>
@@ -599,8 +603,17 @@ function OrganizationActions({
     <div className="flex justify-end gap-2">
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("organization.edit")}
+          <Button
+            variant="outline"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("organization.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("organization.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
@@ -616,8 +629,14 @@ function OrganizationActions({
       </Dialog>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("organization.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("organization.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("organization.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-64 gap-3">

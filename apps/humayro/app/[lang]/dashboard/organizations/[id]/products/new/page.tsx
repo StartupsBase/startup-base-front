@@ -2,6 +2,21 @@ import { notFound } from "next/navigation"
 
 import { ProductCreatePage } from "./_components/product-create-page"
 import { isLanguage } from "@/i18n/config"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; lang: string }>
+}) {
+  const { id, lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "newProduct",
+    path: `/dashboard/organizations/${id}/products/new`,
+    noIndex: true,
+  })
+}
 
 export default async function NewProductPage({
   params,

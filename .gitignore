@@ -53,3 +53,6 @@ next-env.d.ts
 
 # Downloaded by apps/humayro/scripts/download-openapi.mjs before Orval runs.
 apps/humayro/lib/api/openapi.json
+
+.cursor\rules\nx-rules.mdc
+.github\instructions\nx.instructions.md

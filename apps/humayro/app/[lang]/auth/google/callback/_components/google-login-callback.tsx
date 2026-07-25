@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useGoogleCallback } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { googleReturnPathKey } from "@/lib/auth"
+import { getPostLoginPath, googleReturnPathKey } from "@/lib/auth"
 
 export function GoogleLoginCallback({ language }: { language: string }) {
   const { t } = useTranslation()
@@ -37,7 +37,7 @@ export function GoogleLoginCallback({ language }: { language: string }) {
       storedReturnPath?.startsWith(`/${language}/`) &&
       !storedReturnPath.startsWith("//")
         ? storedReturnPath
-        : `/${language}/dashboard`
+        : getPostLoginPath(language, session.user?.roles)
 
     router.replace(destination)
     router.refresh()

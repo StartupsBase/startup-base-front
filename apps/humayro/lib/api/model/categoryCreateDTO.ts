@@ -19,4 +19,5 @@ export interface CategoryCreateDTO {
   organizationId?: number;
   parentId?: number;
   imageId?: number;
+  sortOrder?: number;
 }

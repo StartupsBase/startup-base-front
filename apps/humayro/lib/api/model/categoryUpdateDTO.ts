@@ -19,5 +19,6 @@ export interface CategoryUpdateDTO {
   organizationId?: number;
   parentId?: number;
   imageId?: number;
+  sortOrder?: number;
   active?: boolean;
 }

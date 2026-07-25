@@ -1,23 +1,31 @@
 "use client"
 
-import { HeartIcon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
+import {
+  CheckIcon,
+  CopyLinkIcon,
+  Facebook02Icon,
+  HeartIcon,
+  InstagramIcon,
+  ShoppingCart02Icon,
+  TelegramIcon,
+  TwitterIcon,
+  Upload06Icon,
+  WhatsappIcon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import type { Language } from "@/i18n/config"
 import { addItem, getGetCartQueryKey } from "@/lib/api/generated/cart/cart"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
-import {
-  getGetByProductQueryKey,
-  useAddOrUpdate,
-  useGetByProduct,
-} from "@/lib/api/generated/review/review"
+import { useGetByProduct } from "@/lib/api/generated/review/review"
 import { hasAuthToken } from "@/lib/auth-client"
 import { useGuestStorefront } from "@/lib/guest-storefront"
+import { expandReviewEntries } from "@/lib/review-entries"
 import {
   formatStorefrontPrice,
   getProductName,
@@ -30,6 +38,15 @@ import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
 import { Button } from "@workspace/ui/components/button"
 import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover"
+import { VideoPlayer } from "@workspace/ui/components/video-player"
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -41,6 +58,8 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { useStorefrontActions } from "../../../_components/storefront/use-storefront-actions"
 import { ProductCard } from "../../../_components/storefront/product-card"
+import { ReviewStars } from "./review-card"
+import { ReviewsSection as ReviewsCarouselSection } from "./reviews-section"
 
 export function ProductDetails({
   language,
@@ -71,6 +90,12 @@ export function ProductDetails({
   const [selectedVariantId, setSelectedVariantId] = useState<number>()
   const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const reviewEntries = expandReviewEntries(reviewsQuery.data ?? [])
+  const reviewRating = reviewEntries.length
+    ? reviewEntries.reduce((sum, review) => sum + review.rating, 0) /
+      reviewEntries.length
+    : (product.ratingAvg ?? 0)
 
   const name = getProductName(product, language)
   const description =
@@ -122,6 +147,41 @@ export function ProductDetails({
     }
   }
 
+  const copyProductLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success(t("productDetails.linkCopied"))
+      setCopied(true)
+      window.setTimeout(() => {
+        setCopied(false)
+      }, 1500)
+      return true
+    } catch {
+      toast.error(t("productDetails.linkCopyFailed"))
+      return false
+    }
+  }
+
+  function openShareUrl(platform: "telegram" | "whatsapp" | "facebook" | "x") {
+    const url = encodeURIComponent(window.location.href)
+    const shareText = encodeURIComponent(name)
+    const targets = {
+      telegram: `https://t.me/share/url?url=${url}&text=${shareText}`,
+      whatsapp: `https://wa.me/?text=${shareText}%20${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      x: `https://twitter.com/intent/tweet?url=${url}&text=${shareText}`,
+    }
+
+    window.open(targets[platform], "_blank", "noopener,noreferrer")
+  }
+
+  async function shareOnInstagram() {
+    if (await copyProductLink()) {
+      toast.info(t("productDetails.instagramShareHint"))
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")
+    }
+  }
+
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 lg:py-12">
       <div className="mx-auto max-w-7xl">
@@ -148,16 +208,27 @@ export function ProductDetails({
         </Breadcrumb>
 
         <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,.92fr)] lg:gap-12">
-          <ProductGallery
-            images={images.map((image) => image.url as string)}
-            name={name}
-            activeImage={activeImage}
-            onActiveImage={setActiveImage}
-          />
+          <div className="min-w-0">
+            <ProductGallery
+              images={images.map((image) => image.url as string)}
+              name={name}
+              activeImage={activeImage}
+              onActiveImage={setActiveImage}
+            />
+            {product.videoUrl ? (
+              <VideoPlayer
+                className="mt-5"
+                src={product.videoUrl}
+                title={`${name} · ${t("productDetails.video")}`}
+              />
+            ) : null}
+          </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {product.categoryName ? <span>{product.categoryName}</span> : null}
+              {product.categoryName ? (
+                <span>{product.categoryName}</span>
+              ) : null}
               {product.categoryName && product.organizationName ? (
                 <span>•</span>
               ) : null}
@@ -165,17 +236,94 @@ export function ProductDetails({
                 <span>{product.organizationName}</span>
               ) : null}
             </div>
-            <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-balance sm:text-4xl">
-              {name}
-            </h1>
+            <div className="flex justify-between">
+              <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-balance sm:text-4xl">
+                {name}
+              </h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className={cn(
+                    "size-12 rounded-full",
+                    isFavorite &&
+                      "border-primary bg-primary text-primary-foreground"
+                  )}
+                  aria-label={isFavorite ? text.unfavorite : text.favorite}
+                  onClick={() => actions.toggleFavorite(productId, isFavorite)}
+                >
+                  <HugeiconsIcon
+                    icon={HeartIcon}
+                    className={cn("size-5", isFavorite && "fill-current")}
+                  />
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="size-12 cursor-pointer rounded-full"
+                      aria-label={t("productDetails.shareProduct")}
+                    >
+                      <HugeiconsIcon icon={Upload06Icon} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80">
+                    <PopoverHeader>
+                      <PopoverTitle>
+                        {t("productDetails.shareProduct")}
+                      </PopoverTitle>
+                      <PopoverDescription>
+                        {t("productDetails.shareProductDescription")}
+                      </PopoverDescription>
+                    </PopoverHeader>
+                    <div className="grid grid-cols-3 gap-2">
+                      <ShareOption
+                        icon={TelegramIcon}
+                        label="Telegram"
+                        onClick={() => openShareUrl("telegram")}
+                      />
+                      <ShareOption
+                        icon={WhatsappIcon}
+                        label="WhatsApp"
+                        onClick={() => openShareUrl("whatsapp")}
+                      />
+                      <ShareOption
+                        icon={InstagramIcon}
+                        label="Instagram"
+                        onClick={shareOnInstagram}
+                      />
+                      <ShareOption
+                        icon={Facebook02Icon}
+                        label="Facebook"
+                        onClick={() => openShareUrl("facebook")}
+                      />
+                      <ShareOption
+                        icon={TwitterIcon}
+                        label="X"
+                        onClick={() => openShareUrl("x")}
+                      />
+                      <ShareOption
+                        icon={copied ? CheckIcon : CopyLinkIcon}
+                        label={t("productDetails.copyLink")}
+                        onClick={copyProductLink}
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
             <div className="mt-4 flex items-center gap-3">
-              <RatingStars rating={product.ratingAvg ?? 0} />
+              <ReviewStars rating={reviewRating} />
               <span className="text-sm font-medium">
-                {(product.ratingAvg ?? 0).toFixed(1)}
+                {reviewRating.toFixed(1)}
               </span>
-              <a href="#reviews" className="text-sm text-muted-foreground hover:text-primary">
+              <a
+                href="#reviews"
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
                 {t("productDetails.reviewCount", {
-                  count: product.ratingCount ?? reviewsQuery.data?.length ?? 0,
+                  count: reviewEntries.length,
                 })}
               </a>
             </div>
@@ -184,7 +332,8 @@ export function ProductDetails({
               <p className="text-3xl font-bold text-primary">
                 {formatStorefrontPrice(price, language)}
               </p>
-              {(product.discountPercent ?? 0) > 0 && product.basePrice != null ? (
+              {(product.discountPercent ?? 0) > 0 &&
+              product.basePrice != null ? (
                 <>
                   <p className="pb-1 text-sm text-muted-foreground line-through">
                     {formatStorefrontPrice(product.basePrice, language)}
@@ -196,7 +345,9 @@ export function ProductDetails({
               ) : null}
             </div>
 
-            {description ? <TiptapContentPreview content={description} /> : null}
+            {description ? (
+              <TiptapContentPreview content={description} />
+            ) : null}
 
             {availableVariants.length ? (
               <div className="mt-7">
@@ -282,21 +433,6 @@ export function ProductDetails({
                 <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
                 {isAdding ? text.adding : text.addToCart}
               </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                className={cn(
-                  "size-12 rounded-xl",
-                  isFavorite && "border-primary bg-primary text-primary-foreground"
-                )}
-                aria-label={isFavorite ? text.unfavorite : text.favorite}
-                onClick={() => actions.toggleFavorite(productId, isFavorite)}
-              >
-                <HugeiconsIcon
-                  icon={HeartIcon}
-                  className={cn("size-5", isFavorite && "fill-current")}
-                />
-              </Button>
             </div>
 
             <div className="mt-6 grid grid-cols-3 divide-x rounded-2xl border bg-muted/20 py-4 text-center">
@@ -307,7 +443,7 @@ export function ProductDetails({
           </div>
         </section>
 
-        <ReviewsSection
+        <ReviewsCarouselSection
           language={language}
           productId={productId}
           reviews={reviewsQuery.data ?? []}
@@ -316,7 +452,7 @@ export function ProductDetails({
         />
         {similarProducts.length ? (
           <section className="mt-16 border-t pt-12 lg:mt-24">
-            <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
+            <p className="text-sm font-bold tracking-[.18em] text-primary capitalize">
               {t("productDetails.similarEyebrow")}
             </p>
             <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -359,7 +495,7 @@ export function ProductDetails({
 function TiptapContentPreview({ content }: { content: string }) {
   return (
     <div
-      className="prose prose-sm mt-6 max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary dark:prose-invert"
+      className="prose prose-sm prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary dark:prose-invert mt-6 max-w-none text-muted-foreground"
       dangerouslySetInnerHTML={{ __html: content }}
     />
   )
@@ -422,202 +558,33 @@ function ProductGallery({
   )
 }
 
-function ReviewsSection({
-  canReview,
-  language,
-  loading,
-  productId,
-  reviews,
-}: {
-  canReview: boolean
-  language: Language
-  loading: boolean
-  productId: number
-  reviews: Array<{
-    id?: number
-    userName?: string
-    rating?: number
-    comment?: string
-    createdAt?: string
-  }>
-}) {
-  const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const [rating, setRating] = useState(5)
-  const [comment, setComment] = useState("")
-  const reviewMutation = useAddOrUpdate()
-  const ratingDistribution = useMemo(
-    () =>
-      [5, 4, 3, 2, 1].map((value) => ({
-        value,
-        count: reviews.filter((review) => Math.round(review.rating ?? 0) === value)
-          .length,
-      })),
-    [reviews]
-  )
-  const average = reviews.length
-    ? reviews.reduce((sum, review) => sum + (review.rating ?? 0), 0) /
-      reviews.length
-    : 0
-
-  async function submitReview(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    try {
-      await reviewMutation.mutateAsync({
-        data: { productId, rating, comment: comment.trim() || undefined },
-      })
-      await queryClient.invalidateQueries({
-        queryKey: getGetByProductQueryKey(productId),
-      })
-      setComment("")
-      toast.success(t("productDetails.reviewSaved"))
-    } catch {
-      toast.error(t("productDetails.reviewFailed"))
-    }
-  }
-
-  return (
-    <section id="reviews" className="scroll-mt-24 border-t pt-12 mt-16 lg:mt-24">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-bold tracking-[.18em] text-primary uppercase">
-            {t("productDetails.reviewsEyebrow")}
-          </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight">
-            {t("productDetails.reviewsTitle")}
-          </h2>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {t("productDetails.reviewCount", { count: reviews.length })}
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="rounded-3xl border bg-card p-6">
-          <div className="flex items-end gap-2">
-            <span className="text-5xl font-bold">{average.toFixed(1)}</span>
-            <span className="pb-1 text-sm text-muted-foreground">/ 5</span>
-          </div>
-          <RatingStars rating={average} className="mt-3" />
-          <div className="mt-6 space-y-2">
-            {ratingDistribution.map((item) => (
-              <div key={item.value} className="flex items-center gap-2 text-xs">
-                <span className="w-3">{item.value}</span>
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{
-                      width: `${reviews.length ? (item.count / reviews.length) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-                <span className="w-5 text-right text-muted-foreground">
-                  {item.count}
-                </span>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        <div>
-          {canReview ? (
-            <form onSubmit={submitReview} className="mb-6 rounded-3xl border bg-card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-semibold">{t("productDetails.writeReview")}</h3>
-                <div className="flex gap-1" aria-label={t("productDetails.rating")}>
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={cn(
-                        "text-2xl transition hover:scale-110",
-                        value <= rating ? "text-amber-400" : "text-muted"
-                      )}
-                      onClick={() => setRating(value)}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <textarea
-                value={comment}
-                className="mt-4 min-h-24 w-full resize-none rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                placeholder={t("productDetails.reviewPlaceholder")}
-                onChange={(event) => setComment(event.target.value)}
-              />
-              <div className="mt-3 flex justify-end">
-                <Button type="submit" disabled={reviewMutation.isPending}>
-                  {t("productDetails.submitReview")}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="mb-6 rounded-2xl border border-dashed p-5 text-sm text-muted-foreground">
-              {t("productDetails.signInToReview")}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[1, 2].map((item) => (
-                <div key={item} className="h-40 animate-pulse rounded-2xl bg-muted" />
-              ))}
-            </div>
-          ) : reviews.length ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {reviews.map((review, index) => (
-                <article key={review.id ?? index} className="rounded-2xl border bg-card p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-10 place-items-center rounded-full bg-primary/10 font-bold text-primary">
-                        {(review.userName || "?").charAt(0).toUpperCase()}
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-semibold">
-                          {review.userName || t("productDetails.anonymous")}
-                        </h3>
-                        {review.createdAt ? (
-                          <time className="text-xs text-muted-foreground">
-                            {new Intl.DateTimeFormat(
-                              language === "ru" ? "ru-RU" : "uz-UZ",
-                              { dateStyle: "medium" }
-                            ).format(new Date(review.createdAt))}
-                          </time>
-                        ) : null}
-                      </div>
-                    </div>
-                    <RatingStars rating={review.rating ?? 0} />
-                  </div>
-                  <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                    {review.comment || t("productDetails.noComment")}
-                  </p>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground">
-              {t("productDetails.noReviews")}
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function RatingStars({ rating, className }: { rating: number; className?: string }) {
-  return (
-    <span className={cn("text-sm tracking-wider text-amber-400", className)}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <span key={star} className={star > Math.round(rating) ? "text-muted" : ""}>
-          ★
-        </span>
-      ))}
-    </span>
-  )
-}
-
 function ProductPromise({ title }: { title: string }) {
-  return <p className="px-2 text-[11px] font-medium text-muted-foreground">{title}</p>
+  return (
+    <p className="px-2 text-[11px] font-medium text-muted-foreground">
+      {title}
+    </p>
+  )
+}
+
+function ShareOption({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: typeof TelegramIcon
+  label: string
+  onClick: () => void | Promise<unknown>
+}) {
+  return (
+    <button
+      type="button"
+      className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border p-3 text-xs font-medium transition hover:border-primary/35 hover:bg-primary/5 hover:text-primary"
+      onClick={onClick}
+    >
+      <span className="grid size-9 place-items-center rounded-full bg-muted">
+        <HugeiconsIcon icon={icon} className="size-5" />
+      </span>
+      <span className="max-w-full truncate">{label}</span>
+    </button>
+  )
 }

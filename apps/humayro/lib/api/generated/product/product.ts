@@ -402,6 +402,64 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCreate2MutationOptions(options), queryClient);
     }
+    export const createBulk = (
+    productCreateDTO: BodyType<ProductCreateDTO[]>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<ProductDTO[]>(
+      {url: `/api/products/create/list`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: productCreateDTO, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCreateBulkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBulk>>, TError,{data: BodyType<ProductCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBulk>>, TError,{data: BodyType<ProductCreateDTO[]>}, TContext> => {
+
+const mutationKey = ['createBulk'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBulk>>, {data: BodyType<ProductCreateDTO[]>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBulk(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBulkMutationResult = NonNullable<Awaited<ReturnType<typeof createBulk>>>
+    export type CreateBulkMutationBody = BodyType<ProductCreateDTO[]>
+    export type CreateBulkMutationError = ErrorType<unknown>
+
+    export const useCreateBulk = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBulk>>, TError,{data: BodyType<ProductCreateDTO[]>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createBulk>>,
+        TError,
+        {data: BodyType<ProductCreateDTO[]>},
+        TContext
+      > => {
+      return useMutation(getCreateBulkMutationOptions(options), queryClient);
+    }
     export const flashSale = (
 
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal

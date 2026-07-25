@@ -174,7 +174,7 @@ export default function CustomerStories({ lang }: CustomerStoriesProps) {
     <section className="overflow-hidden py-20 sm:py-24">
       <div className="mx-auto px-6 text-center md:px-10">
         <BlurFade delay={0.25} inView>
-        <p className="text-xs font-semibold tracking-[0.18em] text-[#16836b] uppercase dark:text-[#71c9b4]">
+        <p className="text-xs font-semibold tracking-[0.18em] text-[#16836b] capitalize dark:text-[#71c9b4]">
           {copy.eyebrow}
         </p>
         </BlurFade>

@@ -14,6 +14,16 @@ import TeamSection from "./_components/team-section"
 import { CatalogSection } from "./_components/storefront/catalog-section"
 import InfiniteScroll from "@/components/infinite-scroll"
 import Support from "@/components/support"
+import { createTranslatedPageMetadata, getSiteUrl } from "@/lib/seo"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({ language: lang, page: "home" })
+}
 
 export default async function Page({ params }: { params: Promise<unknown> }) {
   const { lang } = (await params) as { lang?: string }
@@ -22,21 +32,40 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
     notFound()
   }
   const { t } = await getTranslation(lang)
+  const onlineStoreJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    name: "Humayro",
+    url: new URL(`/${lang}`, getSiteUrl()).toString(),
+    description: t("seo.siteDescription"),
+    logo: new URL("/brand/humayroLight.png", getSiteUrl()).toString(),
+    availableLanguage: ["Russian", "Uzbek"],
+    areaServed: {
+      "@type": "Country",
+      name: "Uzbekistan",
+    },
+  }
 
   return (
-    <main className="humayro-top-background min-h-1000 text-foreground relative">
-      <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-6 py-5 md:px-10">
-        <section className="flex flex-1 flex-col items-center justify-center py-16 text-center sm:py-24">
+    <main className="humayro-top-background relative min-h-screen overflow-x-clip text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(onlineStoreJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-14 sm:px-6 sm:pt-4 sm:pb-18 md:px-10 lg:pt-6">
+        <section className="flex min-h-[calc(100svh-8rem)] flex-col items-center justify-center py-10 text-center sm:min-h-[calc(100svh-9rem)] sm:py-16 lg:min-h-[calc(100svh-7rem)] lg:py-20">
           <DiaTextReveal
             text={t("home.eyebrow")}
             duration={1.5}
-            className="text-DiaTextRevealrimary mb-6 text-sm font-semibold tracking-[0.24em] uppercase"
+            className="text-DiaTextRevealrimary mb-4 max-w-xs text-xs font-semibold tracking-[0.18em] capitalize sm:mb-6 sm:max-w-none sm:text-sm sm:tracking-[0.24em]"
           />
           <TextAnimate
             animation="blurInUp"
             by="character"
             duration={1.5}
-            className="max-w-5xl text-5xl font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl"
+            className="max-w-5xl text-[clamp(2.5rem,12.5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl"
           >
             {t("home.title")}
           </TextAnimate>
@@ -44,38 +73,55 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             animation="slideLeft"
             by="character"
             duration={1.5}
-            className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl"
+            className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:mt-8 sm:text-xl sm:leading-8"
           >
             {t("home.description")}
           </TextAnimate>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link href={`/${lang}/book-demo`}>
+          <div className="mt-8 grid grid-cols-3 sm:flex w-full max-w-sm flex-col justify-center gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap">
+            <Link href={`/${lang}/book-demo`} className="w-full sm:w-auto">
               <ShimmerButton
                 background={`#008872`}
-                className="h-[40px] min-w-40 bg-input/30! px-4 dark:border-primary"
+                className="h-11 w-full lg:min-w-40 bg-input/30! px-4 sm:w-auto dark:border-primary text-[11px]! lg:text-[18px]! xl:text-[24px]"
               >
                 {t("home.bookingDemoAction")}
               </ShimmerButton>
             </Link>
-            <Button asChild size="lg" className="min-w-40">
+            <Button
+              asChild
+              size="lg"
+              className="h-11 w-full lg:min-w-40 sm:w-auto text-[11px]! lg:text-[18px]! xl:text-[24px]"
+            >
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="min-w-40">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-11 w-full lg:min-w-40 sm:w-auto text-[11px]! lg:text-[18px]! xl:text-[24px]"
+            >
               <Link href={`/${lang}/register`}>
                 {t("home.secondaryAction")}
               </Link>
             </Button>
           </div>
 
-          <div className="mt-14 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium text-muted-foreground sm:text-base">
-            <span>{t("home.featureOne.title")}</span>
-            <span>{t("home.featureTwo.title")}</span>
-            <span>{t("home.featureThree.title")}</span>
+          <div className="mt-8 grid w-full max-w-sm grid-cols-3 gap-2 text-left text-sm font-medium text-muted-foreground sm:mt-12 sm:max-w-3xl sm:grid-cols-3 sm:gap-3 sm:text-center sm:text-base">
+            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
+              {t("home.featureOne.title")}
+            </span>
+            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
+              {t("home.featureTwo.title")}
+            </span>
+            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
+              {t("home.featureThree.title")}
+            </span>
           </div>
         </section>
 
-        <YouTubeVideo />
+        <div className="pb-4 sm:pb-8">
+          <YouTubeVideo />
+        </div>
       </div>
       <InfiniteScroll />
       <CatalogSection language={lang} />

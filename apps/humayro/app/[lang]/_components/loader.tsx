@@ -5,20 +5,14 @@ import {
   ReactNode,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react"
-import { usePathname } from "next/navigation"
 import { HumayroLoaderLayers } from "./humayro-loader-layers"
 
 type HumayroLoaderProps = {
   children: ReactNode
-  language: string
   duration?: number
-  showLoadingText?: boolean
 }
-
-const loaderStorageKey = "humayro:home-loader-shown"
 
 type Particle = {
   x: number
@@ -246,38 +240,13 @@ const flyingLeaves: FlyingLeaf[] = [
 
 export default function HumayroLoader({
   children,
-  language,
   duration = 7600,
-  showLoadingText = true,
 }: HumayroLoaderProps) {
-  const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-  const [visible, setVisible] = useState(false)
-  const hasCheckedLoader = useRef(false)
+  const [mounted, setMounted] = useState(true)
+  const [visible, setVisible] = useState(true)
 
   const stableCoreParticles = useMemo(() => coreParticles, [])
   const stableOrbitParticles = useMemo(() => orbitParticles, [])
-
-  useEffect(() => {
-    if (pathname !== `/${language}` || hasCheckedLoader.current) return
-
-    const checkTimer = window.setTimeout(() => {
-      if (hasCheckedLoader.current) return
-      hasCheckedLoader.current = true
-
-      try {
-        if (window.localStorage.getItem(loaderStorageKey)) return
-        window.localStorage.setItem(loaderStorageKey, "true")
-      } catch {
-        // If storage is unavailable, still show the loader for this page load.
-      }
-
-      setMounted(true)
-      setVisible(true)
-    }, 0)
-
-    return () => window.clearTimeout(checkTimer)
-  }, [language, pathname])
 
   useEffect(() => {
     if (!mounted) return
@@ -664,81 +633,6 @@ export default function HumayroLoader({
                 forwards 3.2s;
             }
 
-            .humayro-loader {
-              --humayro-loader-aura: radial-gradient(
-                circle,
-                rgba(164, 192, 92, 0.18) 0%,
-                rgba(107, 152, 61, 0.08) 37%,
-                transparent 72%
-              );
-              --humayro-loader-core: radial-gradient(
-                circle,
-                rgba(91, 135, 49, 0.62) 0%,
-                rgba(150, 187, 75, 0.25) 30%,
-                transparent 72%
-              );
-              --humayro-loader-glow: radial-gradient(
-                ellipse,
-                rgba(119, 161, 61, 0.32) 0%,
-                rgba(153, 188, 92, 0.11) 45%,
-                transparent 76%
-              );
-              --humayro-loader-title-shadow:
-                0 0 8px rgba(72, 112, 43, 0.18),
-                0 0 22px rgba(142, 175, 76, 0.14);
-              --humayro-core-particle: #5e9639;
-              --humayro-core-particle-shadow:
-                0 0 6px rgba(73, 127, 43, 0.95),
-                0 0 15px rgba(111, 159, 57, 0.65);
-              --humayro-orbit-particle: #6c9f3f;
-              --humayro-orbit-particle-shadow:
-                0 0 5px rgba(84, 139, 45, 0.92),
-                0 0 12px rgba(127, 174, 67, 0.56);
-              background: radial-gradient(
-                circle at 50% 42%,
-                #f2f7e9 0%,
-                #fbfdf7 33%,
-                #ffffff 72%
-              );
-            }
-
-            .dark .humayro-loader {
-              --humayro-loader-aura: radial-gradient(
-                circle,
-                rgba(191, 220, 104, 0.09) 0%,
-                rgba(99, 154, 56, 0.04) 37%,
-                transparent 72%
-              );
-              --humayro-loader-core: radial-gradient(
-                circle,
-                rgba(245, 244, 170, 0.95) 0%,
-                rgba(161, 193, 77, 0.31) 30%,
-                transparent 72%
-              );
-              --humayro-loader-glow: radial-gradient(
-                ellipse,
-                rgba(161, 201, 73, 0.36) 0%,
-                rgba(94, 140, 46, 0.12) 45%,
-                transparent 76%
-              );
-              --humayro-loader-title-shadow:
-                0 0 8px rgba(226, 232, 156, 0.34),
-                0 0 22px rgba(107, 148, 57, 0.22);
-              --humayro-core-particle: #dce97f;
-              --humayro-core-particle-shadow:
-                0 0 5px rgba(220, 233, 127, 0.95),
-                0 0 12px rgba(121, 165, 57, 0.52);
-              --humayro-orbit-particle: #b9d664;
-              --humayro-orbit-particle-shadow: 0 0 5px rgba(185, 214, 100, 0.8);
-              background: radial-gradient(
-                circle at 50% 42%,
-                #0b2f26 0%,
-                #06251e 30%,
-                #031b16 61%,
-                #01120f 100%
-              );
-            }
-
             .humayro-subtitle {
               opacity: 0;
               animation: humayroSubtitleReveal 0.65s ease forwards 3.72s;
@@ -901,7 +795,7 @@ export default function HumayroLoader({
 
           <div className="humayro-loader relative flex h-full w-full items-center justify-center overflow-hidden">
             <div
-              className="pointer-events-none absolute top-[42%] left-1/2 h-[720px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="pointer-events-none absolute top-[42%] left-1/2 h-180 w-180 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
                 background: "var(--humayro-loader-aura)",
                 animation: "humayroBackgroundBreath 3.8s ease-in-out infinite",
@@ -1002,7 +896,7 @@ export default function HumayroLoader({
               )
             })}
 
-            <div className="humayro-logo-wrap relative z-10 flex w-full max-w-[680px] flex-col items-center px-4 text-center">
+            <div className="humayro-logo-wrap relative z-10 flex w-full max-w-170 flex-col items-center px-4 text-center">
               <HumayroLoaderLayers />
 
               <h1
@@ -1027,7 +921,7 @@ export default function HumayroLoader({
 
               <div className="relative mt-5 h-7 w-[min(74vw,290px)]">
                 <span
-                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-[176px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full"
                   style={{
                     background: "var(--humayro-loader-glow)",
                     filter: "blur(7px)",

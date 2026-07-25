@@ -1,5 +1,7 @@
 "use client"
 
+import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -45,7 +47,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
+
+const ALL_ORGANIZATIONS = "__all_organizations__"
+const ALL_BRANCHES = "__all_branches__"
+const GENDER_UNSPECIFIED = "__gender_unspecified__"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -194,10 +207,10 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8 md:px-10">
-      <header className="flex items-center justify-between border-b border-border pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
+      <header className="flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3" />
+          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>
@@ -207,7 +220,9 @@ export function Dashboard({ language }: { language: string }) {
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button>{t("dashboard.addUser")}</Button>
+            <Button className="w-full sm:w-auto">
+              {t("dashboard.addUser")}
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -229,39 +244,64 @@ export function Dashboard({ language }: { language: string }) {
             placeholder={t("dashboard.search")}
             className="w-full sm:w-64"
           />
-          <select
-            value={organizationId}
-            onChange={(event) => {
-              setOrganizationId(event.target.value)
+          <Select
+            value={organizationId || ALL_ORGANIZATIONS}
+            onValueChange={(nextValue) => {
+              setOrganizationId(
+                nextValue === ALL_ORGANIZATIONS ? "" : nextValue
+              )
               setBranchId("")
             }}
             disabled={organizationsQuery.isLoading}
-            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="">{t("dashboard.allOrganizations")}</option>
-            {organizationsQuery.data?.map((organization) =>
-              organization.id !== undefined ? (
-                <option key={organization.id} value={organization.id}>
-                  {organization.name}
-                </option>
-              ) : null
-            )}
-          </select>
-          <select
-            value={branchId}
-            onChange={(event) => setBranchId(event.target.value)}
+            <SelectTrigger
+              aria-label={t("dashboard.allOrganizations")}
+              className="h-11 w-full sm:w-auto sm:max-w-64"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_ORGANIZATIONS}>
+                {t("dashboard.allOrganizations")}
+              </SelectItem>
+              {organizationsQuery.data?.map((organization) =>
+                organization.id !== undefined ? (
+                  <SelectItem
+                    key={organization.id}
+                    value={String(organization.id)}
+                  >
+                    {organization.name}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
+          <Select
+            value={branchId || ALL_BRANCHES}
+            onValueChange={(nextValue) =>
+              setBranchId(nextValue === ALL_BRANCHES ? "" : nextValue)
+            }
             disabled={branchesQuery.isLoading}
-            className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="">{t("dashboard.allBranches")}</option>
-            {branchesQuery.data?.content?.map((branch) =>
-              branch.id !== undefined ? (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ) : null
-            )}
-          </select>
+            <SelectTrigger
+              aria-label={t("dashboard.allBranches")}
+              className="h-11 w-full sm:w-auto sm:max-w-64"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_BRANCHES}>
+                {t("dashboard.allBranches")}
+              </SelectItem>
+              {branchesQuery.data?.content?.map((branch) =>
+                branch.id !== undefined ? (
+                  <SelectItem key={branch.id} value={String(branch.id)}>
+                    {branch.name}
+                  </SelectItem>
+                ) : null
+              )}
+            </SelectContent>
+          </Select>
         </div>
         {usersQuery.isLoading || meQuery.isLoading ? (
           <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
@@ -348,13 +388,26 @@ function UserActions({ user }: { user: UserDTO }) {
 
   return (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        {t("dashboard.edit")}
+      <Button
+        variant="outline"
+        size="sm"
+        className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+        aria-label={t("dashboard.edit")}
+        onClick={() => setOpen(true)}
+      >
+        <HugeiconsIcon icon={PencilEdit02Icon} className="size-5 lg:hidden" />
+        <span className="hidden lg:inline">{t("dashboard.edit")}</span>
       </Button>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("dashboard.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("dashboard.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("dashboard.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64">
@@ -391,17 +444,30 @@ function UserActions({ user }: { user: UserDTO }) {
               onChange={(event) => setPhone(event.target.value)}
               placeholder={t("register.phone")}
             />
-            <select
-              value={gender}
-              onChange={(event) =>
-                setGender(event.target.value as "" | "MALE" | "FEMALE")
+            <Select
+              value={gender || GENDER_UNSPECIFIED}
+              onValueChange={(nextValue) =>
+                setGender(
+                  nextValue === GENDER_UNSPECIFIED
+                    ? ""
+                    : (nextValue as "MALE" | "FEMALE")
+                )
               }
-              className="h-9 rounded-4xl border border-input bg-input/30 px-3 text-sm"
             >
-              <option value="">{t("register.genderUnspecified")}</option>
-              <option value="MALE">{t("register.male")}</option>
-              <option value="FEMALE">{t("register.female")}</option>
-            </select>
+              <SelectTrigger
+                aria-label={t("register.genderUnspecified")}
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={GENDER_UNSPECIFIED}>
+                  {t("register.genderUnspecified")}
+                </SelectItem>
+                <SelectItem value="MALE">{t("register.male")}</SelectItem>
+                <SelectItem value="FEMALE">{t("register.female")}</SelectItem>
+              </SelectContent>
+            </Select>
             <label className="text-sm font-medium">
               {t("dashboard.profilePhoto")}
               <Input

@@ -24,8 +24,19 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { TextAnimate } from "@workspace/ui/components/text-animate"
+import { createTranslatedPageMetadata } from "@/lib/seo"
+
 type BookDemoPageProps = {
   params: Promise<{ lang: string }>
+}
+
+export async function generateMetadata({ params }: BookDemoPageProps) {
+  const { lang } = await params
+  return createTranslatedPageMetadata({
+    language: lang,
+    page: "bookDemo",
+    path: "/book-demo",
+  })
 }
 
 export default async function BookDemoPage({ params }: BookDemoPageProps) {
@@ -165,7 +176,7 @@ export default async function BookDemoPage({ params }: BookDemoPageProps) {
               <div className="absolute -top-10 -right-7 size-40 rounded-full bg-[#f7e5cd]/80" />
               <div className="relative flex min-h-45 items-end justify-between rounded-[1.45rem] bg-[#baa283] p-5">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.16em] text-[#fff8ed]/75 uppercase">
+                  <p className="text-xs font-bold tracking-[0.16em] text-[#fff8ed]/75 capitalize">
                     {copy.cardLabel}
                   </p>
                   <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#fffaf2]">

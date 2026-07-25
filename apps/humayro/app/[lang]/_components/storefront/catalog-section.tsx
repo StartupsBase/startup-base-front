@@ -5,7 +5,10 @@ import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
 import type { Language } from "@/i18n/config"
 import { useHasAuthToken } from "@/lib/use-auth-token"
-import { useCatalogStore, type CatalogSort } from "@/lib/stores/use-catalog-store"
+import {
+  useCatalogStore,
+  type CatalogSort,
+} from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
@@ -54,6 +57,21 @@ export function CatalogSection({ language }: { language: Language }) {
   })
 
   const products = productsQuery.data?.content ?? []
+  const categories = [...(categoriesQuery.data ?? [])].sort(
+    (a, b) =>
+      (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+      (a.name ?? "").localeCompare(b.name ?? "")
+  )
+  const parentCategories = categories.filter(
+    (category) => category.parentId == null
+  )
+  const selectedCategory = categories.find(
+    (category) => category.id === categoryId
+  )
+  const activeParentId = selectedCategory?.parentId ?? selectedCategory?.id
+  const childCategories = categories.filter(
+    (category) => category.parentId === activeParentId
+  )
   const favoriteIds = new Set(
     hasToken ? (favoritesQuery.data ?? []) : actions.guestFavoriteIds
   )
@@ -68,7 +86,7 @@ export function CatalogSection({ language }: { language: Language }) {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-bold tracking-[0.2em] text-primary uppercase">
+            <p className="text-sm font-bold tracking-[0.2em] text-primary capitalize">
               {text.catalogEyebrow}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">
@@ -79,7 +97,10 @@ export function CatalogSection({ language }: { language: Language }) {
             </p>
           </div>
 
-          <Select value={sort} onValueChange={(value) => setSort(value as CatalogSort)}>
+          <Select
+            value={sort}
+            onValueChange={(value) => setSort(value as CatalogSort)}
+          >
             <SelectTrigger className="h-11 min-w-48 rounded-2xl bg-background">
               <SelectValue />
             </SelectTrigger>
@@ -93,7 +114,7 @@ export function CatalogSection({ language }: { language: Language }) {
           </Select>
         </div>
 
-        <div className="mt-9 flex gap-2 overflow-x-auto pb-2">
+        <div className="mt-9 flex gap-3 overflow-x-auto border-b pb-4">
           <button
             type="button"
             className={cn(
@@ -106,7 +127,7 @@ export function CatalogSection({ language }: { language: Language }) {
           >
             {text.allCategories}
           </button>
-          {categoriesQuery.data?.map((category) => {
+          {parentCategories.map((category) => {
             if (category.id == null) return null
             const name =
               language === "ru"
@@ -119,23 +140,61 @@ export function CatalogSection({ language }: { language: Language }) {
                 type="button"
                 className={cn(
                   "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                  categoryId === category.id
+                  activeParentId === category.id
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background hover:border-primary/50"
                 )}
                 onClick={() => setCategoryId(category.id ?? null)}
               >
+                {category.imageUrl ? (
+                  <img
+                    src={category.imageUrl}
+                    alt=""
+                    className="mr-2 inline-block size-7 rounded-full object-cover"
+                  />
+                ) : null}
                 {name || "—"}
               </button>
             )
           })}
         </div>
 
+        {childCategories.length ? (
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+            {childCategories.map((category) => {
+              if (category.id == null) return null
+              const name =
+                language === "ru"
+                  ? category.nameRu || category.name || category.nameEng
+                  : category.name || category.nameRu || category.nameEng
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={cn(
+                    "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
+                    categoryId === category.id
+                      ? "bg-primary/12 text-primary ring-1 ring-primary/25"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => setCategoryId(category.id ?? null)}
+                >
+                  {name || "—"}
+                </button>
+              )
+            })}
+          </div>
+        ) : null}
+
         {productsQuery.isPending ? (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
             {Array.from({ length: 10 }).map((_, index) => (
-              <div key={index} className="overflow-hidden rounded-2xl border">
-                <div className="aspect-[4/3] animate-pulse bg-muted" />
+              <div
+                key={index}
+                className="w-[86%] max-w-80 shrink-0 snap-center overflow-hidden rounded-2xl border first:snap-start sm:w-auto sm:max-w-none"
+              >
+                <div className="aspect-4/3 animate-pulse bg-muted" />
                 <div className="space-y-3 p-3">
                   <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
                   <div className="h-8 animate-pulse rounded bg-muted" />
@@ -155,18 +214,22 @@ export function CatalogSection({ language }: { language: Language }) {
             {text.noProducts}
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
             {products.map((product, index) => (
-              <ProductCard
+              <div
                 key={product.id ?? index}
-                product={product}
-                language={language}
-                isFavorite={product.id != null && favoriteIds.has(product.id)}
-                isAdding={actions.pendingCartId === product.id}
-                isTogglingFavorite={actions.pendingFavoriteId === product.id}
-                onAddToCart={actions.addProductToCart}
-                onToggleFavorite={actions.toggleFavorite}
-              />
+                className="w-[86%] max-w-80 shrink-0 snap-center first:snap-start sm:w-auto sm:max-w-none"
+              >
+                <ProductCard
+                  product={product}
+                  language={language}
+                  isFavorite={product.id != null && favoriteIds.has(product.id)}
+                  isAdding={actions.pendingCartId === product.id}
+                  isTogglingFavorite={actions.pendingFavoriteId === product.id}
+                  onAddToCart={actions.addProductToCart}
+                  onToggleFavorite={actions.toggleFavorite}
+                />
+              </div>
             ))}
           </div>
         )}

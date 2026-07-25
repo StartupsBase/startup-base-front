@@ -18,7 +18,7 @@ export function ProductCreatePage({
   const organizationHref = `/${language}/dashboard/organizations/${organizationId}`
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
       <DashboardBreadcrumb
         language={language}
         items={[
@@ -40,7 +40,6 @@ export function ProductCreatePage({
       </header>
       <ProductForm
         organizationId={organizationId}
-        showAssistant
         onComplete={() => router.push(organizationHref)}
       />
     </main>

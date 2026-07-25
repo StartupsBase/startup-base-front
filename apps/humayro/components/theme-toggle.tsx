@@ -5,7 +5,6 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useTranslation } from "react-i18next"
 
 import { useTheme } from "@/components/theme-provider"
-import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 function ThemeToggle({ className }: { className?: string }) {
@@ -14,20 +13,21 @@ function ThemeToggle({ className }: { className?: string }) {
   const isDark = theme === "dark"
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      size="icon"
-      className={cn(className)}
+      className={cn(
+        "flex size-8 aspect-square shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-input/30 transition-colors hover:bg-input/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none xs:size-9 sm:size-10 lg:size-9 xl:size-10 2xl:size-11 3xl:size-12",
+        className
+      )}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={t(isDark ? "home.themeToLight" : "home.themeToDark")}
     >
       <HugeiconsIcon
         icon={isDark ? Sun01Icon : Moon01Icon}
-        strokeWidth={1.8}
-        className="size-4"
+        strokeWidth={2}
+        className="size-4.5 sm:size-5 2xl:size-5.5"
       />
-    </Button>
+    </button>
   )
 }
 

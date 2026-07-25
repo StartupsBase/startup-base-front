@@ -18,6 +18,7 @@ export interface ProductCreateDTO {
   descriptionEng?: string;
   categoryId: number;
   organizationId?: number;
+  branchId: number;
   basePrice: number;
   /**
      * @minimum 0

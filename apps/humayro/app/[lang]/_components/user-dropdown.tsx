@@ -1,5 +1,7 @@
 "use client"
 
+import { UserCircleIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -18,8 +20,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
+import { cn } from "@workspace/ui/lib/utils"
 
-export function UserDropdown({ language }: { language: string }) {
+export function UserDropdown({
+  language,
+  compact = false,
+}: {
+  language: string
+  compact?: boolean
+}) {
   const queryClient = useQueryClient()
   const { t } = useTranslation()
   const [enabled, setEnabled] = useState(!!hasAuthToken())
@@ -28,7 +37,7 @@ export function UserDropdown({ language }: { language: string }) {
   const setUser = useAuthStore((state) => state.setUser)
   const clear = useAuthStore((state) => state.clear)
   const pathname = usePathname()
-  const meQuery = useMe1({ query: { enabled, retry: false,  } })
+  const meQuery = useMe1({ query: { enabled, retry: false } })
   const currentUser = meQuery.data ?? user
   const name = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
@@ -36,7 +45,11 @@ export function UserDropdown({ language }: { language: string }) {
   const contact = identifier ?? currentUser?.email ?? currentUser?.phone
 
   useEffect(() => {
-    setEnabled(hasAuthToken())
+    const frame = window.requestAnimationFrame(() => {
+      setEnabled(hasAuthToken())
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [])
 
   useEffect(() => {
@@ -59,8 +72,26 @@ export function UserDropdown({ language }: { language: string }) {
 
   if (!currentUser) {
     return (
-      <Button asChild variant="ghost">
-        <Link href={`/${language}/login`}>{t("home.loginAction")}</Link>
+      <Button
+        asChild
+        variant="ghost"
+        className={cn(
+          "shrink-0 rounded-full",
+          compact
+            ? "size-11 px-0"
+            : "xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-xs 3xl:h-12 3xl:text-base h-8 px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
+        )}
+      >
+        <Link
+          href={`/${language}/login`}
+          aria-label={compact ? t("home.loginAction") : undefined}
+        >
+          {compact ? (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
+          ) : (
+            t("home.loginAction")
+          )}
+        </Link>
       </Button>
     )
   }
@@ -71,16 +102,32 @@ export function UserDropdown({ language }: { language: string }) {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 max-w-44 justify-start gap-2 truncate px-2 text-xs"
+          aria-label={
+            compact ? name || contact || t("home.account") : undefined
+          }
+          className={cn(
+            "truncate rounded-full",
+            compact
+              ? "size-11 justify-center px-0"
+              : "3xl:h-12 3xl:max-w-48 3xl:text-base h-10 max-w-36 justify-start gap-2 px-3 text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
+          )}
         >
           {currentUser.photo?.s3Url ? (
             <img
               src={currentUser.photo.s3Url}
               alt=""
-              className="size-5 rounded-full object-cover"
+              className={cn(
+                "shrink-0 rounded-full object-cover",
+                compact ? "size-6" : "xs:size-4.5 size-4 sm:size-5 2xl:size-6"
+              )}
             />
+          ) : compact ? (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
           ) : null}
-          {name || contact || t("home.account")}
+          <p className="hidden sm:block">
+            {!compact ? name || contact || t("home.account") : null}
+          </p>
+          <HugeiconsIcon className="block sm:hidden size-5.5" icon={UserCircleIcon} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 shadow-none">
@@ -106,9 +153,7 @@ export function UserDropdown({ language }: { language: string }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${language}/orders`}>
-            {t("storefront.myOrders")}
-          </Link>
+          <Link href={`/${language}/orders`}>{t("storefront.myOrders")}</Link>
         </DropdownMenuItem>
         {pathname !== `/${language}/dashboard` && (
           <DropdownMenuItem asChild>

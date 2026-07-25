@@ -14,4 +14,5 @@ export interface ReviewCreateDTO {
      */
   rating: number;
   comment?: string;
+  attachmentIds?: number[];
 }
