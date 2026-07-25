@@ -22,7 +22,7 @@ const YouTubeVideo = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1072px]">
+    <div className="mx-auto w-full max-w-268">
       <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-[0_24px_70px_-48px_rgba(0,0,0,.9)] sm:rounded-2xl">
         {!isPlaying ? (
           <button

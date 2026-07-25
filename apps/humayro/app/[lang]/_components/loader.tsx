@@ -5,20 +5,14 @@ import {
   ReactNode,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react"
-import { usePathname } from "next/navigation"
 import { HumayroLoaderLayers } from "./humayro-loader-layers"
 
 type HumayroLoaderProps = {
   children: ReactNode
-  language: string
   duration?: number
-  showLoadingText?: boolean
 }
-
-const loaderStorageKey = "humayro:home-loader-shown"
 
 type Particle = {
   x: number
@@ -246,38 +240,13 @@ const flyingLeaves: FlyingLeaf[] = [
 
 export default function HumayroLoader({
   children,
-  language,
   duration = 7600,
-  showLoadingText = true,
 }: HumayroLoaderProps) {
-  const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-  const [visible, setVisible] = useState(false)
-  const hasCheckedLoader = useRef(false)
+  const [mounted, setMounted] = useState(true)
+  const [visible, setVisible] = useState(true)
 
   const stableCoreParticles = useMemo(() => coreParticles, [])
   const stableOrbitParticles = useMemo(() => orbitParticles, [])
-
-  useEffect(() => {
-    if (pathname !== `/${language}` || hasCheckedLoader.current) return
-
-    const checkTimer = window.setTimeout(() => {
-      if (hasCheckedLoader.current) return
-      hasCheckedLoader.current = true
-
-      try {
-        if (window.localStorage.getItem(loaderStorageKey)) return
-        window.localStorage.setItem(loaderStorageKey, "true")
-      } catch {
-        // If storage is unavailable, still show the loader for this page load.
-      }
-
-      setMounted(true)
-      setVisible(true)
-    }, 0)
-
-    return () => window.clearTimeout(checkTimer)
-  }, [language, pathname])
 
   useEffect(() => {
     if (!mounted) return
@@ -826,7 +795,7 @@ export default function HumayroLoader({
 
           <div className="humayro-loader relative flex h-full w-full items-center justify-center overflow-hidden">
             <div
-              className="pointer-events-none absolute top-[42%] left-1/2 h-[720px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="pointer-events-none absolute top-[42%] left-1/2 h-180 w-180 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
                 background: "var(--humayro-loader-aura)",
                 animation: "humayroBackgroundBreath 3.8s ease-in-out infinite",
@@ -927,7 +896,7 @@ export default function HumayroLoader({
               )
             })}
 
-            <div className="humayro-logo-wrap relative z-10 flex w-full max-w-[680px] flex-col items-center px-4 text-center">
+            <div className="humayro-logo-wrap relative z-10 flex w-full max-w-170 flex-col items-center px-4 text-center">
               <HumayroLoaderLayers />
 
               <h1
@@ -952,7 +921,7 @@ export default function HumayroLoader({
 
               <div className="relative mt-5 h-7 w-[min(74vw,290px)]">
                 <span
-                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-[176px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                  className="humayro-bottom-glow absolute top-1/2 left-1/2 h-4 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full"
                   style={{
                     background: "var(--humayro-loader-glow)",
                     filter: "blur(7px)",
