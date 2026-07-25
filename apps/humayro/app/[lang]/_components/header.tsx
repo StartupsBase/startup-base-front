@@ -60,7 +60,7 @@ export default function Header({ language }: { language: Language }) {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 mx-auto flex w-full items-center border-b border-border/70 bg-background/80 px-4 py-2.5 backdrop-blur-xl transition-all duration-300 lg:hidden ${
+        className={`sticky top-0 z-40 mx-auto flex w-full items-center border-b border-border/70 bg-background/10 px-4 py-2.5 backdrop-blur-xl transition-all duration-300 lg:hidden ${
           isSticky ? "shadow-[0_12px_30px_-24px_rgba(0,0,0,.8)]" : ""
         }`}
       >

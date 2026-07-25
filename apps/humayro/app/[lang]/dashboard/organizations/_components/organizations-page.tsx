@@ -1,6 +1,8 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -601,8 +603,17 @@ function OrganizationActions({
     <div className="flex justify-end gap-2">
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("organization.edit")}
+          <Button
+            variant="outline"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("organization.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("organization.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
@@ -618,8 +629,14 @@ function OrganizationActions({
       </Dialog>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("organization.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("organization.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("organization.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-64 gap-3">

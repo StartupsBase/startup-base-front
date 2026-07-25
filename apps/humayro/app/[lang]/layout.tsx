@@ -111,7 +111,7 @@ export default async function RootLayout({
           <QueryProvider>
             <TelegramProvider>
               <I18nProvider language={lang}>
-                <HumayroLoader language={lang}>
+                <HumayroLoader>
                   <NextTopLoader color="#008872" showSpinner={false} />
                   <Header language={lang} />
                   {children}

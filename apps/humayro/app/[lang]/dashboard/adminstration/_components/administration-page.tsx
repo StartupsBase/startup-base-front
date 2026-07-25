@@ -1,5 +1,7 @@
 "use client"
 
+import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -92,7 +94,7 @@ export function AdministrationPage({ language }: { language: string }) {
         language={language}
         items={[{ label: t("administration.title") }]}
       />
-      <SidebarTrigger className="mb-3 mt-6 hidden md:inline-flex" />
+      <SidebarTrigger className="mt-6 mb-3 hidden md:inline-flex" />
       <div className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("administration.title")}
@@ -664,14 +666,29 @@ function RowActions({
   const { t } = useTranslation()
   return (
     <div className="flex justify-end gap-2">
-      <Button size="sm" variant="outline" onClick={onEdit}>
-        {t("administration.edit")}
+      <Button
+        size="sm"
+        variant="outline"
+        className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+        aria-label={t("administration.edit")}
+        onClick={onEdit}
+      >
+        <HugeiconsIcon icon={PencilEdit02Icon} className="size-5 lg:hidden" />
+        <span className="hidden lg:inline">{t("administration.edit")}</span>
       </Button>
       {onDelete ? (
         <Popover>
           <PopoverTrigger asChild>
-            <Button size="sm" variant="destructive">
-              {t("administration.delete")}
+            <Button
+              size="sm"
+              variant="destructive"
+              className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+              aria-label={t("administration.delete")}
+            >
+              <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+              <span className="hidden lg:inline">
+                {t("administration.delete")}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="grid w-64 gap-3">

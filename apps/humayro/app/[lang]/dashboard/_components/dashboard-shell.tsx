@@ -36,6 +36,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { cn } from "@workspace/ui/lib/utils"
@@ -101,6 +102,7 @@ export function DashboardShell({
           } as React.CSSProperties
         }
       >
+        <CloseSidebarOnOutsideInteraction />
         <Sidebar
           collapsible="icon"
           variant="inset"
@@ -288,6 +290,39 @@ export function DashboardShell({
       </SidebarProvider>
     </TooltipProvider>
   )
+}
+
+function CloseSidebarOnOutsideInteraction() {
+  const { isMobile, open, setOpen } = useSidebar()
+
+  useEffect(() => {
+    if (isMobile || !open) return
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const clickedSidebarControl = target.closest(
+        '[data-sidebar="sidebar"], [data-sidebar="trigger"], [data-sidebar="rail"]'
+      )
+
+      if (!clickedSidebarControl) setOpen(false)
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false)
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isMobile, open, setOpen])
+
+  return null
 }
 
 function MobileNavItem({

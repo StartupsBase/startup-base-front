@@ -78,11 +78,11 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             {t("home.description")}
           </TextAnimate>
 
-          <div className="mt-8 flex w-full max-w-sm flex-col justify-center gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap">
+          <div className="mt-8 grid grid-cols-3 sm:flex w-full max-w-sm flex-col justify-center gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap">
             <Link href={`/${lang}/book-demo`} className="w-full sm:w-auto">
               <ShimmerButton
                 background={`#008872`}
-                className="h-11 w-full min-w-40 bg-input/30! px-4 sm:w-auto dark:border-primary"
+                className="h-11 w-full lg:min-w-40 bg-input/30! px-4 sm:w-auto dark:border-primary text-[11px]! lg:text-[18px]! xl:text-[24px]"
               >
                 {t("home.bookingDemoAction")}
               </ShimmerButton>
@@ -90,7 +90,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             <Button
               asChild
               size="lg"
-              className="h-11 w-full min-w-40 sm:w-auto"
+              className="h-11 w-full lg:min-w-40 sm:w-auto text-[11px]! lg:text-[18px]! xl:text-[24px]"
             >
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
@@ -98,7 +98,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               asChild
               variant="outline"
               size="lg"
-              className="h-11 w-full min-w-40 sm:w-auto"
+              className="h-11 w-full lg:min-w-40 sm:w-auto text-[11px]! lg:text-[18px]! xl:text-[24px]"
             >
               <Link href={`/${lang}/register`}>
                 {t("home.secondaryAction")}
@@ -106,7 +106,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             </Button>
           </div>
 
-          <div className="mt-8 grid w-full max-w-sm grid-cols-1 gap-2 text-left text-sm font-medium text-muted-foreground sm:mt-12 sm:max-w-3xl sm:grid-cols-3 sm:gap-3 sm:text-center sm:text-base">
+          <div className="mt-8 grid w-full max-w-sm grid-cols-3 gap-2 text-left text-sm font-medium text-muted-foreground sm:mt-12 sm:max-w-3xl sm:grid-cols-3 sm:gap-3 sm:text-center sm:text-base">
             <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
               {t("home.featureOne.title")}
             </span>

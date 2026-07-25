@@ -4,6 +4,7 @@ import {
   Add01Icon,
   Delete02Icon,
   PencilEdit02Icon,
+  Trash,
   ViewIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -1019,12 +1020,22 @@ function ProductActions({
         </Dialog>
       ) : null}
       {product.id !== undefined ? (
-        <Button asChild variant="ghost" size="icon" title={t("product.edit")}>
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+          title={t("product.edit")}
+          aria-label={t("product.edit")}
+        >
           <Link
             href={`/${language}/dashboard/organizations/${organizationId}/products/${product.id}/edit`}
           >
-            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-            <span className="sr-only">{t("product.edit")}</span>
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("product.edit")}</span>
           </Link>
         </Button>
       ) : null}
@@ -1032,12 +1043,13 @@ function ProductActions({
         <DialogTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive"
+            size="sm"
+            className="size-10 p-0 text-destructive hover:text-destructive lg:h-8 lg:w-auto lg:px-3"
             title={t("product.delete")}
+            aria-label={t("product.delete")}
           >
-            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
-            <span className="sr-only">{t("product.delete")}</span>
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("product.delete")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
@@ -1328,8 +1340,17 @@ function BranchActions({
     <div className="flex justify-end gap-2">
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("branch.edit")}
+          <Button
+            variant="outline"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("branch.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("branch.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
@@ -1346,8 +1367,14 @@ function BranchActions({
       </Dialog>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("branch.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("branch.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("branch.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-64 gap-3">
@@ -1780,9 +1807,18 @@ function CategoryActions({
       ) : null}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" title={t("category.edit")}>
-            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-            <span className="sr-only">{t("category.edit")}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            title={t("category.edit")}
+            aria-label={t("category.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("category.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
@@ -1802,12 +1838,13 @@ function CategoryActions({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive"
+            size="sm"
+            className="size-10 p-0 text-destructive hover:text-destructive lg:h-8 lg:w-auto lg:px-3"
             title={t("category.delete")}
+            aria-label={t("category.delete")}
           >
-            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
-            <span className="sr-only">{t("category.delete")}</span>
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("category.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-72 gap-3">

@@ -13,10 +13,19 @@ import { useGetByProduct } from "@/lib/api/generated/review/review"
 import { expandReviewEntries } from "@/lib/review-entries"
 import { getProductName } from "@/lib/storefront"
 import { Button } from "@workspace/ui/components/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { ReviewCard, ReviewStars } from "../../_components/review-card"
 import { useReviewDeletion } from "../../_components/use-review-deletion"
+
+type ReviewSort = "newest" | "rating-high" | "rating-low"
 
 export function AllReviews({
   language,
@@ -31,6 +40,7 @@ export function AllReviews({
 }) {
   const { t } = useTranslation()
   const [onlyWithPhotos, setOnlyWithPhotos] = useState(false)
+  const [sort, setSort] = useState<ReviewSort>("newest")
   const reviewsQuery = useGetByProduct(productId, {
     query: { initialData: reviews, retry: 1, staleTime: 30_000 },
   })
@@ -46,9 +56,18 @@ export function AllReviews({
     productId,
     reviews: currentReviews,
   })
-  const visibleEntries = onlyWithPhotos
-    ? entries.filter((review) => review.images.length)
-    : entries
+  const visibleEntries = (
+    onlyWithPhotos
+      ? entries.filter((review) => review.images.length)
+      : [...entries]
+  ).sort((first, second) => {
+    if (sort === "rating-high") return second.rating - first.rating
+    if (sort === "rating-low") return first.rating - second.rating
+    return (
+      new Date(second.createdAt).getTime() -
+      new Date(first.createdAt).getTime()
+    )
+  })
   const reviewImages = entries.flatMap((review) => review.images)
   const average = entries.length
     ? entries.reduce((sum, review) => sum + review.rating, 0) / entries.length
@@ -119,10 +138,33 @@ export function AllReviews({
         ) : null}
 
         <section className="py-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-5">
-            <h2 className="text-2xl font-bold">
-              {t("productDetails.allReviews")}
-            </h2>
+          <h2 className="sr-only">
+            {t("productDetails.allReviews")}
+          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-4 border-y py-4">
+            <Select
+              value={sort}
+              onValueChange={(value) => setSort(value as ReviewSort)}
+            >
+              <SelectTrigger className="w-auto min-w-44 border-0 bg-transparent px-0 shadow-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectItem value="newest">
+                  {language === "ru" ? "Сначала новые" : "Avval yangilari"}
+                </SelectItem>
+                <SelectItem value="rating-high">
+                  {language === "ru"
+                    ? "С высокой оценкой"
+                    : "Yuqori baholangan"}
+                </SelectItem>
+                <SelectItem value="rating-low">
+                  {language === "ru"
+                    ? "С низкой оценкой"
+                    : "Past baholangan"}
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <button
               type="button"
               aria-pressed={onlyWithPhotos}
@@ -146,13 +188,13 @@ export function AllReviews({
           </div>
 
           {visibleEntries.length ? (
-            <div className="mt-6 grid gap-5 lg:grid-cols-2">
+            <div>
               {visibleEntries.map((review) => (
                 <ReviewCard
                   key={`${review.sourceReviewId}-${review.id}`}
                   review={review}
                   language={language}
-                  className="min-h-48"
+                  variant="flat"
                   deleting={isDeleting}
                   onDelete={deleteReview}
                 />

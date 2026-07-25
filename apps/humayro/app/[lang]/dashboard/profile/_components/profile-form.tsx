@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import { useSidebar } from "@workspace/ui/components/sidebar"
 
 const GENDER_UNSPECIFIED = "__gender_unspecified__"
 
@@ -56,6 +57,7 @@ export function ProfileForm({ language }: { language: string }) {
   const [photo, setPhoto] = React.useState<File | null>(null)
   const [submitError, setSubmitError] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
+  const { open } = useSidebar()
   const previewUrl = React.useMemo(
     () => (photo ? URL.createObjectURL(photo) : null),
     [photo]
@@ -184,7 +186,7 @@ export function ProfileForm({ language }: { language: string }) {
 
       <div className="grid min-w-0 lg:grid-cols-[190px_minmax(0,1fr)]">
         <aside className="border-b py-5 lg:border-r lg:border-b-0 lg:pr-6">
-          <nav className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0 [&::-webkit-scrollbar]:hidden">
+          <nav className={`-mx-4 flex scrollbar-none gap-2 max-w-102.5 overflow-x-auto xl:w-full px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0 [&::-webkit-scrollbar]:hidden ${open ? "md:max-w-112.5" : "md:max-w-170 overflow-hidden"}`}>
             {navItems.map((item) => {
               const classes = `relative shrink-0 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                 item.active
