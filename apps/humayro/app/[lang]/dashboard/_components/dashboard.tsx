@@ -1,5 +1,7 @@
 "use client"
 
+import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -386,13 +388,26 @@ function UserActions({ user }: { user: UserDTO }) {
 
   return (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        {t("dashboard.edit")}
+      <Button
+        variant="outline"
+        size="sm"
+        className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+        aria-label={t("dashboard.edit")}
+        onClick={() => setOpen(true)}
+      >
+        <HugeiconsIcon icon={PencilEdit02Icon} className="size-5 lg:hidden" />
+        <span className="hidden lg:inline">{t("dashboard.edit")}</span>
       </Button>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("dashboard.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("dashboard.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("dashboard.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64">

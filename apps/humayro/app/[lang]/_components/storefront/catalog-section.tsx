@@ -188,9 +188,12 @@ export function CatalogSection({ language }: { language: Language }) {
         ) : null}
 
         {productsQuery.isPending ? (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
             {Array.from({ length: 10 }).map((_, index) => (
-              <div key={index} className="overflow-hidden rounded-2xl border">
+              <div
+                key={index}
+                className="w-[86%] max-w-80 shrink-0 snap-center overflow-hidden rounded-2xl border first:snap-start sm:w-auto sm:max-w-none"
+              >
                 <div className="aspect-4/3 animate-pulse bg-muted" />
                 <div className="space-y-3 p-3">
                   <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
@@ -211,18 +214,22 @@ export function CatalogSection({ language }: { language: Language }) {
             {text.noProducts}
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
             {products.map((product, index) => (
-              <ProductCard
+              <div
                 key={product.id ?? index}
-                product={product}
-                language={language}
-                isFavorite={product.id != null && favoriteIds.has(product.id)}
-                isAdding={actions.pendingCartId === product.id}
-                isTogglingFavorite={actions.pendingFavoriteId === product.id}
-                onAddToCart={actions.addProductToCart}
-                onToggleFavorite={actions.toggleFavorite}
-              />
+                className="w-[86%] max-w-80 shrink-0 snap-center first:snap-start sm:w-auto sm:max-w-none"
+              >
+                <ProductCard
+                  product={product}
+                  language={language}
+                  isFavorite={product.id != null && favoriteIds.has(product.id)}
+                  isAdding={actions.pendingCartId === product.id}
+                  isTogglingFavorite={actions.pendingFavoriteId === product.id}
+                  onAddToCart={actions.addProductToCart}
+                  onToggleFavorite={actions.toggleFavorite}
+                />
+              </div>
             ))}
           </div>
         )}

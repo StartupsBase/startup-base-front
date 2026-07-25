@@ -30,6 +30,8 @@ export function ReviewCard({
   language,
   onDelete,
   review,
+  showImages = true,
+  variant = "card",
 }: {
   className?: string
   compact?: boolean
@@ -37,28 +39,41 @@ export function ReviewCard({
   language: Language
   onDelete?: (review: DisplayReviewEntry) => Promise<void>
   review: DisplayReviewEntry
+  showImages?: boolean
+  variant?: "card" | "flat"
 }) {
   const { t } = useTranslation()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const userName = review.userName || t("productDetails.anonymous")
+  const isFlat = variant === "flat"
 
   return (
     <>
       <article
         className={cn(
-          "flex h-full flex-col rounded-2xl border bg-card p-5",
+          "flex h-full flex-col",
+          isFlat
+            ? "border-b py-8 last:border-b-0"
+            : "rounded-2xl border bg-card p-5",
           className
         )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">
-              {userName.charAt(0).toUpperCase()}
-            </span>
+            {!isFlat ? (
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            ) : null}
             <div className="min-w-0">
               <h3 className="truncate text-sm font-semibold">{userName}</h3>
-              <time className="text-xs text-muted-foreground">
+              <time
+                className={cn(
+                  "text-xs text-muted-foreground",
+                  isFlat && "mt-1 block"
+                )}
+              >
                 {new Intl.DateTimeFormat(
                   language === "ru" ? "ru-RU" : "uz-UZ",
                   { dateStyle: "medium" }
@@ -123,14 +138,15 @@ export function ReviewCard({
 
         <p
           className={cn(
-            "mt-4 text-sm leading-6 text-muted-foreground",
-            compact && "line-clamp-4"
+            "mt-4 text-sm leading-6",
+            isFlat ? "max-w-4xl text-foreground" : "text-muted-foreground",
+            compact && !isFlat && "line-clamp-4"
           )}
         >
           {review.comment || t("productDetails.noComment")}
         </p>
 
-        {review.images.length ? (
+        {showImages && review.images.length ? (
           <div className="mt-4 flex flex-wrap gap-2">
             {review.images.slice(0, 4).map((image, index) => (
               <button
@@ -158,23 +174,25 @@ export function ReviewCard({
         ) : null}
       </article>
 
-      <Dialog
-        open={selectedImage != null}
-        onOpenChange={(open) => !open && setSelectedImage(null)}
-      >
-        <DialogContent className="max-w-4xl border-0 bg-transparent p-0 shadow-none">
-          <DialogTitle className="sr-only">
-            {t("productDetails.reviewImage")}
-          </DialogTitle>
-          {selectedImage ? (
-            <img
-              src={selectedImage}
-              alt={t("productDetails.reviewImage")}
-              className="max-h-[85vh] w-full rounded-2xl object-contain"
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {showImages ? (
+        <Dialog
+          open={selectedImage != null}
+          onOpenChange={(open) => !open && setSelectedImage(null)}
+        >
+          <DialogContent className="max-w-4xl border-0 bg-transparent p-0 shadow-none">
+            <DialogTitle className="sr-only">
+              {t("productDetails.reviewImage")}
+            </DialogTitle>
+            {selectedImage ? (
+              <img
+                src={selectedImage}
+                alt={t("productDetails.reviewImage")}
+                className="max-h-[85vh] w-full rounded-2xl object-contain"
+              />
+            ) : null}
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   )
 }

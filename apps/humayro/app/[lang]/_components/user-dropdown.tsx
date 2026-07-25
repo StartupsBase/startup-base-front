@@ -109,7 +109,7 @@ export function UserDropdown({
             "truncate rounded-full",
             compact
               ? "size-11 justify-center px-0"
-              : "xs:h-9 xs:max-w-20 xs:gap-1.5 xs:px-2 xs:text-[11px] 2xs:max-w-24 2xs:text-xs 3xl:h-12 3xl:max-w-48 3xl:text-base h-8 max-w-16 justify-start gap-1 px-1.5 text-[10px] sm:h-10 sm:max-w-36 sm:gap-2 sm:px-3 sm:text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
+              : "3xl:h-12 3xl:max-w-48 3xl:text-base h-10 max-w-36 justify-start gap-2 px-3 text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
           )}
         >
           {currentUser.photo?.s3Url ? (
@@ -118,15 +118,16 @@ export function UserDropdown({
               alt=""
               className={cn(
                 "shrink-0 rounded-full object-cover",
-                compact
-                  ? "size-6"
-                  : "xs:size-[18px] size-4 sm:size-5 2xl:size-6"
+                compact ? "size-6" : "xs:size-4.5 size-4 sm:size-5 2xl:size-6"
               )}
             />
           ) : compact ? (
             <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
           ) : null}
-          {!compact ? name || contact || t("home.account") : null}
+          <p className="hidden sm:block">
+            {!compact ? name || contact || t("home.account") : null}
+          </p>
+          <HugeiconsIcon className="block sm:hidden size-5.5" icon={UserCircleIcon} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 shadow-none">

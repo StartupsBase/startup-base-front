@@ -379,7 +379,7 @@ export function ReviewsSection({
         ) : entries.length ? (
           <div
             ref={carouselRef}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto pb-3 [&::-webkit-scrollbar]:hidden"
           >
             {entries.map((review) => (
               <ReviewCard
@@ -387,6 +387,7 @@ export function ReviewsSection({
                 review={review}
                 language={language}
                 compact
+                showImages={false}
                 className="min-w-[min(360px,85vw)] snap-start"
                 deleting={isDeleting}
                 onDelete={deleteReview}
