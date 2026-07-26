@@ -88,7 +88,6 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 import { SortableList } from "@workspace/ui/components/sortable-list"
 
 const categorySchema = z.object({
@@ -646,7 +645,6 @@ export function OrganizationCategoriesPage({
               )}
             </div>
             <div className="min-w-0">
-              <SidebarTrigger className="mb-2 hidden md:inline-flex" />
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-primary">
                   {t("dashboard.organizations")}

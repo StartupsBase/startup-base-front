@@ -18,6 +18,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 
 import type {
+  CategoryDTO,
   ProductDTO,
   ProductImageCreateDTO,
   ProductListDTO,
@@ -77,10 +78,8 @@ function createProductSchema(t: Translation) {
   return z.object({
     name: z.string().trim().min(1, t("product.validation.nameRequired")),
     nameRu: z.string().trim(),
-    nameEng: z.string().trim(),
     descriptionUz: z.string().trim(),
     descriptionRu: z.string().trim(),
-    descriptionEng: z.string().trim(),
     categoryId: z.coerce
       .number({ error: t("product.validation.categoryRequired") })
       .int(t("product.validation.categoryRequired"))
@@ -121,16 +120,87 @@ type ProductVariant = {
 
 const steps = ["basic", "media", "variants", "review"] as const
 
+const PRICE_SUFFIX = "UZS"
+
+function sanitizePriceInput(value: string) {
+  const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "")
+  const [whole = "", ...decimals] = normalized.split(".")
+  const decimal = decimals.join("").slice(0, 2)
+  return decimals.length > 0 ? `${whole}.${decimal}` : whole
+}
+
+function formatPriceInput(value: string | number | undefined) {
+  const raw = String(value ?? "")
+  if (!raw) return ""
+  const [whole = "0", decimal] = raw.split(".")
+  const formattedWhole = Number(whole || 0).toLocaleString("uz-UZ")
+  return decimal === undefined ? formattedWhole : `${formattedWhole}.${decimal}`
+}
+
+function formatPrice(value: number) {
+  return value.toLocaleString("uz-UZ", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  })
+}
+
+function getCategoryOptions(categories: CategoryDTO[]) {
+  const selectable = categories.filter(
+    (category): category is CategoryDTO & { id: number } =>
+      category.id !== undefined
+  )
+  const ids = new Set(selectable.map((category) => category.id))
+  const visited = new Set<number>()
+  const result: Array<{
+    category: CategoryDTO & { id: number }
+    depth: number
+    label: string
+  }> = []
+  const sortCategories = (
+    left: CategoryDTO & { id: number },
+    right: CategoryDTO & { id: number }
+  ) =>
+    (left.sortOrder ?? 0) - (right.sortOrder ?? 0) ||
+    (left.name ?? "").localeCompare(right.name ?? "")
+
+  function visit(
+    category: CategoryDTO & { id: number },
+    ancestors: string[],
+    depth: number
+  ) {
+    if (visited.has(category.id)) return
+    visited.add(category.id)
+    const name = category.name || "—"
+    const path = [...ancestors, name]
+    result.push({ category, depth, label: path.join(" / ") })
+    selectable
+      .filter((item) => item.parentId === category.id)
+      .sort(sortCategories)
+      .forEach((child) => visit(child, path, depth + 1))
+  }
+
+  selectable
+    .filter(
+      (category) => category.parentId == null || !ids.has(category.parentId)
+    )
+    .sort(sortCategories)
+    .forEach((category) => visit(category, [], 0))
+  selectable
+    .filter((category) => !visited.has(category.id))
+    .sort(sortCategories)
+    .forEach((category) => visit(category, [], 0))
+
+  return result
+}
+
 function productValues(product?: ProductSource): ProductInputs {
   const detailed = product as ProductDTO | undefined
 
   return {
     name: product?.name ?? "",
     nameRu: product?.nameRu ?? "",
-    nameEng: product?.nameEng ?? "",
     descriptionUz: detailed?.descriptionUz ?? "",
     descriptionRu: detailed?.descriptionRu ?? "",
-    descriptionEng: detailed?.descriptionEng ?? "",
     categoryId: product?.categoryId ?? "",
     branchId: product?.branchId ?? "",
     basePrice: product?.basePrice ?? 0,
@@ -243,10 +313,8 @@ export function ProductForm({
       const valid = await form.trigger([
         "name",
         "nameRu",
-        "nameEng",
         "descriptionUz",
         "descriptionRu",
-        "descriptionEng",
         "categoryId",
         "branchId",
         "basePrice",
@@ -425,13 +493,9 @@ export function ProductForm({
 
     if (sourceName) {
       form.setValue("nameRu", sourceName, { shouldDirty: true })
-      form.setValue("nameEng", sourceName, { shouldDirty: true })
     }
     if (sourceDescription) {
       form.setValue("descriptionRu", sourceDescription, { shouldDirty: true })
-      form.setValue("descriptionEng", sourceDescription, {
-        shouldDirty: true,
-      })
     }
     setEditorVersion((current) => current + 1)
     toast.success(t("product.localizedFieldsFilled"))
@@ -446,12 +510,8 @@ export function ProductForm({
     const data = {
       name: values.name,
       ...(values.nameRu ? { nameRu: values.nameRu } : {}),
-      ...(values.nameEng ? { nameEng: values.nameEng } : {}),
       ...(values.descriptionUz ? { descriptionUz: values.descriptionUz } : {}),
       ...(values.descriptionRu ? { descriptionRu: values.descriptionRu } : {}),
-      ...(values.descriptionEng
-        ? { descriptionEng: values.descriptionEng }
-        : {}),
       categoryId: values.categoryId,
       organizationId,
       branchId: values.branchId,
@@ -497,6 +557,7 @@ export function ProductForm({
     update.isPending ||
     uploadImages.isPending ||
     uploadVideo.isPending
+  const categoryOptions = getCategoryOptions(categories)
 
   if (editing && detailsQuery.isLoading) {
     return (
@@ -509,7 +570,7 @@ export function ProductForm({
   return (
     <form
       className="grid gap-6"
-      onSubmit={form.handleSubmit(submit)}
+      onSubmit={form.handleSubmit(submit, () => setStep(0))}
       noValidate
     >
       <div className="grid gap-8">
@@ -605,10 +666,10 @@ export function ProductForm({
               colors={colors}
               sizes={sizes}
               categoryName={
-                categories.find(
-                  (category) =>
+                categoryOptions.find(
+                  ({ category }) =>
                     category.id === Number(form.getValues("categoryId"))
-                )?.name
+                )?.label
               }
               branchName={
                 branches.find(
@@ -619,12 +680,7 @@ export function ProductForm({
             />
           ) : null}
 
-          <div
-            className={cn(
-              "flex flex-wrap items-center gap-3 border-t border-border pt-4",
-              step === steps.length - 1 ? "justify-end" : "justify-between"
-            )}
-          >
+          <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
             <Button
               type="button"
               variant="outline"
@@ -633,7 +689,7 @@ export function ProductForm({
             >
               {t("product.previewProduct")}
             </Button>
-            {step === steps.length - 1 ? (
+            {!editing && step === steps.length - 1 ? (
               <Button
                 type="button"
                 variant="outline"
@@ -643,24 +699,32 @@ export function ProductForm({
                 {t("product.edit")}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className={cn(step === steps.length - 1 && "hidden")}
-              disabled={step === 0 || pending}
-              onClick={() => setStep((current) => Math.max(0, current - 1))}
-            >
-              {t("product.previousStep")}
-            </Button>
-            {step < steps.length - 1 ? (
-              <Button type="button" disabled={pending} onClick={nextStep}>
-                {t("product.nextStep")}
-              </Button>
-            ) : (
-              <Button type="submit" disabled={pending}>
-                {editing ? t("product.save") : t("product.publish")}
-              </Button>
-            )}
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+              {step > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => setStep((current) => Math.max(0, current - 1))}
+                >
+                  {t("product.previousStep")}
+                </Button>
+              ) : null}
+              {editing ? (
+                <Button type="submit" disabled={pending}>
+                  {t("product.save")}
+                </Button>
+              ) : null}
+              {step < steps.length - 1 ? (
+                <Button type="button" disabled={pending} onClick={nextStep}>
+                  {t("product.nextStep")}
+                </Button>
+              ) : !editing ? (
+                <Button type="submit" disabled={pending}>
+                  {t("product.publish")}
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -683,10 +747,10 @@ export function ProductForm({
               colors={colors}
               sizes={sizes}
               categoryName={
-                categories.find(
-                  (category) =>
+                categoryOptions.find(
+                  ({ category }) =>
                     category.id === Number(form.getValues("categoryId"))
-                )?.name
+                )?.label
               }
               branchName={
                 branches.find(
@@ -711,12 +775,20 @@ function BasicStep({
   t,
 }: {
   form: ReturnType<typeof useForm<ProductInputs, unknown, ProductValues>>
-  categories: Array<{ id?: number; name?: string }>
+  categories: CategoryDTO[]
   branches: Array<{ id?: number; name?: string; address?: string }>
   editorVersion: number
   onFillLocalizedFields: () => void
   t: Translation
 }) {
+  const basePrice = Number(form.watch("basePrice") || 0)
+  const discountPercent = Number(form.watch("discountPercent") || 0)
+  const discountedPrice = Math.max(
+    0,
+    basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100)
+  )
+  const categoryOptions = getCategoryOptions(categories)
+
   return (
     <section className="grid gap-5">
       <ProductField
@@ -725,20 +797,12 @@ function BasicStep({
       >
         <Input {...form.register("name")} />
       </ProductField>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ProductField
-          label={t("product.nameRu")}
-          error={form.formState.errors.nameRu?.message}
-        >
-          <Input {...form.register("nameRu")} />
-        </ProductField>
-        <ProductField
-          label={t("product.nameEng")}
-          error={form.formState.errors.nameEng?.message}
-        >
-          <Input {...form.register("nameEng")} />
-        </ProductField>
-      </div>
+      <ProductField
+        label={t("product.nameRu")}
+        error={form.formState.errors.nameRu?.message}
+      >
+        <Input {...form.register("nameRu")} />
+      </ProductField>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed bg-muted/30 p-4">
         <p className="max-w-xl text-sm text-muted-foreground">
           {t("product.fillLocalizedFieldsDescription")}
@@ -748,37 +812,35 @@ function BasicStep({
         </Button>
       </div>
       <div className="grid gap-5">
-        {(["descriptionUz", "descriptionRu", "descriptionEng"] as const).map(
-          (name) => (
-            <ProductField
-              key={name}
-              label={t(`product.${name}`)}
-              error={form.formState.errors[name]?.message}
-            >
-              <Controller
-                control={form.control}
-                name={name}
-                render={({ field }) => (
-                  <RichTextEditor
-                    key={`${name}-${editorVersion}`}
-                    value={field.value as string}
-                    output="html"
-                    placeholder={t(`product.${name}`)}
-                    editorContentClassName="min-h-36"
-                    onBlur={field.onBlur}
-                    onChange={(content) =>
-                      field.onChange(
-                        typeof content === "string"
-                          ? content
-                          : JSON.stringify(content)
-                      )
-                    }
-                  />
-                )}
-              />
-            </ProductField>
-          )
-        )}
+        {(["descriptionUz", "descriptionRu"] as const).map((name) => (
+          <ProductField
+            key={name}
+            label={t(`product.${name}`)}
+            error={form.formState.errors[name]?.message}
+          >
+            <Controller
+              control={form.control}
+              name={name}
+              render={({ field }) => (
+                <RichTextEditor
+                  key={`${name}-${editorVersion}`}
+                  value={field.value as string}
+                  output="html"
+                  placeholder={t(`product.${name}`)}
+                  editorContentClassName="min-h-36"
+                  onBlur={field.onBlur}
+                  onChange={(content) =>
+                    field.onChange(
+                      typeof content === "string"
+                        ? content
+                        : JSON.stringify(content)
+                    )
+                  }
+                />
+              )}
+            />
+          </ProductField>
+        ))}
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <ProductField
@@ -798,13 +860,21 @@ function BasicStep({
               <SelectValue placeholder={t("product.selectCategory")} />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) =>
-                category.id !== undefined ? (
-                  <SelectItem key={category.id} value={String(category.id)}>
-                    {category.name}
-                  </SelectItem>
-                ) : null
-              )}
+              {categoryOptions.map(({ category, depth, label }) => (
+                <SelectItem key={category.id} value={String(category.id)}>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {depth > 0 ? (
+                      <span
+                        aria-hidden="true"
+                        className="shrink-0 text-muted-foreground"
+                      >
+                        {"↳".repeat(Math.min(depth, 3))}
+                      </span>
+                    ) : null}
+                    <span className="truncate">{label}</span>
+                  </span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </ProductField>
@@ -842,24 +912,43 @@ function BasicStep({
           label={t("product.basePrice")}
           error={form.formState.errors.basePrice?.message}
         >
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            {...form.register("basePrice")}
+          <Controller
+            control={form.control}
+            name="basePrice"
+            render={({ field }) => (
+              <PriceInput
+                value={field.value as string | number}
+                onBlur={field.onBlur}
+                onValueChange={field.onChange}
+              />
+            )}
           />
         </ProductField>
         <ProductField
           label={t("product.discountPercent")}
           error={form.formState.errors.discountPercent?.message}
         >
-          <Input
-            type="number"
-            min="0"
-            max="100"
-            {...form.register("discountPercent")}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              className="pr-10"
+              {...form.register("discountPercent")}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
+              %
+            </span>
+          </div>
         </ProductField>
+      </div>
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+        <span className="text-sm font-medium text-muted-foreground">
+          {t("product.finalPrice")}
+        </span>
+        <strong className="text-lg text-primary">
+          {formatPrice(discountedPrice)} {PRICE_SUFFIX}
+        </strong>
       </div>
       <label className="flex items-center gap-2 text-sm font-medium">
         <Checkbox
@@ -871,6 +960,35 @@ function BasicStep({
         {t("product.active")}
       </label>
     </section>
+  )
+}
+
+function PriceInput({
+  value,
+  onBlur,
+  onValueChange,
+}: {
+  value: string | number | undefined
+  onBlur?: () => void
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        className="pr-16 tabular-nums"
+        value={formatPriceInput(value)}
+        onBlur={onBlur}
+        onChange={(event) =>
+          onValueChange(sanitizePriceInput(event.target.value))
+        }
+      />
+      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-muted-foreground">
+        {PRICE_SUFFIX}
+      </span>
+    </div>
   )
 }
 
@@ -1213,15 +1331,9 @@ function VariantsStep({
                   />
                 </ProductField>
                 <ProductField label={t("product.variantPrice")}>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder={t("product.variantPrice")}
+                  <PriceInput
                     value={variant.price}
-                    onChange={(event) =>
-                      onChange(index, { price: event.target.value })
-                    }
+                    onValueChange={(price) => onChange(index, { price })}
                   />
                 </ProductField>
               </div>
@@ -1279,7 +1391,6 @@ function ReviewStep({
   const descriptions = [
     [t("product.descriptionUz"), values.descriptionUz],
     [t("product.descriptionRu"), values.descriptionRu],
-    [t("product.descriptionEng"), values.descriptionEng],
   ].filter((item): item is [string, string] => Boolean(item[1]))
 
   return (
@@ -1355,7 +1466,6 @@ function ReviewStep({
             </h3>
             <div className="mt-2 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
               {values.nameRu ? <span>{values.nameRu}</span> : null}
-              {values.nameEng ? <span>{values.nameEng}</span> : null}
             </div>
           </div>
 
@@ -1368,10 +1478,12 @@ function ReviewStep({
 
           <div>
             <div className="flex items-baseline gap-3">
-              <p className="text-3xl font-semibold">{price.toLocaleString()}</p>
+              <p className="text-3xl font-semibold">
+                {formatPrice(price)} {PRICE_SUFFIX}
+              </p>
               {discount > 0 ? (
                 <p className="text-base text-muted-foreground line-through">
-                  {basePrice.toLocaleString()}
+                  {formatPrice(basePrice)} {PRICE_SUFFIX}
                 </p>
               ) : null}
             </div>
@@ -1465,7 +1577,10 @@ function ReviewStep({
                       ?.value ?? "—"}
                   </span>
                   <span className="text-right">
-                    {variant.price || basePrice} · {variant.stock}
+                    {formatPrice(Number(variant.price || basePrice))}{" "}
+                    {PRICE_SUFFIX}
+                    {" · "}
+                    {variant.stock}
                   </span>
                 </div>
               ))}

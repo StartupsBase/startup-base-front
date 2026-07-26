@@ -82,7 +82,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             <Link href={`/${lang}/book-demo`} className="w-full sm:w-auto">
               <ShimmerButton
                 background={`#008872`}
-                className="h-11 w-full min-w-40 bg-input/30! px-4 sm:w-auto dark:border-primary"
+                className="h-10 w-full min-w-36 bg-input/30! px-3 text-sm sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg dark:border-primary"
               >
                 {t("home.bookingDemoAction")}
               </ShimmerButton>
@@ -90,7 +90,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             <Button
               asChild
               size="lg"
-              className="h-11 w-full min-w-40 sm:w-auto"
+              className="h-10 w-full min-w-36 px-3 text-sm sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg"
             >
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
@@ -98,7 +98,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               asChild
               variant="outline"
               size="lg"
-              className="h-11 w-full min-w-40 sm:w-auto"
+              className="h-10 w-full min-w-36 px-3 text-sm sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg"
             >
               <Link href={`/${lang}/register`}>
                 {t("home.secondaryAction")}

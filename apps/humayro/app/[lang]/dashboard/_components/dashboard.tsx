@@ -45,7 +45,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 
 function getErrorMessage(error: unknown, t: (key: string) => string) {
   if (error && typeof error === "object" && "response" in error) {
@@ -197,7 +196,6 @@ export function Dashboard({ language }: { language: string }) {
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
       <header className="flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>

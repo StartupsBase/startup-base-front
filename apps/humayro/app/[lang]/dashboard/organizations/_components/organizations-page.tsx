@@ -45,7 +45,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 import { ImageCropInput } from "../../profile/_components/image-crop-input"
 import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 import { LocationPickerDialog } from "./maps/location-picker-dialog"
@@ -288,7 +287,6 @@ export function OrganizationsPage({ language }: { language: string }) {
       />
       <header className="mt-6 flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SidebarTrigger className="mb-3 hidden md:inline-flex" />
           <p className="text-sm font-medium text-primary">
             {t("dashboard.admin")}
           </p>
