@@ -1280,44 +1280,52 @@ function VariantsStep({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <ProductField label={t("product.color")}>
-                  <select
-                    value={variant.colorId}
-                    onChange={(event) =>
-                      onChange(index, { colorId: event.target.value })
+                  <Select
+                    value={variant.colorId || undefined}
+                    onValueChange={(nextValue) =>
+                      onChange(index, { colorId: nextValue })
                     }
-                    className="h-11 w-full max-w-full min-w-0 truncate rounded-xl border border-input bg-background px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
-                    <option value="" disabled>
-                      {t("product.color")}
-                    </option>
-                    {colors.map((color) =>
-                      color.id !== undefined ? (
-                        <option key={color.id} value={String(color.id)}>
-                          {color.name}
-                        </option>
-                      ) : null
-                    )}
-                  </select>
+                    <SelectTrigger
+                      aria-label={t("product.color")}
+                      className="h-11 w-full rounded-xl bg-background"
+                    >
+                      <SelectValue placeholder={t("product.color")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colors.map((color) =>
+                        color.id !== undefined ? (
+                          <SelectItem key={color.id} value={String(color.id)}>
+                            {color.name}
+                          </SelectItem>
+                        ) : null
+                      )}
+                    </SelectContent>
+                  </Select>
                 </ProductField>
                 <ProductField label={t("product.size")}>
-                  <select
-                    value={variant.sizeId}
-                    onChange={(event) =>
-                      onChange(index, { sizeId: event.target.value })
+                  <Select
+                    value={variant.sizeId || undefined}
+                    onValueChange={(nextValue) =>
+                      onChange(index, { sizeId: nextValue })
                     }
-                    className="h-11 w-full max-w-full min-w-0 truncate rounded-xl border border-input bg-background px-3 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
-                    <option value="" disabled>
-                      {t("product.size")}
-                    </option>
-                    {sizes.map((size) =>
-                      size.id !== undefined ? (
-                        <option key={size.id} value={String(size.id)}>
-                          {size.value}
-                        </option>
-                      ) : null
-                    )}
-                  </select>
+                    <SelectTrigger
+                      aria-label={t("product.size")}
+                      className="h-11 w-full rounded-xl bg-background"
+                    >
+                      <SelectValue placeholder={t("product.size")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sizes.map((size) =>
+                        size.id !== undefined ? (
+                          <SelectItem key={size.id} value={String(size.id)}>
+                            {size.value}
+                          </SelectItem>
+                        ) : null
+                      )}
+                    </SelectContent>
+                  </Select>
                 </ProductField>
                 <ProductField label={t("product.stock")}>
                   <Input

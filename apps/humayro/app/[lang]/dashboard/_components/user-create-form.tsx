@@ -13,7 +13,16 @@ import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organi
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { PasswordInput } from "@/components/forms/password-input"
+
+const NO_ORGANIZATION = "__no_organization__"
 
 const schema = z.object({
   firstname: z.string().min(1),
@@ -68,7 +77,7 @@ export function UserCreateForm({
   }
   return (
     <form className="grid gap-3" onSubmit={form.handleSubmit(submit)}>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Input placeholder="First name" {...form.register("firstname")} />
         <Input placeholder="Last name" {...form.register("lastname")} />
       </div>
@@ -85,33 +94,74 @@ export function UserCreateForm({
           <PhoneInput value={field.value} onChange={field.onChange} />
         )}
       />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Input
           type="number"
           min="0"
           placeholder="Age"
           {...form.register("age")}
         />
-        <select
-          className="rounded-4xl border border-input bg-input/30 px-3 text-sm"
-          {...form.register("gender")}
-        >
-          <option value="MALE">Male</option>
-          <option value="FEMALE">Female</option>
-        </select>
+        <Controller
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger
+                ref={field.ref}
+                aria-label={t("register.gender")}
+                className="w-full"
+                onBlur={field.onBlur}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MALE">{t("register.male")}</SelectItem>
+                <SelectItem value="FEMALE">{t("register.female")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
       {organizationId === undefined ? (
-        <select
-          className="h-10 rounded-4xl border border-input bg-input/30 px-3 text-sm"
-          {...form.register("organizationId")}
-        >
-          <option value="">No organization</option>
-          {organizations.data?.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </select>
+        <Controller
+          control={form.control}
+          name="organizationId"
+          render={({ field }) => (
+            <Select
+              value={
+                field.value === undefined || field.value === ""
+                  ? NO_ORGANIZATION
+                  : String(field.value)
+              }
+              onValueChange={(nextValue) =>
+                field.onChange(
+                  nextValue === NO_ORGANIZATION ? undefined : nextValue
+                )
+              }
+            >
+              <SelectTrigger
+                ref={field.ref}
+                aria-label={t("dashboard.organizations")}
+                className="h-10 w-full"
+                onBlur={field.onBlur}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_ORGANIZATION}>
+                  {t("dashboard.allOrganizations")}
+                </SelectItem>
+                {organizations.data?.map((org) =>
+                  org.id !== undefined ? (
+                    <SelectItem key={org.id} value={String(org.id)}>
+                      {org.name}
+                    </SelectItem>
+                  ) : null
+                )}
+              </SelectContent>
+            </Select>
+          )}
+        />
       ) : null}
       <Button type="submit" disabled={createUser.isPending}>
         {createUser.isPending ? "Creating..." : "Create user"}

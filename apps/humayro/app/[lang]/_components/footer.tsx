@@ -43,7 +43,7 @@ const footerCopy = {
     blog: "Блог",
     privacy: "Политика конфиденциальности",
     signIn: "Войти",
-    follow: "Мы в соцсетях",
+    follow: "Наши соцсети",
     backToTop: "Наверх",
     playMarket: "Доступно в Google Play",
   },

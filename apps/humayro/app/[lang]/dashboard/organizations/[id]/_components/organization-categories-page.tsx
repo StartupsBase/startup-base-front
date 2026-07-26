@@ -4,6 +4,7 @@ import {
   Add01Icon,
   Delete02Icon,
   PencilEdit02Icon,
+  Trash,
   ViewIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -78,6 +79,13 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -89,6 +97,8 @@ import {
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
 import { SortableList } from "@workspace/ui/components/sortable-list"
+
+const ROOT_CATEGORY = "__root_category__"
 
 const categorySchema = z.object({
   name: z.string().trim().min(1, "Category name is required."),
@@ -1008,12 +1018,22 @@ function ProductActions({
         </Dialog>
       ) : null}
       {product.id !== undefined ? (
-        <Button asChild variant="ghost" size="icon" title={t("product.edit")}>
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+          title={t("product.edit")}
+          aria-label={t("product.edit")}
+        >
           <Link
             href={`/${language}/dashboard/organizations/${organizationId}/products/${product.id}/edit`}
           >
-            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-            <span className="sr-only">{t("product.edit")}</span>
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("product.edit")}</span>
           </Link>
         </Button>
       ) : null}
@@ -1021,12 +1041,13 @@ function ProductActions({
         <DialogTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive"
+            size="sm"
+            className="size-10 p-0 text-destructive hover:text-destructive lg:h-8 lg:w-auto lg:px-3"
             title={t("product.delete")}
+            aria-label={t("product.delete")}
           >
-            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
-            <span className="sr-only">{t("product.delete")}</span>
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("product.delete")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
@@ -1317,8 +1338,17 @@ function BranchActions({
     <div className="flex justify-end gap-2">
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            {t("branch.edit")}
+          <Button
+            variant="outline"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("branch.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("branch.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
@@ -1335,8 +1365,14 @@ function BranchActions({
       </Dialog>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="destructive" size="sm">
-            {t("branch.delete")}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            aria-label={t("branch.delete")}
+          >
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("branch.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-64 gap-3">
@@ -1536,35 +1572,73 @@ function CategoryForm({
             label={t("category.sizeType")}
             error={form.formState.errors.sizeType?.message}
           >
-            <select
-              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
-              {...form.register("sizeType")}
-            >
-              <option value="LETTER">{t("category.letter")}</option>
-              <option value="NUMBER">{t("category.number")}</option>
-            </select>
+            <Controller
+              control={form.control}
+              name="sizeType"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    ref={field.ref}
+                    aria-label={t("category.sizeType")}
+                    className="h-11 w-full rounded-xl bg-background"
+                    onBlur={field.onBlur}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LETTER">
+                      {t("category.letter")}
+                    </SelectItem>
+                    <SelectItem value="NUMBER">
+                      {t("category.number")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </CategoryField>
           <CategoryField
             label={t("category.parent")}
             error={form.formState.errors.parentId?.message}
           >
-            <select
-              className="h-11 rounded-xl border border-input bg-background px-3 text-sm"
-              {...form.register("parentId")}
-            >
-              <option value="">{t("category.root")}</option>
-              {categories
-                .filter(
-                  (item) =>
-                    item.id !== undefined && !excludedParentIds.has(item.id)
-                )
-                .map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.parentId ? `↳ ${item.parentName} / ` : ""}
-                    {item.name}
-                  </option>
-                ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <Select
+                  value={field.value || ROOT_CATEGORY}
+                  onValueChange={(nextValue) =>
+                    field.onChange(nextValue === ROOT_CATEGORY ? "" : nextValue)
+                  }
+                >
+                  <SelectTrigger
+                    ref={field.ref}
+                    aria-label={t("category.parent")}
+                    className="h-11 w-full rounded-xl bg-background"
+                    onBlur={field.onBlur}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ROOT_CATEGORY}>
+                      {t("category.root")}
+                    </SelectItem>
+                    {categories
+                      .filter(
+                        (item) =>
+                          item.id !== undefined &&
+                          !excludedParentIds.has(item.id)
+                      )
+                      .map((item) => (
+                        <SelectItem key={item.id} value={String(item.id)}>
+                          {item.parentId ? `↳ ${item.parentName} / ` : ""}
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </CategoryField>
         </div>
         <CategoryField label={t("category.sortOrder")}>
@@ -1731,9 +1805,18 @@ function CategoryActions({
       ) : null}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" title={t("category.edit")}>
-            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-            <span className="sr-only">{t("category.edit")}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            title={t("category.edit")}
+            aria-label={t("category.edit")}
+          >
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5 lg:hidden"
+            />
+            <span className="hidden lg:inline">{t("category.edit")}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
@@ -1753,12 +1836,13 @@ function CategoryActions({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive"
+            size="sm"
+            className="size-10 p-0 text-destructive hover:text-destructive lg:h-8 lg:w-auto lg:px-3"
             title={t("category.delete")}
+            aria-label={t("category.delete")}
           >
-            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
-            <span className="sr-only">{t("category.delete")}</span>
+            <HugeiconsIcon icon={Trash} className="size-5 lg:hidden" />
+            <span className="hidden lg:inline">{t("category.delete")}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="grid w-72 gap-3">

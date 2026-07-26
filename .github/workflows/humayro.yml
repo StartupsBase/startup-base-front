@@ -167,6 +167,8 @@ jobs:
           scp -i ~/.ssh/humayro_deploy -P "$DEPLOY_PORT" \
             deploy/humayro/docker-compose.prod.yml \
             deploy/humayro/deploy.sh \
+            deploy/humayro/nginx.conf \
+            deploy/humayro/nginx-http.conf \
             "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
       - name: Pull and deploy image

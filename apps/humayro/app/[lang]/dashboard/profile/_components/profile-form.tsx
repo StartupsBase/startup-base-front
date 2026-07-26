@@ -24,6 +24,16 @@ import { ImageCropInput } from "./image-crop-input"
 import { Input } from "@/components/input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import { useSidebar } from "@workspace/ui/components/sidebar"
+
+const GENDER_UNSPECIFIED = "__gender_unspecified__"
 
 const profileSchema = z.object({
   firstname: z.string().trim().min(1),
@@ -47,6 +57,7 @@ export function ProfileForm({ language }: { language: string }) {
   const [photo, setPhoto] = React.useState<File | null>(null)
   const [submitError, setSubmitError] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
+  const { open } = useSidebar()
   const previewUrl = React.useMemo(
     () => (photo ? URL.createObjectURL(photo) : null),
     [photo]
@@ -150,12 +161,12 @@ export function ProfileForm({ language }: { language: string }) {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-5 border-b py-7 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto box-border w-full max-w-full min-w-0 overflow-x-hidden px-4 pb-12 sm:px-6 lg:max-w-7xl lg:px-8">
+      <div className="flex flex-col gap-5 border-b py-7 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">
           {t("profile.title")}
         </h1>
-        <label className="flex h-11 w-full items-center gap-3 rounded-xl border bg-background px-4 text-muted-foreground sm:max-w-72">
+        <label className="flex h-11 w-full max-w-full min-w-0 items-center gap-3 rounded-xl border bg-background px-4 text-muted-foreground lg:max-w-72">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -173,9 +184,9 @@ export function ProfileForm({ language }: { language: string }) {
         </label>
       </div>
 
-      <div className="grid lg:grid-cols-[190px_minmax(0,1fr)]">
+      <div className="grid min-w-0 lg:grid-cols-[190px_minmax(0,1fr)]">
         <aside className="border-b py-5 lg:border-r lg:border-b-0 lg:pr-6">
-          <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-1">
+          <nav className={`-mx-4 flex scrollbar-none gap-2 max-w-102.5 overflow-x-auto xl:w-full px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0 [&::-webkit-scrollbar]:hidden ${open ? "md:max-w-112.5" : "md:max-w-170 overflow-hidden"}`}>
             {navItems.map((item) => {
               const classes = `relative shrink-0 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                 item.active
@@ -206,7 +217,7 @@ export function ProfileForm({ language }: { language: string }) {
         </aside>
 
         <form
-          className="min-w-0 py-7 lg:pl-8"
+          className="box-border w-full max-w-full min-w-0 overflow-x-hidden py-7 lg:pl-8"
           onSubmit={form.handleSubmit(submit)}
         >
           <SectionHeading
@@ -216,7 +227,7 @@ export function ProfileForm({ language }: { language: string }) {
 
           <div className="divide-y border-y">
             <AccountRow label={t("profile.photo")} hint={t("profile.photo")}>
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center">
                 <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg font-semibold">
                   {photoUrl ? (
                     <img
@@ -243,7 +254,7 @@ export function ProfileForm({ language }: { language: string }) {
               label={t("profile.firstname")}
               hint={t("profile.nameHint")}
             >
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid w-full max-w-full min-w-0 gap-3 xl:grid-cols-2">
                 <Field
                   error={
                     form.formState.errors.firstname &&
@@ -305,14 +316,38 @@ export function ProfileForm({ language }: { language: string }) {
               label={t("profile.gender")}
               hint={t("profile.genderHint")}
             >
-              <select
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                {...form.register("gender")}
-              >
-                <option value="">{t("profile.genderUnspecified")}</option>
-                <option value="MALE">{t("profile.male")}</option>
-                <option value="FEMALE">{t("profile.female")}</option>
-              </select>
+              <Controller
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? GENDER_UNSPECIFIED}
+                    onValueChange={(nextValue) =>
+                      field.onChange(
+                        nextValue === GENDER_UNSPECIFIED ? undefined : nextValue
+                      )
+                    }
+                  >
+                    <SelectTrigger
+                      ref={field.ref}
+                      aria-label={t("profile.gender")}
+                      className="h-11 w-full rounded-xl bg-background px-4"
+                      onBlur={field.onBlur}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={GENDER_UNSPECIFIED}>
+                        {t("profile.genderUnspecified")}
+                      </SelectItem>
+                      <SelectItem value="MALE">{t("profile.male")}</SelectItem>
+                      <SelectItem value="FEMALE">
+                        {t("profile.female")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </AccountRow>
           </div>
 
@@ -349,11 +384,11 @@ export function ProfileForm({ language }: { language: string }) {
                 label={t("profile.password")}
                 hint={t("profile.passwordHint")}
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center">
                   <Input value="••••••••••" disabled readOnly />
                   <Link
                     href={`/${language}/forgot-password`}
-                    className="shrink-0 text-sm font-medium text-primary hover:underline"
+                    className="text-sm font-medium break-words text-primary hover:underline xl:shrink-0"
                   >
                     {t("profile.changePassword")}
                   </Link>
@@ -389,7 +424,7 @@ function Field({
   error?: string | false
 }) {
   return (
-    <div className="block space-y-2">
+    <div className="block min-w-0 space-y-2">
       {children}
       {error ? (
         <span className="block text-xs text-destructive">{error}</span>
@@ -406,9 +441,11 @@ function SectionHeading({
   description: string
 }) {
   return (
-    <div className="mb-5">
+    <div className="mb-5 min-w-0">
       <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      <p className="mt-1 max-w-full text-sm break-words text-muted-foreground">
+        {description}
+      </p>
     </div>
   )
 }
@@ -423,14 +460,14 @@ function AccountRow({
   label: string
 }) {
   return (
-    <div className="grid gap-4 py-5 md:grid-cols-[minmax(150px,230px)_minmax(0,1fr)] md:items-center">
-      <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="mt-1 max-w-52 text-xs leading-5 text-muted-foreground">
+    <div className="grid w-full max-w-full min-w-0 gap-4 py-5 xl:grid-cols-[minmax(150px,230px)_minmax(0,1fr)] xl:items-center">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold break-words">{label}</p>
+        <p className="mt-1 max-w-full text-xs leading-5 break-words text-muted-foreground xl:max-w-52">
           {hint}
         </p>
       </div>
-      <div className="min-w-0 md:max-w-xl">{children}</div>
+      <div className="w-full max-w-full min-w-0 xl:max-w-xl">{children}</div>
     </div>
   )
 }

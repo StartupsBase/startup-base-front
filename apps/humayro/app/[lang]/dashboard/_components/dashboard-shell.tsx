@@ -102,6 +102,7 @@ export function DashboardShell({
           } as React.CSSProperties
         }
       >
+        <CloseSidebarOnOutsideInteraction />
         <Sidebar
           collapsible="icon"
           variant="inset"
@@ -114,7 +115,7 @@ export function DashboardShell({
             <Link
               href={`/${language}`}
               aria-label="Humayro"
-              className="hidden size-11 place-items-center rounded-2xl bg-background shadow-sm ring-1 ring-sidebar-border transition group-data-[collapsible=icon]:grid hover:scale-[1.03]"
+              className="hidden size-11 place-items-center rounded-2xl bg-primary shadow-sm ring-1 ring-primary/30 transition group-data-[collapsible=icon]:grid hover:scale-[1.03]"
             >
               <Logo className="size-9" />
             </Link>
@@ -243,7 +244,9 @@ export function DashboardShell({
               <UserDropdown language={language} />
             </div>
           </header>
-          <main className="min-w-0 pb-24 md:pb-0">{children}</main>
+          <main className="w-full max-w-full min-w-0 overflow-x-hidden pb-24 md:pb-0">
+            {children}
+          </main>
           <nav
             aria-label={t("dashboard.navigation")}
             className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-24px_rgba(0,0,0,.55)] backdrop-blur-xl md:hidden"
@@ -288,6 +291,39 @@ export function DashboardShell({
       </SidebarProvider>
     </TooltipProvider>
   )
+}
+
+function CloseSidebarOnOutsideInteraction() {
+  const { isMobile, open, setOpen } = useSidebar()
+
+  useEffect(() => {
+    if (isMobile || !open) return
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const clickedSidebarControl = target.closest(
+        '[data-sidebar="sidebar"], [data-sidebar="trigger"], [data-sidebar="rail"]'
+      )
+
+      if (!clickedSidebarControl) setOpen(false)
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false)
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isMobile, open, setOpen])
+
+  return null
 }
 
 function MobileNavItem({
