@@ -37,6 +37,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@workspace/ui/components/sidebar"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { cn } from "@workspace/ui/lib/utils"
@@ -234,8 +235,8 @@ export function DashboardShell({
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="min-w-0 overflow-x-clip md:my-3 md:mr-3 md:rounded-[2rem]! md:border md:border-border/70 md:shadow-[0_24px_70px_-48px_rgba(0,0,0,.7)]">
-          <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-4 md:border-b-0 md:px-6">
+        <SidebarInset className="min-w-0 overflow-x-clip md:my-4 md:mr-3 md:rounded-[2rem]! md:border md:border-border/70 md:shadow-[0_24px_70px_-48px_rgba(0,0,0,.7)]">
+          <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-4 md:border-b-0 md:px-6 rounded-3xl">
             <LogoBrand className="md:hidden" />
             <SidebarTrigger className="hidden size-10 rounded-xl border bg-background shadow-sm md:inline-flex" />
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">

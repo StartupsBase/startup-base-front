@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -21,7 +21,6 @@ import type {
   CategoryDTO,
   ProductDTO,
   ProductImageCreateDTO,
-  ProductListDTO,
   ProductVariantCreateDTO,
 } from "@/lib/api"
 import { RichTextEditor } from "@/components/rich-text-editor"
@@ -102,7 +101,6 @@ function createProductSchema(t: Translation) {
 type ProductSchema = ReturnType<typeof createProductSchema>
 type ProductValues = z.infer<ProductSchema>
 type ProductInputs = z.input<ProductSchema>
-type ProductSource = ProductListDTO | ProductDTO
 
 type ProductImage = ProductImageCreateDTO & {
   name: string
@@ -130,10 +128,20 @@ function sanitizePriceInput(value: string) {
 }
 
 function formatPriceInput(value: string | number | undefined) {
-  const raw = String(value ?? "")
+  const raw =
+    typeof value === "number"
+      ? value.toLocaleString("en-US", {
+          useGrouping: false,
+          maximumFractionDigits: 20,
+        })
+      : String(value ?? "")
   if (!raw) return ""
   const [whole = "0", decimal] = raw.split(".")
-  const formattedWhole = Number(whole || 0).toLocaleString("uz-UZ")
+  const normalizedWhole = (whole || "0").replace(/^0+(?=\d)/, "")
+  const formattedWhole = normalizedWhole.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    "\u00a0"
+  )
   return decimal === undefined ? formattedWhole : `${formattedWhole}.${decimal}`
 }
 
@@ -193,14 +201,12 @@ function getCategoryOptions(categories: CategoryDTO[]) {
   return result
 }
 
-function productValues(product?: ProductSource): ProductInputs {
-  const detailed = product as ProductDTO | undefined
-
+function productValues(product?: ProductDTO): ProductInputs {
   return {
     name: product?.name ?? "",
     nameRu: product?.nameRu ?? "",
-    descriptionUz: detailed?.descriptionUz ?? "",
-    descriptionRu: detailed?.descriptionRu ?? "",
+    descriptionUz: product?.descriptionUz ?? "",
+    descriptionRu: product?.descriptionRu ?? "",
     categoryId: product?.categoryId ?? "",
     branchId: product?.branchId ?? "",
     basePrice: product?.basePrice ?? 0,
@@ -239,17 +245,17 @@ function productVariants(product?: ProductDTO): ProductVariant[] {
 
 export function ProductForm({
   organizationId,
-  product,
+  productId,
   onComplete,
 }: {
   organizationId: number
-  product?: ProductListDTO
+  productId?: number
   onComplete: () => void
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const editing = product?.id !== undefined
-  const detailsQuery = useGetById2(product?.id ?? 0, {
+  const editing = productId !== undefined
+  const detailsQuery = useGetById2(productId ?? 0, {
     query: { enabled: editing, retry: false },
   })
   const categoriesQuery = useGetAll4()
@@ -272,31 +278,54 @@ export function ProductForm({
   const [previewOpen, setPreviewOpen] = useState(false)
   const form = useForm<ProductInputs, unknown, ProductValues>({
     resolver: zodResolver(createProductSchema(t)),
-    defaultValues: productValues(product),
+    defaultValues: productValues(),
   })
 
   useEffect(() => {
-    const source = detailsQuery.data ?? product
-    form.reset(productValues(source))
+    if (!detailsQuery.data) return
 
-    if (detailsQuery.data) {
-      // The edit dialog starts with list data, then hydrates advanced fields
-      // once the full product response is available.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setImages(productImages(detailsQuery.data))
-      setVariants(productVariants(detailsQuery.data))
-      setVideoAttachmentId(detailsQuery.data.videoAttachmentId)
-      setVideoName(detailsQuery.data.videoUrl ? t("product.video") : "")
-      setVideoUrl(detailsQuery.data.videoUrl)
-    }
-  }, [detailsQuery.data, form, product, t])
+    form.reset(productValues(detailsQuery.data))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImages(productImages(detailsQuery.data))
+    setVariants(productVariants(detailsQuery.data))
+    setVideoAttachmentId(detailsQuery.data.videoAttachmentId)
+    setVideoName(detailsQuery.data.videoUrl ? t("product.video") : "")
+    setVideoUrl(detailsQuery.data.videoUrl)
+  }, [detailsQuery.data, form, t])
 
-  const categories = (categoriesQuery.data ?? []).filter(
+  const organizationCategories = (categoriesQuery.data ?? []).filter(
     (category) => category.organizationId === organizationId
   )
-  const branches = (branchesQuery.data?.content ?? []).filter(
+  const categories =
+    detailsQuery.data?.categoryId !== undefined &&
+    !organizationCategories.some(
+      (category) => category.id === detailsQuery.data?.categoryId
+    )
+      ? [
+          ...organizationCategories,
+          {
+            id: detailsQuery.data.categoryId,
+            name: detailsQuery.data.categoryName,
+            organizationId,
+          },
+        ]
+      : organizationCategories
+  const activeBranches = (branchesQuery.data?.content ?? []).filter(
     (branch) => branch.active !== false
   )
+  const branches =
+    detailsQuery.data?.branchId !== undefined &&
+    !activeBranches.some((branch) => branch.id === detailsQuery.data?.branchId)
+      ? [
+          ...activeBranches,
+          {
+            id: detailsQuery.data.branchId,
+            name: detailsQuery.data.branchName,
+            organizationId,
+            active: true,
+          },
+        ]
+      : activeBranches
   const colors = (colorsQuery.data ?? []).filter(
     (color) =>
       color.organizationId === undefined ||
@@ -529,8 +558,8 @@ export function ProductForm({
     }
 
     try {
-      if (editing && product.id !== undefined) {
-        await update.mutateAsync({ id: product.id, data })
+      if (editing && productId !== undefined) {
+        await update.mutateAsync({ id: productId, data })
       } else {
         await create.mutateAsync({ data })
       }
@@ -781,8 +810,12 @@ function BasicStep({
   onFillLocalizedFields: () => void
   t: Translation
 }) {
-  const basePrice = Number(form.watch("basePrice") || 0)
-  const discountPercent = Number(form.watch("discountPercent") || 0)
+  const basePrice = Number(
+    useWatch({ control: form.control, name: "basePrice" }) || 0
+  )
+  const discountPercent = Number(
+    useWatch({ control: form.control, name: "discountPercent" }) || 0
+  )
   const discountedPrice = Math.max(
     0,
     basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100)
@@ -847,64 +880,93 @@ function BasicStep({
           label={t("product.category")}
           error={form.formState.errors.categoryId?.message}
         >
-          <Select
-            value={String(form.watch("categoryId") || "")}
-            onValueChange={(value) =>
-              form.setValue("categoryId", value, {
-                shouldValidate: true,
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.selectCategory")} />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryOptions.map(({ category, depth, label }) => (
-                <SelectItem key={category.id} value={String(category.id)}>
-                  <span className="flex min-w-0 items-center gap-2">
-                    {depth > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="shrink-0 text-muted-foreground"
-                      >
-                        {"↳".repeat(Math.min(depth, 3))}
-                      </span>
-                    ) : null}
-                    <span className="truncate">{label}</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Controller
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => {
+              const selected = categoryOptions.find(
+                ({ category }) => category.id === Number(field.value)
+              )
+
+              return (
+                <Select
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    onBlur={field.onBlur}
+                    aria-invalid={Boolean(form.formState.errors.categoryId)}
+                  >
+                    <SelectValue placeholder={t("product.selectCategory")}>
+                      {selected?.label}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map(({ category, depth, label }) => (
+                      <SelectItem key={category.id} value={String(category.id)}>
+                        <span className="flex min-w-0 items-center gap-2">
+                          {depth > 0 ? (
+                            <span
+                              aria-hidden="true"
+                              className="shrink-0 text-muted-foreground"
+                            >
+                              {"↳".repeat(Math.min(depth, 3))}
+                            </span>
+                          ) : null}
+                          <span className="truncate">{label}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }}
+          />
         </ProductField>
         <ProductField
           label={t("product.branch")}
           error={form.formState.errors.branchId?.message}
         >
-          <Select
-            value={String(form.watch("branchId") || "")}
-            onValueChange={(value) =>
-              form.setValue("branchId", value, {
-                shouldValidate: true,
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.selectBranch")} />
-            </SelectTrigger>
-            <SelectContent>
-              {branches.map((branch) =>
-                branch.id !== undefined ? (
-                  <SelectItem key={branch.id} value={String(branch.id)}>
-                    {branch.name}
-                    {branch.address ? ` · ${branch.address}` : ""}
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
+          <Controller
+            control={form.control}
+            name="branchId"
+            render={({ field }) => {
+              const selected = branches.find(
+                (branch) => branch.id === Number(field.value)
+              )
+              const selectedLabel = selected
+                ? `${selected.name ?? "—"}${selected.address ? ` · ${selected.address}` : ""}`
+                : undefined
+
+              return (
+                <Select
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    onBlur={field.onBlur}
+                    aria-invalid={Boolean(form.formState.errors.branchId)}
+                  >
+                    <SelectValue placeholder={t("product.selectBranch")}>
+                      {selectedLabel}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map((branch) =>
+                      branch.id !== undefined ? (
+                        <SelectItem key={branch.id} value={String(branch.id)}>
+                          {branch.name}
+                          {branch.address ? ` · ${branch.address}` : ""}
+                        </SelectItem>
+                      ) : null
+                    )}
+                  </SelectContent>
+                </Select>
+              )
+            }}
+          />
         </ProductField>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -1281,7 +1343,7 @@ function VariantsStep({
               <div className="grid gap-4 sm:grid-cols-2">
                 <ProductField label={t("product.color")}>
                   <Select
-                    value={variant.colorId || undefined}
+                    value={variant.colorId}
                     onValueChange={(nextValue) =>
                       onChange(index, { colorId: nextValue })
                     }
@@ -1305,7 +1367,7 @@ function VariantsStep({
                 </ProductField>
                 <ProductField label={t("product.size")}>
                   <Select
-                    value={variant.sizeId || undefined}
+                    value={variant.sizeId}
                     onValueChange={(nextValue) =>
                       onChange(index, { sizeId: nextValue })
                     }

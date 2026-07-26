@@ -48,7 +48,7 @@ export function ProductEditPage({
       <div className="[&_[role=combobox]]:text-base [&_button]:text-base [&_input]:text-base [&_label]:text-base">
         <ProductForm
           organizationId={organizationId}
-          product={{ id: productId }}
+          productId={productId}
           onComplete={() => router.push(organizationHref)}
         />
       </div>

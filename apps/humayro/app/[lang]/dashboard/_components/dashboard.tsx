@@ -54,8 +54,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
-
 const ALL_ORGANIZATIONS = "__all_organizations__"
 const ALL_BRANCHES = "__all_branches__"
 const GENDER_UNSPECIFIED = "__gender_unspecified__"
@@ -207,7 +205,7 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <header className="flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium text-primary">
