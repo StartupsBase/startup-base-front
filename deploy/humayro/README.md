@@ -7,7 +7,7 @@ container.
 
 | Git branch | GitHub environment | Frontend | API | Host port |
 | --- | --- | --- | --- | --- |
-| `dev` | `development` | `https://dev.humayro.uz` | `https://dev-api.humayro.uz` | `127.0.0.1:3001` |
+| `dev` | `development` | `https://dev.humayro.uz` | `https://dev-api.humayro.uz` | `127.0.0.1:3003` |
 | `main` | `production` | `https://humayro.uz` | `https://swagger.humayro.uz` | `127.0.0.1:3000` |
 
 Each environment has its own Docker Compose project, container name, runtime
@@ -66,7 +66,7 @@ following secrets in each environment, using that environment's server values:
 Put these variables in the `development` environment:
 
 - `HUMAYRO_DEPLOY_PATH=/opt/humayro-development-front`
-- `HUMAYRO_APP_PORT=3001`
+- `HUMAYRO_APP_PORT=3003`
 - `HUMAYRO_CONTAINER_NAME=humayro-development-front`
 - `HUMAYRO_COMPOSE_PROJECT=humayro-development`
 - `HUMAYRO_ENVIRONMENT_FILE=.env.development`
@@ -139,7 +139,7 @@ cd /opt/humayro-development-front
 HUMAYRO_IMAGE="$(cat .deployed-image.development)" \
 HUMAYRO_DEPLOYMENT=development bash deploy.sh
 docker compose --project-name humayro-development -f docker-compose.yml ps
-curl -I http://127.0.0.1:3001
+curl -I http://127.0.0.1:3003
 ```
 
 Production uses `HUMAYRO_DEPLOYMENT=production`, project

@@ -9,7 +9,7 @@ readonly compose_file="docker-compose.yml"
 
 case "$HUMAYRO_DEPLOYMENT" in
   development)
-    : "${HUMAYRO_PORT:=3001}"
+    : "${HUMAYRO_PORT:=3003}"
     : "${HUMAYRO_CONTAINER_NAME:=humayro-development-front}"
     : "${HUMAYRO_COMPOSE_PROJECT:=humayro-development}"
     : "${HUMAYRO_ENV_FILE:=.env.development}"
