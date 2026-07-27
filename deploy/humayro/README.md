@@ -1,107 +1,153 @@
-# Humayro production deployment
+# Humayro development and production deployment
 
-This deployment builds `apps/humayro` as a Next.js standalone container, stores
-immutable images in GitHub Container Registry, and updates a single Docker
-Compose service on the VPS. Nginx terminates TLS and proxies only to
-`127.0.0.1:3000`; the Next.js server is never exposed directly.
+Humayro has two isolated delivery paths. A push to `dev` builds the frontend
+against the development API and deploys it to the development container. A push
+to `main` builds against the production API and deploys only the production
+container.
 
-The production topology keeps frontend and backend separated on the same VPS:
+| Git branch | GitHub environment | Frontend | API | Host port |
+| --- | --- | --- | --- | --- |
+| `dev` | `development` | `https://dev.humayro.uz` | `https://dev-api.humayro.uz` | `127.0.0.1:3001` |
+| `main` | `production` | `https://humayro.uz` | `https://swagger.humayro.uz` | `127.0.0.1:3000` |
 
-- `humayro.uz` and `www.humayro.uz` proxy only to the frontend container on
-  `127.0.0.1:3000`.
-- `swagger.humayro.uz` continues to proxy only to the backend service on
-  `127.0.0.1:8080`.
-- The frontend talks to the backend through
-  `NEXT_PUBLIC_API_URL=https://swagger.humayro.uz`.
+Each environment has its own Docker Compose project, container name, runtime
+environment file, deployment directory, and rollback state. A failed
+development deployment therefore cannot replace or roll back production.
 
-## 1. Prepare DNS and the VPS
+## 1. DNS, backend, and VPS
 
-The `A` record for `humayro.uz` must point to the VPS. Allow inbound TCP 80 and
-443 in both the provider firewall and the host firewall. SSH must be reachable
-from GitHub-hosted runners, or the workflow must use a self-hosted runner.
+Point both `humayro.uz` and `dev.humayro.uz` to the frontend VPS. Keep the two
+backend deployments isolated as well:
 
-Install Docker Engine with the Compose v2 plugin, Nginx, and Certbot. Add the
-deployment user to the `docker` group, then sign in again so the group change is
-applied. Copy this directory to the VPS and run the one-time TLS bootstrap:
+- development backend: `dev-api.humayro.uz`;
+- production backend: `swagger.humayro.uz`.
 
-```bash
-sudo bash bootstrap-vps.sh ops@example.com
-```
+The development backend must allow `https://dev.humayro.uz` in CORS and OAuth
+redirect settings. Production must allow `https://humayro.uz`. Do not share a
+database, object-storage prefix, OAuth callback, or backend runtime secret
+between these environments.
 
-Create the application directory as the deployment user. Any absolute path is
-valid as long as the SSH user can write to it. If the server keeps frontend and
-backend assets under `/opt`, use `/opt/humayro-front` and set
-`HUMAYRO_DEPLOY_PATH` to the same value in GitHub:
+Install Docker Engine with Compose v2, Nginx, and Certbot. Copy this directory
+to each VPS once, then configure the matching Nginx host and TLS certificate:
 
 ```bash
-mkdir -p /opt/humayro-front
-touch /opt/humayro-front/.env.production
-chmod 600 /opt/humayro-front/.env.production
+sudo bash bootstrap-vps.sh development ops@example.com
+sudo bash bootstrap-vps.sh production ops@example.com
 ```
 
-The committed `.env.production.example` documents server-only variables. Public
-`NEXT_PUBLIC_*` values do not belong in this host file because Next.js embeds
-them in the browser bundle while building the image.
+Run only the matching command when development and production use different
+servers. When they share one VPS, run both; the script installs separate Nginx
+site files and does not overwrite the other environment.
 
-## 2. Configure GitHub
+Create separate writable deployment directories:
 
-Create a `production` GitHub Environment. Add these environment secrets:
+```bash
+mkdir -p /opt/humayro-development-front /opt/humayro-production-front
+touch /opt/humayro-development-front/.env.development
+touch /opt/humayro-production-front/.env.production
+chmod 600 /opt/humayro-development-front/.env.development
+chmod 600 /opt/humayro-production-front/.env.production
+```
 
-- `HUMAYRO_DEPLOY_HOST`: VPS hostname or IP.
-- `HUMAYRO_DEPLOY_USER`: unprivileged SSH user with Docker access.
-- `HUMAYRO_DEPLOY_SSH_KEY`: private key dedicated to CI deployment.
-- `HUMAYRO_DEPLOY_KNOWN_HOSTS`: verified SSH host-key line for the VPS.
+These files are host-managed and CI never overwrites them. `NEXT_PUBLIC_*`
+values do not belong in them because Next.js embeds public values while the
+container image is built.
 
-Add this repository secret so the image-build job can read it:
+## 2. GitHub configuration
 
-- `HUMAYRO_YANDEX_MAPS_API_KEY`: browser API key restricted to
-  `https://humayro.uz/*` at Yandex.
+Create two GitHub Environments named `development` and `production`. Put the
+following secrets in each environment, using that environment's server values:
 
-Add these repository variables:
+- `HUMAYRO_DEPLOY_HOST`
+- `HUMAYRO_DEPLOY_USER`
+- `HUMAYRO_DEPLOY_SSH_KEY`
+- `HUMAYRO_DEPLOY_KNOWN_HOSTS`
 
-- `HUMAYRO_API_URL=https://swagger.humayro.uz`
+Put these variables in the `development` environment:
+
+- `HUMAYRO_DEPLOY_PATH=/opt/humayro-development-front`
+- `HUMAYRO_APP_PORT=3001`
+- `HUMAYRO_CONTAINER_NAME=humayro-development-front`
+- `HUMAYRO_COMPOSE_PROJECT=humayro-development`
+- `HUMAYRO_ENVIRONMENT_FILE=.env.development`
 - `HUMAYRO_DEPLOY_PORT=22` (optional)
-- `HUMAYRO_DEPLOY_PATH=/opt/humayro-front`
 
-Obtain `HUMAYRO_DEPLOY_KNOWN_HOSTS` from a trusted network or the VPS provider's
-console and compare its fingerprint before saving it. Do not blindly trust a
-host key collected during CI.
+Put the corresponding variables in `production`:
 
-## 3. Deploy
+- `HUMAYRO_DEPLOY_PATH=/opt/humayro-production-front`
+- `HUMAYRO_APP_PORT=3000`
+- `HUMAYRO_CONTAINER_NAME=humayro-production-front`
+- `HUMAYRO_COMPOSE_PROJECT=humayro-production`
+- `HUMAYRO_ENVIRONMENT_FILE=.env.production`
+- `HUMAYRO_DEPLOY_PORT=22` (optional)
 
-Pull requests run lint, TypeScript, and the production build. A push to `main`
-publishes an image addressed by its digest. Successful `main` builds copy the
-Compose manifest, deployment script, and current Nginx configs to the VPS, wait
-for the new container health check, and roll back to the previous image if
-needed.
+The workflow already has safe URL defaults. If they need to change, add these
+as repository variables because the target-resolution job intentionally runs
+before a deployment environment is selected:
 
-When the OAuth callback opens as raw JSON, the VPS is still using an older
-Nginx config that sends `/api/auth/google/callback` to the backend. Install the
-current config once and reload Nginx:
+- `HUMAYRO_DEV_API_URL`
+- `HUMAYRO_DEV_SITE_URL`
+- `HUMAYRO_PRODUCTION_API_URL`
+- `HUMAYRO_PRODUCTION_SITE_URL`
+
+Keep `HUMAYRO_YANDEX_MAPS_API_KEY` as a repository secret and allow both
+frontend origins in Yandex. Restrict the GitHub `production` environment to the
+`main` branch and require approval if desired. Restrict `development` to `dev`.
+
+Obtain `HUMAYRO_DEPLOY_KNOWN_HOSTS` from a trusted network or the provider
+console and verify its fingerprint. Never collect and trust the host key during
+the workflow itself.
+
+## 3. CI/CD behavior
+
+Pull requests targeting `dev` build with development URLs. Pull requests
+targeting `main` build with production URLs. Pushes to either branch run lint,
+TypeScript, and a target-specific build, publish an immutable GHCR image, then
+deploy only the matching environment. Each environment keeps an independent
+previous-image pointer for automatic rollback.
+
+The workflow can also be run manually. Select `dev` or `main` in the GitHub
+Actions branch selector; any other branch is rejected.
+
+## 4. Local scripts and Husky
+
+Local Humayro development uses the development API by default:
 
 ```bash
-sudo install -m 0644 /opt/humayro-front/nginx.conf /etc/nginx/sites-available/humayro.conf
-sudo nginx -t
-sudo systemctl reload nginx
+pnpm dev:humayro
+pnpm --filter humayro generate:api:development
+pnpm --filter humayro build:development
 ```
 
-The Google OAuth client and the backend must both use this exact redirect URI:
+Production contract generation and builds are explicit:
+
+```bash
+pnpm --filter humayro generate:api:production
+pnpm --filter humayro build:production
+```
+
+Husky inspects the remote ref during `git push`. Pushing `dev` runs
+`check:humayro:dev`; pushing `main` runs `check:humayro:main`. Other branch
+pushes are not blocked by Humayro's deployment checks.
+
+## 5. Host operations
+
+Useful development commands:
+
+```bash
+cd /opt/humayro-development-front
+HUMAYRO_IMAGE="$(cat .deployed-image.development)" \
+HUMAYRO_DEPLOYMENT=development bash deploy.sh
+docker compose --project-name humayro-development -f docker-compose.yml ps
+curl -I http://127.0.0.1:3001
+```
+
+Production uses `HUMAYRO_DEPLOYMENT=production`, project
+`humayro-production`, state file `.deployed-image.production`, and port 3000.
+
+The OAuth redirect URIs must be registered exactly as:
 
 ```text
+https://dev.humayro.uz/api/auth/google/callback
 https://humayro.uz/api/auth/google/callback
-```
-
-Add it under **Authorized redirect URIs** in Google Cloud Console. Even a
-different protocol, subdomain, path, or trailing slash causes
-`redirect_uri_mismatch`.
-
-The workflow can also be started manually from **Actions > Humayro CI/CD**.
-
-Useful host commands:
-
-```bash
-cd /opt/humayro-front
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs --tail=200 app
-curl -I http://127.0.0.1:3000
 ```

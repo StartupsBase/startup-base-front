@@ -1,17 +1,17 @@
 services:
   app:
     image: ${HUMAYRO_IMAGE:?HUMAYRO_IMAGE must reference an immutable image}
-    container_name: humayro-front
+    container_name: ${HUMAYRO_CONTAINER_NAME:?HUMAYRO_CONTAINER_NAME must isolate the deployment}
     restart: unless-stopped
     init: true
     env_file:
-      - .env.production
+      - ${HUMAYRO_ENV_FILE:?HUMAYRO_ENV_FILE is required}
     environment:
       HOSTNAME: 0.0.0.0
       NODE_ENV: production
       PORT: 3000
     ports:
-      - "127.0.0.1:${HUMAYRO_PORT:-3000}:3000"
+      - "127.0.0.1:${HUMAYRO_PORT:?HUMAYRO_PORT is required}:3000"
     healthcheck:
       test:
         [

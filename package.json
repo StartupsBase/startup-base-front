@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "dev": "turbo dev",
     "dev:humayro": "turbo dev --filter=humayro",
     "dev:parking-avto": "turbo dev --filter=parking-avto",
@@ -13,6 +14,8 @@
     "build:parking-avto": "turbo build --filter=parking-avto",
     "build:stadion24": "turbo build --filter=stadion24",
     "build:wending": "turbo build --filter=wending",
+    "check:humayro:dev": "node scripts/husky/check-humayro.mjs development",
+    "check:humayro:main": "node scripts/husky/check-humayro.mjs production",
     "lint": "turbo lint",
     "lint:humayro": "turbo lint --filter=humayro",
     "lint:parking-avto": "turbo lint --filter=parking-avto",
@@ -26,11 +29,12 @@
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "husky": "^9.1.7",
+    "nx": "23.0.1",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.18",
-    "typescript": "^5",
-    "nx": "23.0.1"
+    "typescript": "^5"
   },
   "packageManager": "pnpm@10.33.4",
   "engines": {
