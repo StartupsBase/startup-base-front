@@ -1,19 +1,19 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
+import { z } from "zod"
 
+import { GoogleLoginButton } from "@/components/forms/google-login-button"
+import { PasswordInput } from "@/components/forms/password-input"
+import { Input } from "@/components/input"
 import { useRegister } from "@/lib/api"
 import { saveAuthToken } from "@/lib/auth-client"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
-import { GoogleLoginButton } from "@/components/forms/google-login-button"
-import { Input } from "@/components/input"
-import { PasswordInput } from "@/components/forms/password-input"
 import { Button } from "@workspace/ui/components/button"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
@@ -204,12 +204,6 @@ export function RegisterForm({ language }: { language: string }) {
           ? t("register.submitting")
           : t("register.submit")}
       </Button>
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border/80" />
-        {t("login.orContinue")}
-        <span className="h-px flex-1 bg-border/80" />
-      </div>
-      <GoogleLoginButton />
       <p className="pt-0.5 text-center text-sm text-muted-foreground">
         {t("register.hasAccount")}{" "}
         <Link

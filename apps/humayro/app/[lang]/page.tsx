@@ -105,18 +105,6 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               </Link>
             </Button>
           </div>
-
-          <div className="mt-8 grid w-full max-w-sm grid-cols-3 gap-2 text-left text-sm font-medium text-muted-foreground sm:mt-12 sm:max-w-3xl sm:grid-cols-3 sm:gap-3 sm:text-center sm:text-base">
-            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
-              {t("home.featureOne.title")}
-            </span>
-            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
-              {t("home.featureTwo.title")}
-            </span>
-            <span className="rounded-2xl border border-border/60 bg-background/45 px-4 py-3 backdrop-blur-sm">
-              {t("home.featureThree.title")}
-            </span>
-          </div>
         </section>
 
         <div className="pb-4 sm:pb-8">
