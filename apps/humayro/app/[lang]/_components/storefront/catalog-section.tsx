@@ -1,8 +1,15 @@
 "use client"
 
 import { useGetAll4 } from "@/lib/api/generated/category/category"
+import { useGetAll3 } from "@/lib/api/generated/color/color"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
-import { useGetAll2 } from "@/lib/api/generated/product/product"
+import {
+  getGetById2QueryOptions,
+  useGetAll2,
+} from "@/lib/api/generated/product/product"
+import { useGetAll1 } from "@/lib/api/generated/size/size"
+import type { ColorDTO } from "@/lib/api/model/colorDTO"
+import type { SizeDTO } from "@/lib/api/model/sizeDTO"
 import type { Language } from "@/i18n/config"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import {
@@ -10,6 +17,7 @@ import {
   type CatalogSort,
 } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
+import { Slider } from "@workspace/ui/components/slider"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
   Select,
@@ -19,6 +27,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
+import { useQueries } from "@tanstack/react-query"
+import { useState } from "react"
 
 import { ProductCard } from "./product-card"
 import { useStorefrontActions } from "./use-storefront-actions"
@@ -29,6 +39,40 @@ const sortMap: Record<CatalogSort, string> = {
   "price-high": "discountedPrice,desc",
 }
 
+const PRICE_MIN = 0
+const PRICE_MAX = 10_000_000
+
+const catalogFilterCopy = {
+  ru: {
+    filters: "Фильтры",
+    clearFilters: "Сбросить",
+    priceRange: "Диапазон цен",
+    priceFrom: "От",
+    priceTo: "До",
+    colors: "Цвет",
+    sizes: "Размер",
+    showMore: "Ещё",
+    showLess: "Показать меньше",
+    unnamedColor: "Цвет без названия",
+    loadingOptions: "Загружаем варианты...",
+    noOptions: "Нет доступных вариантов",
+  },
+  uz: {
+    filters: "Filtrlar",
+    clearFilters: "Tozalash",
+    priceRange: "Narx oralig‘i",
+    priceFrom: "Dan",
+    priceTo: "Gacha",
+    colors: "Rang",
+    sizes: "O‘lcham",
+    showMore: "Yana",
+    showLess: "Kamroq ko‘rsatish",
+    unnamedColor: "Nomsiz rang",
+    loadingOptions: "Variantlar yuklanmoqda...",
+    noOptions: "Mavjud variantlar yo‘q",
+  },
+} satisfies Record<Language, Record<string, string>>
+
 export function CatalogSection({ language }: { language: Language }) {
   const text = useStorefrontCopy()
   const hasToken = useHasAuthToken()
@@ -37,15 +81,35 @@ export function CatalogSection({ language }: { language: Language }) {
   const setCategoryId = useCatalogStore((state) => state.setCategoryId)
   const setSort = useCatalogStore((state) => state.setSort)
   const actions = useStorefrontActions(language)
+  const [draftPriceRange, setDraftPriceRange] = useState<[number, number]>([
+    PRICE_MIN,
+    PRICE_MAX,
+  ])
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    PRICE_MIN,
+    PRICE_MAX,
+  ])
+  const [colorId, setColorId] = useState<number | null>(null)
+  const [sizeId, setSizeId] = useState<number | null>(null)
 
   const categoriesQuery = useGetAll4(
     { active: true },
     { query: { staleTime: 5 * 60_000 } }
   )
+  const colorsQuery = useGetAll3({
+    query: { staleTime: 5 * 60_000, retry: false },
+  })
+  const sizesQuery = useGetAll1(undefined, {
+    query: { staleTime: 5 * 60_000, retry: false },
+  })
   const productsQuery = useGetAll2(
     {
       active: true,
       categoryId: categoryId ?? undefined,
+      minPrice: priceRange[0] > PRICE_MIN ? priceRange[0] : undefined,
+      maxPrice: priceRange[1] < PRICE_MAX ? priceRange[1] : undefined,
+      colorId: colorId ?? undefined,
+      sizeId: sizeId ?? undefined,
       sort: sortMap[sort],
       page: 0,
       size: 12,
@@ -57,6 +121,17 @@ export function CatalogSection({ language }: { language: Language }) {
   })
 
   const products = productsQuery.data?.content ?? []
+  const filterProductQueries = useQueries({
+    queries: products.flatMap((product) =>
+      product.id == null
+        ? []
+        : [
+            getGetById2QueryOptions(product.id, {
+              query: { staleTime: 5 * 60_000, retry: 1 },
+            }),
+          ]
+    ),
+  })
   const categories = [...(categoriesQuery.data ?? [])].sort(
     (a, b) =>
       (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
@@ -75,10 +150,73 @@ export function CatalogSection({ language }: { language: Language }) {
   const favoriteIds = new Set(
     hasToken ? (favoritesQuery.data ?? []) : actions.guestFavoriteIds
   )
+  const variantColors: ColorDTO[] = filterProductQueries.flatMap(
+    (query) =>
+      query.data?.variants?.flatMap((variant) =>
+        variant.colorId == null
+          ? []
+          : [
+              {
+                id: variant.colorId,
+                name: variant.colorName,
+                hexCode: variant.colorHex,
+              } satisfies ColorDTO,
+            ]
+      ) ?? []
+  )
+  const variantSizes: SizeDTO[] = filterProductQueries.flatMap(
+    (query) =>
+      query.data?.variants?.flatMap((variant) =>
+        variant.sizeId == null
+          ? []
+          : [
+              {
+                id: variant.sizeId,
+                value: variant.sizeValue,
+              } satisfies SizeDTO,
+            ]
+      ) ?? []
+  )
+  const colors = Array.from(
+    new Map(
+      [...variantColors, ...(colorsQuery.data ?? [])]
+        .filter((color) => color.id != null)
+        .map((color) => [color.id, color])
+    ).values()
+  )
+  const sizes = Array.from(
+    new Map(
+      [...variantSizes, ...(sizesQuery.data ?? [])]
+        .filter((size) => size.id != null)
+        .map((size) => [size.id, size])
+    ).values()
+  ).sort(
+    (first, second) =>
+      (first.sortOrder ?? 0) - (second.sortOrder ?? 0) ||
+      (first.value ?? "").localeCompare(second.value ?? "")
+  )
   const sortLabels: Record<CatalogSort, string> = {
     newest: text.newest,
     "price-low": text.priceLow,
     "price-high": text.priceHigh,
+  }
+
+  function applyPriceRange(range: number[]) {
+    const nextRange: [number, number] = [
+      Math.max(PRICE_MIN, Math.min(range[0] ?? PRICE_MIN, PRICE_MAX)),
+      Math.max(PRICE_MIN, Math.min(range[1] ?? PRICE_MAX, PRICE_MAX)),
+    ]
+    nextRange.sort((first, second) => first - second)
+    setDraftPriceRange(nextRange)
+    setPriceRange(nextRange)
+  }
+
+  function resetFilters() {
+    const initialRange: [number, number] = [PRICE_MIN, PRICE_MAX]
+    setDraftPriceRange(initialRange)
+    setPriceRange(initialRange)
+    setColorId(null)
+    setSizeId(null)
   }
 
   return (
@@ -158,82 +296,385 @@ export function CatalogSection({ language }: { language: Language }) {
             )
           })}
         </div>
+      </div>
+      <div className="max-w-8xl mx-auto">
+        <div className="flex gap-10">
+          <div className="hidden lg:block lg:min-w-52.5 xl:min-w-62.5">
+            {childCategories.length ? (
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                {childCategories.map((category) => {
+                  if (category.id == null) return null
+                  const name =
+                    language === "ru"
+                      ? category.nameRu || category.name || category.nameEng
+                      : category.name || category.nameRu || category.nameEng
 
-        {childCategories.length ? (
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-            {childCategories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      className={cn(
+                        "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
+                        categoryId === category.id
+                          ? "bg-primary/12 text-primary ring-1 ring-primary/25"
+                          : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                      onClick={() => setCategoryId(category.id ?? null)}
+                    >
+                      {name || "—"}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
+            <CatalogFilters
+              language={language}
+              colors={colors}
+              sizes={sizes}
+              draftPriceRange={draftPriceRange}
+              appliedPriceRange={priceRange}
+              selectedColorId={colorId}
+              selectedSizeId={sizeId}
+              optionsLoading={
+                colorsQuery.isPending ||
+                sizesQuery.isPending ||
+                filterProductQueries.some((query) => query.isPending)
+              }
+              onDraftPriceChange={setDraftPriceRange}
+              onApplyPriceRange={applyPriceRange}
+              onColorChange={(id) =>
+                setColorId((current) => (current === id ? null : id))
+              }
+              onSizeChange={(id) =>
+                setSizeId((current) => (current === id ? null : id))
+              }
+              onReset={resetFilters}
+            />
+          </div>
 
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={cn(
-                    "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
-                    categoryId === category.id
-                      ? "bg-primary/12 text-primary ring-1 ring-primary/25"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  onClick={() => setCategoryId(category.id ?? null)}
+          <div className="w-full max-w-312 min-w-0 flex-1 xl:max-w-261 2xl:max-w-312">
+            {productsQuery.isPending ? (
+              <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-auto pb-2">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-[86%] max-w-80 shrink-0 snap-start overflow-hidden rounded-2xl border sm:w-72 sm:max-w-none lg:w-75"
+                  >
+                    <div className="aspect-4/3 animate-pulse bg-muted" />
+                    <div className="space-y-3 p-3">
+                      <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+                      <div className="h-8 animate-pulse rounded bg-muted" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : productsQuery.isError ? (
+              <div className="mt-10 rounded-3xl border border-destructive/20 bg-destructive/5 p-10 text-center">
+                <p className="text-destructive">{text.productsError}</p>
+                <Button
+                  className="mt-4"
+                  onClick={() => productsQuery.refetch()}
                 >
-                  {name || "—"}
-                </button>
-              )
-            })}
-          </div>
-        ) : null}
-
-        {productsQuery.isPending ? (
-          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <div
-                key={index}
-                className="w-[86%] max-w-80 shrink-0 snap-center overflow-hidden rounded-2xl border first:snap-start sm:w-auto sm:max-w-none"
-              >
-                <div className="aspect-4/3 animate-pulse bg-muted" />
-                <div className="space-y-3 p-3">
-                  <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
-                  <div className="h-8 animate-pulse rounded bg-muted" />
-                </div>
+                  {text.retry}
+                </Button>
               </div>
-            ))}
-          </div>
-        ) : productsQuery.isError ? (
-          <div className="mt-10 rounded-3xl border border-destructive/20 bg-destructive/5 p-10 text-center">
-            <p className="text-destructive">{text.productsError}</p>
-            <Button className="mt-4" onClick={() => productsQuery.refetch()}>
-              {text.retry}
-            </Button>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="mt-10 rounded-3xl border border-dashed p-16 text-center text-muted-foreground">
-            {text.noProducts}
-          </div>
-        ) : (
-          <div className="mt-10 -mr-4 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pr-4 pb-2 sm:mr-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pr-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-5 [&::-webkit-scrollbar]:hidden">
-            {products.map((product, index) => (
-              <div
-                key={product.id ?? index}
-                className="w-[86%] max-w-80 shrink-0 snap-center first:snap-start sm:w-auto sm:max-w-none"
-              >
-                <ProductCard
-                  product={product}
-                  language={language}
-                  isFavorite={product.id != null && favoriteIds.has(product.id)}
-                  isAdding={actions.pendingCartId === product.id}
-                  isTogglingFavorite={actions.pendingFavoriteId === product.id}
-                  onAddToCart={actions.addProductToCart}
-                  onToggleFavorite={actions.toggleFavorite}
-                />
+            ) : products.length === 0 ? (
+              <div className="mt-10 rounded-3xl border border-dashed p-16 text-center text-muted-foreground">
+                {text.noProducts}
               </div>
-            ))}
+            ) : (
+              <div className="mt-10 flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto overscroll-x-contain pb-2 [&::-webkit-scrollbar]:hidden">
+                {products.map((product, index) => (
+                  <div
+                    key={product.id ?? index}
+                    className="w-[86%] max-w-80 shrink-0 snap-start sm:w-72 sm:max-w-none lg:w-75"
+                  >
+                    <ProductCard
+                      product={product}
+                      language={language}
+                      isFavorite={
+                        product.id != null && favoriteIds.has(product.id)
+                      }
+                      isAdding={actions.pendingCartId === product.id}
+                      isTogglingFavorite={
+                        actions.pendingFavoriteId === product.id
+                      }
+                      onAddToCart={actions.addProductToCart}
+                      onToggleFavorite={actions.toggleFavorite}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </section>
   )
+}
+
+type CatalogFiltersProps = {
+  language: Language
+  colors: ColorDTO[]
+  sizes: SizeDTO[]
+  draftPriceRange: [number, number]
+  appliedPriceRange: [number, number]
+  selectedColorId: number | null
+  selectedSizeId: number | null
+  optionsLoading: boolean
+  onDraftPriceChange: (range: [number, number]) => void
+  onApplyPriceRange: (range: number[]) => void
+  onColorChange: (id: number) => void
+  onSizeChange: (id: number) => void
+  onReset: () => void
+}
+
+function CatalogFilters({
+  language,
+  colors,
+  sizes,
+  draftPriceRange,
+  appliedPriceRange,
+  selectedColorId,
+  selectedSizeId,
+  optionsLoading,
+  onDraftPriceChange,
+  onApplyPriceRange,
+  onColorChange,
+  onSizeChange,
+  onReset,
+}: CatalogFiltersProps) {
+  const text = catalogFilterCopy[language]
+  const isFiltered =
+    appliedPriceRange[0] !== PRICE_MIN ||
+    appliedPriceRange[1] !== PRICE_MAX ||
+    selectedColorId != null ||
+    selectedSizeId != null
+
+  function updatePrice(index: 0 | 1, value: number) {
+    const clamped = Math.max(PRICE_MIN, Math.min(value || 0, PRICE_MAX))
+    const nextRange: [number, number] = [...draftPriceRange]
+    nextRange[index] =
+      index === 0
+        ? Math.min(clamped, nextRange[1])
+        : Math.max(clamped, nextRange[0])
+    onDraftPriceChange(nextRange)
+  }
+
+  return (
+    <aside className="mt-10 rounded-2xl border bg-card/60 p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-commerce text-lg font-bold">{text.filters}</h3>
+        {isFiltered ? (
+          <button
+            type="button"
+            className="text-xs font-semibold text-primary hover:underline"
+            onClick={onReset}
+          >
+            {text.clearFilters}
+          </button>
+        ) : null}
+      </div>
+
+      <fieldset className="mt-5">
+        <legend className="text-sm font-semibold">{text.priceRange}</legend>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <label className="min-w-0">
+            <span className="sr-only">{text.priceFrom}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={draftPriceRange[0].toLocaleString("ru-RU")}
+              aria-label={text.priceFrom}
+              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+              onChange={(event) => {
+                const rawValue = event.target.value.replace(/\D/g, "")
+                const value = rawValue ? Number(rawValue) : 0
+
+                updatePrice(
+                  0,
+                  Math.max(PRICE_MIN, Math.min(value, draftPriceRange[1]))
+                )
+              }}
+              onBlur={() => onApplyPriceRange(draftPriceRange)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onApplyPriceRange(draftPriceRange)
+                  event.currentTarget.blur()
+                }
+              }}
+            />
+          </label>
+          <label className="min-w-0">
+            <span className="sr-only">{text.priceTo}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={draftPriceRange[1].toLocaleString("ru-RU")}
+              aria-label={text.priceTo}
+              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+              onChange={(event) => {
+                const rawValue = event.target.value.replace(/\D/g, "")
+                const value = Number(rawValue)
+
+                updatePrice(1, Math.min(value, PRICE_MAX))
+              }}
+              onBlur={() => onApplyPriceRange(draftPriceRange)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onApplyPriceRange(draftPriceRange)
+                  event.currentTarget.blur()
+                }
+              }}
+            />
+          </label>
+        </div>
+        <Slider
+          min={PRICE_MIN}
+          max={PRICE_MAX}
+          step={10_000}
+          value={draftPriceRange}
+          aria-label={text.priceRange}
+          className="mt-4 py-2 [&_[data-slot=slider-track]]:h-1.5"
+          onValueChange={(value) =>
+            onDraftPriceChange(value as [number, number])
+          }
+          onValueCommit={onApplyPriceRange}
+        />
+      </fieldset>
+
+      <fieldset className="mt-6 border-t pt-5">
+        <legend className="text-sm font-semibold">{text.colors}</legend>
+        {colors.length ? (
+          <>
+            <div className="mt-3 space-y-1">
+              {colors.map((color) => {
+                if (color.id == null) return null
+                const name = getCatalogColorName(color, language)
+
+                return (
+                  <button
+                    key={color.id}
+                    type="button"
+                    aria-pressed={selectedColorId === color.id}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition",
+                      selectedColorId === color.id
+                        ? "bg-primary/12 font-semibold text-primary ring-1 ring-primary/25"
+                        : "hover:bg-muted"
+                    )}
+                    onClick={() => onColorChange(color.id!)}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-6 shrink-0 rounded-full border border-black/10 shadow-sm"
+                      style={{ backgroundColor: getColorHex(color.hexCode) }}
+                    />
+                    <span className="truncate">
+                      {name || text.unnamedColor}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            {optionsLoading ? text.loadingOptions : text.noOptions}
+          </p>
+        )}
+      </fieldset>
+
+      <fieldset className="mt-6 border-t pt-5">
+        <legend className="text-sm font-semibold">{text.sizes}</legend>
+        {sizes.length ? (
+          <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {sizes.map((size) =>
+                size.id == null ? null : (
+                  <button
+                    key={size.id}
+                    type="button"
+                    aria-pressed={selectedSizeId === size.id}
+                    className={cn(
+                      "min-w-10 rounded-xl border px-3 py-2 text-sm font-semibold transition",
+                      selectedSizeId === size.id
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background hover:border-primary/50"
+                    )}
+                    onClick={() => onSizeChange(size.id!)}
+                  >
+                    {size.value || "—"}
+                  </button>
+                )
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            {optionsLoading ? text.loadingOptions : text.noOptions}
+          </p>
+        )}
+      </fieldset>
+    </aside>
+  )
+}
+
+function getColorHex(hexCode?: string) {
+  if (!hexCode) return "var(--muted)"
+  const normalized = hexCode.startsWith("#") ? hexCode : `#${hexCode}`
+  return /^#[\da-f]{3,8}$/i.test(normalized) ? normalized : "var(--muted)"
+}
+
+function getCatalogColorName(color: ColorDTO, language: Language) {
+  if (language === "ru" && color.nameRu) return color.nameRu
+  if (language === "uz" && color.nameUz) return color.nameUz
+
+  const fallbackName =
+    color.name || color.nameUz || color.nameRu || color.nameEng || ""
+  const normalizedName = fallbackName
+    .toLocaleLowerCase()
+    .replaceAll("‘", "'")
+    .replaceAll("’", "'")
+
+  const knownColors: Record<string, Record<Language, string>> = {
+    qizil: { uz: "Qizil", ru: "Красный" },
+    red: { uz: "Qizil", ru: "Красный" },
+    красный: { uz: "Qizil", ru: "Красный" },
+    yashil: { uz: "Yashil", ru: "Зелёный" },
+    green: { uz: "Yashil", ru: "Зелёный" },
+    зелёный: { uz: "Yashil", ru: "Зелёный" },
+    kok: { uz: "Ko‘k", ru: "Синий" },
+    "ko'k": { uz: "Ko‘k", ru: "Синий" },
+    blue: { uz: "Ko‘k", ru: "Синий" },
+    синий: { uz: "Ko‘k", ru: "Синий" },
+    qora: { uz: "Qora", ru: "Чёрный" },
+    black: { uz: "Qora", ru: "Чёрный" },
+    чёрный: { uz: "Qora", ru: "Чёрный" },
+    oq: { uz: "Oq", ru: "Белый" },
+    white: { uz: "Oq", ru: "Белый" },
+    белый: { uz: "Oq", ru: "Белый" },
+    sariq: { uz: "Sariq", ru: "Жёлтый" },
+    yellow: { uz: "Sariq", ru: "Жёлтый" },
+    жёлтый: { uz: "Sariq", ru: "Жёлтый" },
+    jigarrang: { uz: "Jigarrang", ru: "Коричневый" },
+    brown: { uz: "Jigarrang", ru: "Коричневый" },
+    коричневый: { uz: "Jigarrang", ru: "Коричневый" },
+    kulrang: { uz: "Kulrang", ru: "Серый" },
+    gray: { uz: "Kulrang", ru: "Серый" },
+    grey: { uz: "Kulrang", ru: "Серый" },
+    серый: { uz: "Kulrang", ru: "Серый" },
+    pushti: { uz: "Pushti", ru: "Розовый" },
+    pink: { uz: "Pushti", ru: "Розовый" },
+    розовый: { uz: "Pushti", ru: "Розовый" },
+    binafsha: { uz: "Binafsha", ru: "Фиолетовый" },
+    binafsharang: { uz: "Binafsharang", ru: "Фиолетовый" },
+    purple: { uz: "Binafsha", ru: "Фиолетовый" },
+    фиолетовый: { uz: "Binafsha", ru: "Фиолетовый" },
+    xaki: { uz: "Xaki", ru: "Хаки" },
+    khaki: { uz: "Xaki", ru: "Хаки" },
+    хаки: { uz: "Xaki", ru: "Хаки" },
+  }
+
+  return knownColors[normalizedName]?.[language] || fallbackName
 }
