@@ -67,7 +67,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
   }, [isOpen])
 
   const searchOverlay = isOpen ? (
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-100" role="dialog" aria-modal="true">
       <button
         type="button"
         aria-label={text.searchClose}
@@ -78,7 +78,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
         <div className="relative">
           <HugeiconsIcon
             icon={Search01Icon}
-            className="xs:left-3.5 xs:size-[18px] pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-primary sm:left-4 sm:size-5 2xl:left-5 2xl:size-6"
+            className="xs:left-3.5 xs:size-4.5 pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-primary sm:left-4 sm:size-5 2xl:left-5 2xl:size-6"
           />
           <Input
             ref={inputRef}
@@ -120,7 +120,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="aspect-[4/3] animate-pulse rounded-xl bg-muted/70"
+                  className="aspect-4/3 animate-pulse rounded-xl bg-muted/70"
                 />
               ))}
             </div>
@@ -151,7 +151,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
       <div className="relative min-w-0 flex-1 lg:max-w-none">
         <HugeiconsIcon
           icon={Search01Icon}
-          className="xs:left-3.5 xs:size-[18px] pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground sm:left-4 sm:size-5 2xl:left-5 2xl:size-[22px]"
+          className="xs:left-3.5 xs:size-4.5 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground sm:left-4 sm:size-5 2xl:left-5 2xl:size-5.5"
         />
         <Input
           value={query}

@@ -58,6 +58,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { useStorefrontActions } from "../../../_components/storefront/use-storefront-actions"
 import { ProductCard } from "../../../_components/storefront/product-card"
+import { Chat } from "../../../_components/chat"
 import { ReviewStars } from "./review-card"
 import { ReviewsSection as ReviewsCarouselSection } from "./reviews-section"
 
@@ -488,6 +489,15 @@ export function ProductDetails({
           </section>
         ) : null}
       </div>
+      {product.organizationId != null ? (
+        <Chat
+          language={language}
+          organizationId={product.organizationId}
+          organizationName={product.organizationName}
+          branchId={product.branchId}
+          branchName={product.branchName}
+        />
+      ) : null}
     </main>
   )
 }

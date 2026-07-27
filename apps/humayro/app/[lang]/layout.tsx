@@ -7,6 +7,7 @@ import "react-phone-number-input/style.css"
 import Footer from "./_components/footer"
 import Header from "./_components/header"
 import { I18nProvider } from "@/components/i18n-provider"
+import { CookieConsent } from "@/components/cookie-consent"
 import HumayroLoader from "./_components/loader"
 import { QueryProvider } from "@/components/query-provider"
 import { SonnerProvider } from "@/components/sonner-provider"
@@ -93,6 +94,28 @@ export default async function RootLayout({
   if (!isLanguage(lang)) {
     notFound()
   }
+  const cookieCopy =
+    lang === "uz"
+      ? {
+          heading: "Cookie fayllaridan foydalanamiz",
+          description:
+            "Saytning to‘g‘ri ishlashi va xizmatlarni yaxshilash uchun cookie fayllaridan foydalanamiz.",
+          consentText:
+            "“Qabul qilish” tugmasini bosish orqali cookie fayllaridan foydalanishga rozilik bildirasiz.",
+          accept: "Qabul qilish",
+          decline: "Rad etish",
+          learnMore: "Batafsil",
+        }
+      : {
+          heading: "Мы используем cookie",
+          description:
+            "Мы используем cookie для корректной работы сайта и улучшения наших сервисов.",
+          consentText:
+            "Нажимая «Принять», вы соглашаетесь на использование cookie.",
+          accept: "Принять",
+          decline: "Отклонить",
+          learnMore: "Подробнее",
+        }
 
   return (
     <html
@@ -116,6 +139,15 @@ export default async function RootLayout({
                   <Header language={lang} />
                   {children}
                   <Footer language={lang} />
+                  <CookieConsent
+                    heading={cookieCopy.heading}
+                    description={cookieCopy.description}
+                    consentText={cookieCopy.consentText}
+                    acceptLabel={cookieCopy.accept}
+                    declineLabel={cookieCopy.decline}
+                    learnMoreLabel={cookieCopy.learnMore}
+                    learnMoreHref={`/${lang}/privacy-policy`}
+                  />
                 </HumayroLoader>
               </I18nProvider>
             </TelegramProvider>
