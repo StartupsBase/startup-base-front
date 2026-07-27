@@ -4,13 +4,19 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/run-with-environment.mjs development pnpm exec next dev",
+    "dev:development": "node scripts/run-with-environment.mjs development pnpm exec next dev",
+    "dev:production": "node scripts/run-with-environment.mjs production pnpm exec next dev",
     "build": "next build",
+    "build:development": "node scripts/run-with-environment.mjs development pnpm exec next build",
+    "build:production": "node scripts/run-with-environment.mjs production pnpm exec next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "next typegen && tsc --noEmit",
-    "generate:api": "node scripts/download-openapi.mjs && orval --config orval.config.ts"
+    "generate:api": "node scripts/download-openapi.mjs && orval --config orval.config.ts",
+    "generate:api:development": "node scripts/run-with-environment.mjs development pnpm run generate:api",
+    "generate:api:production": "node scripts/run-with-environment.mjs production pnpm run generate:api"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -2,14 +2,19 @@ name: Humayro CI/CD
 
 on:
   pull_request:
+    branches:
+      - dev
+      - main
     paths:
       - ".github/workflows/humayro.yml"
       - ".dockerignore"
+      - ".husky/**"
       - "apps/humayro/**"
       - "deploy/humayro/**"
       - "packages/ui/**"
       - "packages/eslint-config/**"
       - "packages/typescript-config/**"
+      - "scripts/husky/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -17,15 +22,18 @@ on:
       - "tsconfig.json"
   push:
     branches:
+      - dev
       - main
     paths:
       - ".github/workflows/humayro.yml"
       - ".dockerignore"
+      - ".husky/**"
       - "apps/humayro/**"
       - "deploy/humayro/**"
       - "packages/ui/**"
       - "packages/eslint-config/**"
       - "packages/typescript-config/**"
+      - "scripts/husky/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -41,11 +49,64 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  resolve:
+    name: Resolve deployment target
+    runs-on: ubuntu-latest
+    outputs:
+      api-url: ${{ steps.target.outputs.api-url }}
+      compose-project: ${{ steps.target.outputs.compose-project }}
+      container-name: ${{ steps.target.outputs.container-name }}
+      default-deploy-path: ${{ steps.target.outputs.default-deploy-path }}
+      environment: ${{ steps.target.outputs.environment }}
+      environment-file: ${{ steps.target.outputs.environment-file }}
+      port: ${{ steps.target.outputs.port }}
+      site-url: ${{ steps.target.outputs.site-url }}
+    steps:
+      - name: Select development or production
+        id: target
+        shell: bash
+        env:
+          DEV_API_URL: ${{ vars.HUMAYRO_DEV_API_URL || 'https://dev-api.humayro.uz' }}
+          DEV_SITE_URL: ${{ vars.HUMAYRO_DEV_SITE_URL || 'https://dev.humayro.uz' }}
+          PRODUCTION_API_URL: ${{ vars.HUMAYRO_PRODUCTION_API_URL || 'https://swagger.humayro.uz' }}
+          PRODUCTION_SITE_URL: ${{ vars.HUMAYRO_PRODUCTION_SITE_URL || 'https://humayro.uz' }}
+        run: |
+          target_branch="${GITHUB_BASE_REF:-$GITHUB_REF_NAME}"
+
+          case "$target_branch" in
+            dev)
+              echo "environment=development" >>"$GITHUB_OUTPUT"
+              echo "api-url=$DEV_API_URL" >>"$GITHUB_OUTPUT"
+              echo "site-url=$DEV_SITE_URL" >>"$GITHUB_OUTPUT"
+              echo "compose-project=humayro-development" >>"$GITHUB_OUTPUT"
+              echo "container-name=humayro-development-front" >>"$GITHUB_OUTPUT"
+              echo "default-deploy-path=/opt/humayro-development-front" >>"$GITHUB_OUTPUT"
+              echo "environment-file=.env.development" >>"$GITHUB_OUTPUT"
+              echo "port=3003" >>"$GITHUB_OUTPUT"
+              ;;
+            main)
+              echo "environment=production" >>"$GITHUB_OUTPUT"
+              echo "api-url=$PRODUCTION_API_URL" >>"$GITHUB_OUTPUT"
+              echo "site-url=$PRODUCTION_SITE_URL" >>"$GITHUB_OUTPUT"
+              echo "compose-project=humayro-production" >>"$GITHUB_OUTPUT"
+              echo "container-name=humayro-production-front" >>"$GITHUB_OUTPUT"
+              echo "default-deploy-path=/opt/humayro-production-front" >>"$GITHUB_OUTPUT"
+              echo "environment-file=.env.production" >>"$GITHUB_OUTPUT"
+              echo "port=3000" >>"$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Humayro may only be deployed from dev or main, not $target_branch." >&2
+              exit 1
+              ;;
+          esac
+
   checks:
-    name: Lint, typecheck, and build
+    name: Check ${{ needs.resolve.outputs.environment }}
+    needs: resolve
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_API_URL: ${{ vars.HUMAYRO_API_URL || 'https://swagger.humayro.uz' }}
+      NEXT_PUBLIC_API_URL: ${{ needs.resolve.outputs.api-url }}
+      NEXT_PUBLIC_SITE_URL: ${{ needs.resolve.outputs.site-url }}
       NEXT_PUBLIC_YANDEX_MAPS_API_KEY: ${{ secrets.HUMAYRO_YANDEX_MAPS_API_KEY }}
     steps:
       - name: Check out repository
@@ -73,9 +134,11 @@ jobs:
         run: pnpm --filter humayro build
 
   image:
-    name: Publish container image
+    name: Publish ${{ needs.resolve.outputs.environment }} image
     if: github.event_name != 'pull_request'
-    needs: checks
+    needs:
+      - resolve
+      - checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -108,11 +171,12 @@ jobs:
           context: .
           file: apps/humayro/Dockerfile
           push: true
-          tags: ${{ steps.image-name.outputs.value }}:${{ github.sha }}
-          cache-from: type=gha,scope=humayro
-          cache-to: type=gha,mode=max,scope=humayro
+          tags: ${{ steps.image-name.outputs.value }}:${{ needs.resolve.outputs.environment }}-${{ github.sha }}
+          cache-from: type=gha,scope=humayro-${{ needs.resolve.outputs.environment }}
+          cache-to: type=gha,mode=max,scope=humayro-${{ needs.resolve.outputs.environment }}
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ vars.HUMAYRO_API_URL || 'https://swagger.humayro.uz' }}
+            NEXT_PUBLIC_API_URL=${{ needs.resolve.outputs.api-url }}
+            NEXT_PUBLIC_SITE_URL=${{ needs.resolve.outputs.site-url }}
             NEXT_PUBLIC_YANDEX_MAPS_API_KEY=${{ secrets.HUMAYRO_YANDEX_MAPS_API_KEY }}
             DEPLOYMENT_VERSION=${{ github.sha }}
 
@@ -124,23 +188,30 @@ jobs:
         run: echo "value=${IMAGE_NAME}@${IMAGE_DIGEST}" >>"$GITHUB_OUTPUT"
 
   deploy:
-    name: Deploy to humayro.uz
-    if: github.ref == 'refs/heads/main'
-    needs: image
+    name: Deploy ${{ needs.resolve.outputs.environment }}
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    needs:
+      - resolve
+      - image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
     environment:
-      name: production
-      url: https://humayro.uz
+      name: ${{ needs.resolve.outputs.environment }}
+      url: ${{ needs.resolve.outputs.site-url }}
     env:
       DEPLOY_HOST: ${{ secrets.HUMAYRO_DEPLOY_HOST }}
       DEPLOY_USER: ${{ secrets.HUMAYRO_DEPLOY_USER }}
       DEPLOY_SSH_KEY: ${{ secrets.HUMAYRO_DEPLOY_SSH_KEY }}
       DEPLOY_KNOWN_HOSTS: ${{ secrets.HUMAYRO_DEPLOY_KNOWN_HOSTS }}
       DEPLOY_PORT: ${{ vars.HUMAYRO_DEPLOY_PORT || '22' }}
-      DEPLOY_PATH: ${{ vars.HUMAYRO_DEPLOY_PATH || 'humayro' }}
+      DEPLOY_PATH: ${{ vars.HUMAYRO_DEPLOY_PATH || needs.resolve.outputs.default-deploy-path }}
+      DEPLOY_APP_PORT: ${{ vars.HUMAYRO_APP_PORT || needs.resolve.outputs.port }}
+      DEPLOY_CONTAINER_NAME: ${{ vars.HUMAYRO_CONTAINER_NAME || needs.resolve.outputs.container-name }}
+      DEPLOY_COMPOSE_PROJECT: ${{ vars.HUMAYRO_COMPOSE_PROJECT || needs.resolve.outputs.compose-project }}
+      DEPLOY_ENVIRONMENT_FILE: ${{ vars.HUMAYRO_ENVIRONMENT_FILE || needs.resolve.outputs.environment-file }}
+      DEPLOYMENT_ENVIRONMENT: ${{ needs.resolve.outputs.environment }}
       IMAGE_REFERENCE: ${{ needs.image.outputs.reference }}
       GHCR_USER: ${{ github.actor }}
       GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -165,11 +236,15 @@ jobs:
         run: |
           ssh -i ~/.ssh/humayro_deploy -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
           scp -i ~/.ssh/humayro_deploy -P "$DEPLOY_PORT" \
-            deploy/humayro/docker-compose.prod.yml \
+            deploy/humayro/docker-compose.yml \
             deploy/humayro/deploy.sh \
-            deploy/humayro/nginx.conf \
-            deploy/humayro/nginx-http.conf \
             "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+          scp -i ~/.ssh/humayro_deploy -P "$DEPLOY_PORT" \
+            "deploy/humayro/nginx-$DEPLOYMENT_ENVIRONMENT.conf" \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/nginx.conf"
+          scp -i ~/.ssh/humayro_deploy -P "$DEPLOY_PORT" \
+            "deploy/humayro/nginx-$DEPLOYMENT_ENVIRONMENT-http.conf" \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/nginx-http.conf"
 
       - name: Pull and deploy image
         shell: bash
@@ -179,4 +254,4 @@ jobs:
             "docker login ghcr.io --username '$GHCR_USER' --password-stdin"
           ssh -i ~/.ssh/humayro_deploy -p "$DEPLOY_PORT" \
             "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && HUMAYRO_IMAGE='$IMAGE_REFERENCE' bash deploy.sh"
+            "cd '$DEPLOY_PATH' && HUMAYRO_DEPLOYMENT='$DEPLOYMENT_ENVIRONMENT' HUMAYRO_IMAGE='$IMAGE_REFERENCE' HUMAYRO_PORT='$DEPLOY_APP_PORT' HUMAYRO_CONTAINER_NAME='$DEPLOY_CONTAINER_NAME' HUMAYRO_COMPOSE_PROJECT='$DEPLOY_COMPOSE_PROJECT' HUMAYRO_ENV_FILE='$DEPLOY_ENVIRONMENT_FILE' bash deploy.sh"

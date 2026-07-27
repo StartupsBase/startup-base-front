@@ -1,7 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
+import process from "node:process"
 
-const source = "https://swagger.humayro.uz/v3/api-docs"
+const source =
+  process.env.HUMAYRO_OPENAPI_URL?.trim() ||
+  "https://swagger.humayro.uz/v3/api-docs"
 const output = resolve("lib/api/openapi.json")
 const response = await fetch(source)
 

@@ -1,6 +1,11 @@
 "use client"
 
-import { UserCircleIcon } from "@hugeicons/core-free-icons"
+import {
+  Home01Icon,
+  Logout02Icon,
+  ShoppingCart02Icon,
+  UserCircleIcon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
@@ -106,10 +111,10 @@ export function UserDropdown({
             compact ? name || contact || t("home.account") : undefined
           }
           className={cn(
-            "truncate rounded-full",
+            "rounded-full",
             compact
               ? "size-11 justify-center px-0"
-              : "3xl:h-12 3xl:max-w-48 3xl:text-base h-10 max-w-36 justify-start gap-2 px-3 text-sm lg:h-9 lg:max-w-28 xl:h-10 xl:max-w-36 2xl:h-11 2xl:max-w-44"
+              : "size-10 justify-center px-0 md:h-10 md:w-auto md:max-w-52 md:justify-start md:gap-2.5 md:px-2.5 2xl:h-11 2xl:max-w-60 2xl:px-3"
           )}
         >
           {currentUser.photo?.s3Url ? (
@@ -118,54 +123,82 @@ export function UserDropdown({
               alt=""
               className={cn(
                 "shrink-0 rounded-full object-cover",
-                compact ? "size-6" : "xs:size-4.5 size-4 sm:size-5 2xl:size-6"
+                compact ? "size-6" : "size-6 md:size-7"
               )}
             />
-          ) : compact ? (
-            <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
+          ) : (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-5 md:size-6" />
+          )}
+          {!compact ? (
+            <span className="hidden min-w-0 flex-col items-start md:flex">
+              <span className="max-w-full truncate text-sm leading-4 font-semibold">
+                {name || t("home.account")}
+              </span>
+              {contact ? (
+                <span className="max-w-full truncate text-[11px] leading-4 text-muted-foreground">
+                  {contact}
+                </span>
+              ) : null}
+            </span>
           ) : null}
-          <p className="hidden sm:block">
-            {!compact ? name || contact || t("home.account") : null}
-          </p>
-          <HugeiconsIcon className="block sm:hidden size-5.5" icon={UserCircleIcon} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 shadow-none">
-        <DropdownMenuLabel className="space-y-1 px-3 py-2">
-          {currentUser.photo?.s3Url ? (
-            <img
-              src={currentUser.photo.s3Url}
-              alt=""
-              className="mb-2 size-10 rounded-full object-cover"
-            />
-          ) : null}
-          <p className="truncate font-medium">{name || t("home.account")}</p>
-          {contact ? (
-            <p className="truncate text-xs font-normal text-muted-foreground">
-              {contact}
-            </p>
-          ) : null}
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="w-[min(calc(100vw-1rem),18rem)] rounded-2xl p-2 shadow-xl"
+      >
+        <DropdownMenuLabel className="flex items-center gap-3 rounded-xl bg-muted/60 px-3 py-3">
+          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background text-primary ring-1 ring-border">
+            {currentUser.photo?.s3Url ? (
+              <img
+                src={currentUser.photo.s3Url}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              <HugeiconsIcon icon={UserCircleIcon} className="size-6" />
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-foreground">
+              {name || t("home.account")}
+            </span>
+            {contact ? (
+              <span className="mt-0.5 block truncate text-xs font-normal text-muted-foreground">
+                {contact}
+              </span>
+            ) : null}
+          </span>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
           <Link href={`/${language}/dashboard/profile`}>
+            <HugeiconsIcon icon={UserCircleIcon} />
             {t("profile.title")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/${language}/orders`}>{t("storefront.myOrders")}</Link>
+        <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
+          <Link href={`/${language}/orders`}>
+            <HugeiconsIcon icon={ShoppingCart02Icon} />
+            {t("storefront.myOrders")}
+          </Link>
         </DropdownMenuItem>
         {pathname !== `/${language}/dashboard` && (
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
             <Link href={`/${language}/dashboard`}>
+              <HugeiconsIcon icon={Home01Icon} />
               {t("home.landingAction")}
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator className="my-2" />
         <DropdownMenuItem
           onSelect={signOut}
-          className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+          variant="destructive"
+          className="min-h-11 cursor-pointer px-3"
         >
+          <HugeiconsIcon icon={Logout02Icon} />
           {t("home.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -63,7 +63,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 
 export function AdministrationPage({ language }: { language: string }) {
   const { t } = useTranslation()
@@ -94,7 +93,6 @@ export function AdministrationPage({ language }: { language: string }) {
         language={language}
         items={[{ label: t("administration.title") }]}
       />
-      <SidebarTrigger className="mt-6 mb-3 hidden md:inline-flex" />
       <div className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
           {t("administration.title")}

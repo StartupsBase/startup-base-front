@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -18,9 +18,9 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 
 import type {
+  CategoryDTO,
   ProductDTO,
   ProductImageCreateDTO,
-  ProductListDTO,
   ProductVariantCreateDTO,
 } from "@/lib/api"
 import { RichTextEditor } from "@/components/rich-text-editor"
@@ -77,10 +77,8 @@ function createProductSchema(t: Translation) {
   return z.object({
     name: z.string().trim().min(1, t("product.validation.nameRequired")),
     nameRu: z.string().trim(),
-    nameEng: z.string().trim(),
     descriptionUz: z.string().trim(),
     descriptionRu: z.string().trim(),
-    descriptionEng: z.string().trim(),
     categoryId: z.coerce
       .number({ error: t("product.validation.categoryRequired") })
       .int(t("product.validation.categoryRequired"))
@@ -103,7 +101,6 @@ function createProductSchema(t: Translation) {
 type ProductSchema = ReturnType<typeof createProductSchema>
 type ProductValues = z.infer<ProductSchema>
 type ProductInputs = z.input<ProductSchema>
-type ProductSource = ProductListDTO | ProductDTO
 
 type ProductImage = ProductImageCreateDTO & {
   name: string
@@ -121,16 +118,95 @@ type ProductVariant = {
 
 const steps = ["basic", "media", "variants", "review"] as const
 
-function productValues(product?: ProductSource): ProductInputs {
-  const detailed = product as ProductDTO | undefined
+const PRICE_SUFFIX = "UZS"
 
+function sanitizePriceInput(value: string) {
+  const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "")
+  const [whole = "", ...decimals] = normalized.split(".")
+  const decimal = decimals.join("").slice(0, 2)
+  return decimals.length > 0 ? `${whole}.${decimal}` : whole
+}
+
+function formatPriceInput(value: string | number | undefined) {
+  const raw =
+    typeof value === "number"
+      ? value.toLocaleString("en-US", {
+          useGrouping: false,
+          maximumFractionDigits: 20,
+        })
+      : String(value ?? "")
+  if (!raw) return ""
+  const [whole = "0", decimal] = raw.split(".")
+  const normalizedWhole = (whole || "0").replace(/^0+(?=\d)/, "")
+  const formattedWhole = normalizedWhole.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    "\u00a0"
+  )
+  return decimal === undefined ? formattedWhole : `${formattedWhole}.${decimal}`
+}
+
+function formatPrice(value: number) {
+  return value.toLocaleString("uz-UZ", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  })
+}
+
+function getCategoryOptions(categories: CategoryDTO[]) {
+  const selectable = categories.filter(
+    (category): category is CategoryDTO & { id: number } =>
+      category.id !== undefined
+  )
+  const ids = new Set(selectable.map((category) => category.id))
+  const visited = new Set<number>()
+  const result: Array<{
+    category: CategoryDTO & { id: number }
+    depth: number
+    label: string
+  }> = []
+  const sortCategories = (
+    left: CategoryDTO & { id: number },
+    right: CategoryDTO & { id: number }
+  ) =>
+    (left.sortOrder ?? 0) - (right.sortOrder ?? 0) ||
+    (left.name ?? "").localeCompare(right.name ?? "")
+
+  function visit(
+    category: CategoryDTO & { id: number },
+    ancestors: string[],
+    depth: number
+  ) {
+    if (visited.has(category.id)) return
+    visited.add(category.id)
+    const name = category.name || "—"
+    const path = [...ancestors, name]
+    result.push({ category, depth, label: path.join(" / ") })
+    selectable
+      .filter((item) => item.parentId === category.id)
+      .sort(sortCategories)
+      .forEach((child) => visit(child, path, depth + 1))
+  }
+
+  selectable
+    .filter(
+      (category) => category.parentId == null || !ids.has(category.parentId)
+    )
+    .sort(sortCategories)
+    .forEach((category) => visit(category, [], 0))
+  selectable
+    .filter((category) => !visited.has(category.id))
+    .sort(sortCategories)
+    .forEach((category) => visit(category, [], 0))
+
+  return result
+}
+
+function productValues(product?: ProductDTO): ProductInputs {
   return {
     name: product?.name ?? "",
     nameRu: product?.nameRu ?? "",
-    nameEng: product?.nameEng ?? "",
-    descriptionUz: detailed?.descriptionUz ?? "",
-    descriptionRu: detailed?.descriptionRu ?? "",
-    descriptionEng: detailed?.descriptionEng ?? "",
+    descriptionUz: product?.descriptionUz ?? "",
+    descriptionRu: product?.descriptionRu ?? "",
     categoryId: product?.categoryId ?? "",
     branchId: product?.branchId ?? "",
     basePrice: product?.basePrice ?? 0,
@@ -169,17 +245,17 @@ function productVariants(product?: ProductDTO): ProductVariant[] {
 
 export function ProductForm({
   organizationId,
-  product,
+  productId,
   onComplete,
 }: {
   organizationId: number
-  product?: ProductListDTO
+  productId?: number
   onComplete: () => void
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const editing = product?.id !== undefined
-  const detailsQuery = useGetById2(product?.id ?? 0, {
+  const editing = productId !== undefined
+  const detailsQuery = useGetById2(productId ?? 0, {
     query: { enabled: editing, retry: false },
   })
   const categoriesQuery = useGetAll4()
@@ -202,31 +278,54 @@ export function ProductForm({
   const [previewOpen, setPreviewOpen] = useState(false)
   const form = useForm<ProductInputs, unknown, ProductValues>({
     resolver: zodResolver(createProductSchema(t)),
-    defaultValues: productValues(product),
+    defaultValues: productValues(),
   })
 
   useEffect(() => {
-    const source = detailsQuery.data ?? product
-    form.reset(productValues(source))
+    if (!detailsQuery.data) return
 
-    if (detailsQuery.data) {
-      // The edit dialog starts with list data, then hydrates advanced fields
-      // once the full product response is available.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setImages(productImages(detailsQuery.data))
-      setVariants(productVariants(detailsQuery.data))
-      setVideoAttachmentId(detailsQuery.data.videoAttachmentId)
-      setVideoName(detailsQuery.data.videoUrl ? t("product.video") : "")
-      setVideoUrl(detailsQuery.data.videoUrl)
-    }
-  }, [detailsQuery.data, form, product, t])
+    form.reset(productValues(detailsQuery.data))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImages(productImages(detailsQuery.data))
+    setVariants(productVariants(detailsQuery.data))
+    setVideoAttachmentId(detailsQuery.data.videoAttachmentId)
+    setVideoName(detailsQuery.data.videoUrl ? t("product.video") : "")
+    setVideoUrl(detailsQuery.data.videoUrl)
+  }, [detailsQuery.data, form, t])
 
-  const categories = (categoriesQuery.data ?? []).filter(
+  const organizationCategories = (categoriesQuery.data ?? []).filter(
     (category) => category.organizationId === organizationId
   )
-  const branches = (branchesQuery.data?.content ?? []).filter(
+  const categories =
+    detailsQuery.data?.categoryId !== undefined &&
+    !organizationCategories.some(
+      (category) => category.id === detailsQuery.data?.categoryId
+    )
+      ? [
+          ...organizationCategories,
+          {
+            id: detailsQuery.data.categoryId,
+            name: detailsQuery.data.categoryName,
+            organizationId,
+          },
+        ]
+      : organizationCategories
+  const activeBranches = (branchesQuery.data?.content ?? []).filter(
     (branch) => branch.active !== false
   )
+  const branches =
+    detailsQuery.data?.branchId !== undefined &&
+    !activeBranches.some((branch) => branch.id === detailsQuery.data?.branchId)
+      ? [
+          ...activeBranches,
+          {
+            id: detailsQuery.data.branchId,
+            name: detailsQuery.data.branchName,
+            organizationId,
+            active: true,
+          },
+        ]
+      : activeBranches
   const colors = (colorsQuery.data ?? []).filter(
     (color) =>
       color.organizationId === undefined ||
@@ -243,10 +342,8 @@ export function ProductForm({
       const valid = await form.trigger([
         "name",
         "nameRu",
-        "nameEng",
         "descriptionUz",
         "descriptionRu",
-        "descriptionEng",
         "categoryId",
         "branchId",
         "basePrice",
@@ -425,13 +522,9 @@ export function ProductForm({
 
     if (sourceName) {
       form.setValue("nameRu", sourceName, { shouldDirty: true })
-      form.setValue("nameEng", sourceName, { shouldDirty: true })
     }
     if (sourceDescription) {
       form.setValue("descriptionRu", sourceDescription, { shouldDirty: true })
-      form.setValue("descriptionEng", sourceDescription, {
-        shouldDirty: true,
-      })
     }
     setEditorVersion((current) => current + 1)
     toast.success(t("product.localizedFieldsFilled"))
@@ -446,12 +539,8 @@ export function ProductForm({
     const data = {
       name: values.name,
       ...(values.nameRu ? { nameRu: values.nameRu } : {}),
-      ...(values.nameEng ? { nameEng: values.nameEng } : {}),
       ...(values.descriptionUz ? { descriptionUz: values.descriptionUz } : {}),
       ...(values.descriptionRu ? { descriptionRu: values.descriptionRu } : {}),
-      ...(values.descriptionEng
-        ? { descriptionEng: values.descriptionEng }
-        : {}),
       categoryId: values.categoryId,
       organizationId,
       branchId: values.branchId,
@@ -469,8 +558,8 @@ export function ProductForm({
     }
 
     try {
-      if (editing && product.id !== undefined) {
-        await update.mutateAsync({ id: product.id, data })
+      if (editing && productId !== undefined) {
+        await update.mutateAsync({ id: productId, data })
       } else {
         await create.mutateAsync({ data })
       }
@@ -497,6 +586,7 @@ export function ProductForm({
     update.isPending ||
     uploadImages.isPending ||
     uploadVideo.isPending
+  const categoryOptions = getCategoryOptions(categories)
 
   if (editing && detailsQuery.isLoading) {
     return (
@@ -509,7 +599,7 @@ export function ProductForm({
   return (
     <form
       className="grid gap-6"
-      onSubmit={form.handleSubmit(submit)}
+      onSubmit={form.handleSubmit(submit, () => setStep(0))}
       noValidate
     >
       <div className="grid gap-8">
@@ -605,10 +695,10 @@ export function ProductForm({
               colors={colors}
               sizes={sizes}
               categoryName={
-                categories.find(
-                  (category) =>
+                categoryOptions.find(
+                  ({ category }) =>
                     category.id === Number(form.getValues("categoryId"))
-                )?.name
+                )?.label
               }
               branchName={
                 branches.find(
@@ -619,12 +709,7 @@ export function ProductForm({
             />
           ) : null}
 
-          <div
-            className={cn(
-              "flex flex-wrap items-center gap-3 border-t border-border pt-4",
-              step === steps.length - 1 ? "justify-end" : "justify-between"
-            )}
-          >
+          <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
             <Button
               type="button"
               variant="outline"
@@ -633,7 +718,7 @@ export function ProductForm({
             >
               {t("product.previewProduct")}
             </Button>
-            {step === steps.length - 1 ? (
+            {!editing && step === steps.length - 1 ? (
               <Button
                 type="button"
                 variant="outline"
@@ -643,24 +728,32 @@ export function ProductForm({
                 {t("product.edit")}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className={cn(step === steps.length - 1 && "hidden")}
-              disabled={step === 0 || pending}
-              onClick={() => setStep((current) => Math.max(0, current - 1))}
-            >
-              {t("product.previousStep")}
-            </Button>
-            {step < steps.length - 1 ? (
-              <Button type="button" disabled={pending} onClick={nextStep}>
-                {t("product.nextStep")}
-              </Button>
-            ) : (
-              <Button type="submit" disabled={pending}>
-                {editing ? t("product.save") : t("product.publish")}
-              </Button>
-            )}
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+              {step > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => setStep((current) => Math.max(0, current - 1))}
+                >
+                  {t("product.previousStep")}
+                </Button>
+              ) : null}
+              {editing ? (
+                <Button type="submit" disabled={pending}>
+                  {t("product.save")}
+                </Button>
+              ) : null}
+              {step < steps.length - 1 ? (
+                <Button type="button" disabled={pending} onClick={nextStep}>
+                  {t("product.nextStep")}
+                </Button>
+              ) : !editing ? (
+                <Button type="submit" disabled={pending}>
+                  {t("product.publish")}
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -683,10 +776,10 @@ export function ProductForm({
               colors={colors}
               sizes={sizes}
               categoryName={
-                categories.find(
-                  (category) =>
+                categoryOptions.find(
+                  ({ category }) =>
                     category.id === Number(form.getValues("categoryId"))
-                )?.name
+                )?.label
               }
               branchName={
                 branches.find(
@@ -711,12 +804,24 @@ function BasicStep({
   t,
 }: {
   form: ReturnType<typeof useForm<ProductInputs, unknown, ProductValues>>
-  categories: Array<{ id?: number; name?: string }>
+  categories: CategoryDTO[]
   branches: Array<{ id?: number; name?: string; address?: string }>
   editorVersion: number
   onFillLocalizedFields: () => void
   t: Translation
 }) {
+  const basePrice = Number(
+    useWatch({ control: form.control, name: "basePrice" }) || 0
+  )
+  const discountPercent = Number(
+    useWatch({ control: form.control, name: "discountPercent" }) || 0
+  )
+  const discountedPrice = Math.max(
+    0,
+    basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100)
+  )
+  const categoryOptions = getCategoryOptions(categories)
+
   return (
     <section className="grid gap-5">
       <ProductField
@@ -725,20 +830,12 @@ function BasicStep({
       >
         <Input {...form.register("name")} />
       </ProductField>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ProductField
-          label={t("product.nameRu")}
-          error={form.formState.errors.nameRu?.message}
-        >
-          <Input {...form.register("nameRu")} />
-        </ProductField>
-        <ProductField
-          label={t("product.nameEng")}
-          error={form.formState.errors.nameEng?.message}
-        >
-          <Input {...form.register("nameEng")} />
-        </ProductField>
-      </div>
+      <ProductField
+        label={t("product.nameRu")}
+        error={form.formState.errors.nameRu?.message}
+      >
+        <Input {...form.register("nameRu")} />
+      </ProductField>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed bg-muted/30 p-4">
         <p className="max-w-xl text-sm text-muted-foreground">
           {t("product.fillLocalizedFieldsDescription")}
@@ -748,93 +845,128 @@ function BasicStep({
         </Button>
       </div>
       <div className="grid gap-5">
-        {(["descriptionUz", "descriptionRu", "descriptionEng"] as const).map(
-          (name) => (
-            <ProductField
-              key={name}
-              label={t(`product.${name}`)}
-              error={form.formState.errors[name]?.message}
-            >
-              <Controller
-                control={form.control}
-                name={name}
-                render={({ field }) => (
-                  <RichTextEditor
-                    key={`${name}-${editorVersion}`}
-                    value={field.value as string}
-                    output="html"
-                    placeholder={t(`product.${name}`)}
-                    editorContentClassName="min-h-36"
-                    onBlur={field.onBlur}
-                    onChange={(content) =>
-                      field.onChange(
-                        typeof content === "string"
-                          ? content
-                          : JSON.stringify(content)
-                      )
-                    }
-                  />
-                )}
-              />
-            </ProductField>
-          )
-        )}
+        {(["descriptionUz", "descriptionRu"] as const).map((name) => (
+          <ProductField
+            key={name}
+            label={t(`product.${name}`)}
+            error={form.formState.errors[name]?.message}
+          >
+            <Controller
+              control={form.control}
+              name={name}
+              render={({ field }) => (
+                <RichTextEditor
+                  key={`${name}-${editorVersion}`}
+                  value={field.value as string}
+                  output="html"
+                  placeholder={t(`product.${name}`)}
+                  editorContentClassName="min-h-36"
+                  onBlur={field.onBlur}
+                  onChange={(content) =>
+                    field.onChange(
+                      typeof content === "string"
+                        ? content
+                        : JSON.stringify(content)
+                    )
+                  }
+                />
+              )}
+            />
+          </ProductField>
+        ))}
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <ProductField
           label={t("product.category")}
           error={form.formState.errors.categoryId?.message}
         >
-          <Select
-            value={String(form.watch("categoryId") || "")}
-            onValueChange={(value) =>
-              form.setValue("categoryId", value, {
-                shouldValidate: true,
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.selectCategory")} />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) =>
-                category.id !== undefined ? (
-                  <SelectItem key={category.id} value={String(category.id)}>
-                    {category.name}
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
+          <Controller
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => {
+              const selected = categoryOptions.find(
+                ({ category }) => category.id === Number(field.value)
+              )
+
+              return (
+                <Select
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    onBlur={field.onBlur}
+                    aria-invalid={Boolean(form.formState.errors.categoryId)}
+                  >
+                    <SelectValue placeholder={t("product.selectCategory")}>
+                      {selected?.label}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map(({ category, depth, label }) => (
+                      <SelectItem key={category.id} value={String(category.id)}>
+                        <span className="flex min-w-0 items-center gap-2">
+                          {depth > 0 ? (
+                            <span
+                              aria-hidden="true"
+                              className="shrink-0 text-muted-foreground"
+                            >
+                              {"↳".repeat(Math.min(depth, 3))}
+                            </span>
+                          ) : null}
+                          <span className="truncate">{label}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }}
+          />
         </ProductField>
         <ProductField
           label={t("product.branch")}
           error={form.formState.errors.branchId?.message}
         >
-          <Select
-            value={String(form.watch("branchId") || "")}
-            onValueChange={(value) =>
-              form.setValue("branchId", value, {
-                shouldValidate: true,
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("product.selectBranch")} />
-            </SelectTrigger>
-            <SelectContent>
-              {branches.map((branch) =>
-                branch.id !== undefined ? (
-                  <SelectItem key={branch.id} value={String(branch.id)}>
-                    {branch.name}
-                    {branch.address ? ` · ${branch.address}` : ""}
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
+          <Controller
+            control={form.control}
+            name="branchId"
+            render={({ field }) => {
+              const selected = branches.find(
+                (branch) => branch.id === Number(field.value)
+              )
+              const selectedLabel = selected
+                ? `${selected.name ?? "—"}${selected.address ? ` · ${selected.address}` : ""}`
+                : undefined
+
+              return (
+                <Select
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    onBlur={field.onBlur}
+                    aria-invalid={Boolean(form.formState.errors.branchId)}
+                  >
+                    <SelectValue placeholder={t("product.selectBranch")}>
+                      {selectedLabel}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map((branch) =>
+                      branch.id !== undefined ? (
+                        <SelectItem key={branch.id} value={String(branch.id)}>
+                          {branch.name}
+                          {branch.address ? ` · ${branch.address}` : ""}
+                        </SelectItem>
+                      ) : null
+                    )}
+                  </SelectContent>
+                </Select>
+              )
+            }}
+          />
         </ProductField>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -842,24 +974,43 @@ function BasicStep({
           label={t("product.basePrice")}
           error={form.formState.errors.basePrice?.message}
         >
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            {...form.register("basePrice")}
+          <Controller
+            control={form.control}
+            name="basePrice"
+            render={({ field }) => (
+              <PriceInput
+                value={field.value as string | number}
+                onBlur={field.onBlur}
+                onValueChange={field.onChange}
+              />
+            )}
           />
         </ProductField>
         <ProductField
           label={t("product.discountPercent")}
           error={form.formState.errors.discountPercent?.message}
         >
-          <Input
-            type="number"
-            min="0"
-            max="100"
-            {...form.register("discountPercent")}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              className="pr-10"
+              {...form.register("discountPercent")}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
+              %
+            </span>
+          </div>
         </ProductField>
+      </div>
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+        <span className="text-sm font-medium text-muted-foreground">
+          {t("product.finalPrice")}
+        </span>
+        <strong className="text-lg text-primary">
+          {formatPrice(discountedPrice)} {PRICE_SUFFIX}
+        </strong>
       </div>
       <label className="flex items-center gap-2 text-sm font-medium">
         <Checkbox
@@ -871,6 +1022,35 @@ function BasicStep({
         {t("product.active")}
       </label>
     </section>
+  )
+}
+
+function PriceInput({
+  value,
+  onBlur,
+  onValueChange,
+}: {
+  value: string | number | undefined
+  onBlur?: () => void
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        className="pr-16 tabular-nums"
+        value={formatPriceInput(value)}
+        onBlur={onBlur}
+        onChange={(event) =>
+          onValueChange(sanitizePriceInput(event.target.value))
+        }
+      />
+      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-muted-foreground">
+        {PRICE_SUFFIX}
+      </span>
+    </div>
   )
 }
 
@@ -1163,7 +1343,7 @@ function VariantsStep({
               <div className="grid gap-4 sm:grid-cols-2">
                 <ProductField label={t("product.color")}>
                   <Select
-                    value={variant.colorId || undefined}
+                    value={variant.colorId}
                     onValueChange={(nextValue) =>
                       onChange(index, { colorId: nextValue })
                     }
@@ -1187,7 +1367,7 @@ function VariantsStep({
                 </ProductField>
                 <ProductField label={t("product.size")}>
                   <Select
-                    value={variant.sizeId || undefined}
+                    value={variant.sizeId}
                     onValueChange={(nextValue) =>
                       onChange(index, { sizeId: nextValue })
                     }
@@ -1221,15 +1401,9 @@ function VariantsStep({
                   />
                 </ProductField>
                 <ProductField label={t("product.variantPrice")}>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder={t("product.variantPrice")}
+                  <PriceInput
                     value={variant.price}
-                    onChange={(event) =>
-                      onChange(index, { price: event.target.value })
-                    }
+                    onValueChange={(price) => onChange(index, { price })}
                   />
                 </ProductField>
               </div>
@@ -1287,7 +1461,6 @@ function ReviewStep({
   const descriptions = [
     [t("product.descriptionUz"), values.descriptionUz],
     [t("product.descriptionRu"), values.descriptionRu],
-    [t("product.descriptionEng"), values.descriptionEng],
   ].filter((item): item is [string, string] => Boolean(item[1]))
 
   return (
@@ -1363,7 +1536,6 @@ function ReviewStep({
             </h3>
             <div className="mt-2 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
               {values.nameRu ? <span>{values.nameRu}</span> : null}
-              {values.nameEng ? <span>{values.nameEng}</span> : null}
             </div>
           </div>
 
@@ -1376,10 +1548,12 @@ function ReviewStep({
 
           <div>
             <div className="flex items-baseline gap-3">
-              <p className="text-3xl font-semibold">{price.toLocaleString()}</p>
+              <p className="text-3xl font-semibold">
+                {formatPrice(price)} {PRICE_SUFFIX}
+              </p>
               {discount > 0 ? (
                 <p className="text-base text-muted-foreground line-through">
-                  {basePrice.toLocaleString()}
+                  {formatPrice(basePrice)} {PRICE_SUFFIX}
                 </p>
               ) : null}
             </div>
@@ -1473,7 +1647,10 @@ function ReviewStep({
                       ?.value ?? "—"}
                   </span>
                   <span className="text-right">
-                    {variant.price || basePrice} · {variant.stock}
+                    {formatPrice(Number(variant.price || basePrice))}{" "}
+                    {PRICE_SUFFIX}
+                    {" · "}
+                    {variant.stock}
                   </span>
                 </div>
               ))}
