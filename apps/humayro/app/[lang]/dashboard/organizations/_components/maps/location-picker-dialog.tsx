@@ -31,7 +31,9 @@ const YandexLocationMap = dynamic(
 )
 
 type LocationPickerDialogProps = {
+  address?: string
   onSelect: (address: string, coordinates: MapCoordinates) => void
+  value?: MapCoordinates
 }
 
 type SelectedLocation = MapCoordinates & { address: string }
@@ -50,7 +52,11 @@ async function resolveAddress({ latitude, longitude }: MapCoordinates) {
   }
 }
 
-export function LocationPickerDialog({ onSelect }: LocationPickerDialogProps) {
+export function LocationPickerDialog({
+  address,
+  onSelect,
+  value,
+}: LocationPickerDialogProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [provider, setProvider] = useState<"yandex" | "other">("yandex")
@@ -79,8 +85,24 @@ export function LocationPickerDialog({ onSelect }: LocationPickerDialogProps) {
     setOpen(false)
   }
 
+  function changeOpen(nextOpen: boolean) {
+    if (nextOpen) {
+      setSelected(
+        value
+          ? {
+              ...value,
+              address:
+                address?.trim() ||
+                `${value.latitude.toFixed(6)}, ${value.longitude.toFixed(6)}`,
+            }
+          : null
+      )
+    }
+    setOpen(nextOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={changeOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" className="shrink-0">
           {t("mapPicker.choose")}

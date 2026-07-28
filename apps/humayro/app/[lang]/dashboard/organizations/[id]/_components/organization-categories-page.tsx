@@ -60,6 +60,7 @@ import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
+import { OrganizationForm } from "../../_components/organization-form"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
 import { BulkCategoryForm } from "./bulk-category-form"
 import { Button } from "@workspace/ui/components/button"
@@ -240,6 +241,7 @@ export function OrganizationCategoriesPage({
   >("users")
   const [createOpen, setCreateOpen] = useState(false)
   const [bulkCreateOpen, setBulkCreateOpen] = useState(false)
+  const [editOrganizationOpen, setEditOrganizationOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [createBranchOpen, setCreateBranchOpen] = useState(false)
   const [orderedCategories, setOrderedCategories] = useState<CategoryDTO[]>([])
@@ -661,17 +663,49 @@ export function OrganizationCategoriesPage({
                   {t("dashboard.organizations")}
                 </p>
                 {organizationQuery.data ? (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                      organizationQuery.data.active === false
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-emerald-500/10 text-emerald-600"
-                    }`}
-                  >
-                    {organizationQuery.data.active === false
-                      ? t("organization.inactive")
-                      : t("organization.active")}
-                  </span>
+                  <>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        organizationQuery.data.active === false
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-emerald-500/10 text-emerald-600"
+                      }`}
+                    >
+                      {organizationQuery.data.active === false
+                        ? t("organization.inactive")
+                        : t("organization.active")}
+                    </span>
+                    <Dialog
+                      open={editOrganizationOpen}
+                      onOpenChange={setEditOrganizationOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 rounded-full px-3"
+                        >
+                          <HugeiconsIcon
+                            icon={PencilEdit02Icon}
+                            className="size-4"
+                          />
+                          {t("organization.edit")}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-xl">
+                        <DialogHeader>
+                          <DialogTitle>{t("organization.edit")}</DialogTitle>
+                          <DialogDescription>
+                            {t("organization.editDescription")}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <OrganizationForm
+                          organization={organizationQuery.data}
+                          onComplete={() => setEditOrganizationOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </>
                 ) : null}
               </div>
               <h1 className="mt-1 truncate text-3xl font-semibold tracking-tight">
@@ -774,7 +808,7 @@ export function OrganizationCategoriesPage({
           )}
         </header>
         {organizationQuery.data ? (
-          <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <OrganizationInfo
               label={t("organization.contactPerson")}
               value={organizationQuery.data.contactPerson}
@@ -798,6 +832,22 @@ export function OrganizationCategoriesPage({
             <OrganizationInfo
               label={t("organization.address")}
               value={organizationQuery.data.address}
+            />
+            <OrganizationInfo
+              label={t("organization.latitude")}
+              value={
+                typeof organizationQuery.data.latitude === "number"
+                  ? organizationQuery.data.latitude.toFixed(6)
+                  : undefined
+              }
+            />
+            <OrganizationInfo
+              label={t("organization.longitude")}
+              value={
+                typeof organizationQuery.data.longitude === "number"
+                  ? organizationQuery.data.longitude.toFixed(6)
+                  : undefined
+              }
             />
           </section>
         ) : null}
