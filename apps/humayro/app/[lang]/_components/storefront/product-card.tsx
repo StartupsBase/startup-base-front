@@ -26,6 +26,7 @@ type ProductCardProps = {
   isTogglingFavorite: boolean
   onAddToCart: (productId: number) => void
   onToggleFavorite: (productId: number, isFavorite: boolean) => void
+  onNavigate?: () => void
 }
 
 export function ProductCard({
@@ -37,6 +38,7 @@ export function ProductCard({
   isTogglingFavorite,
   onAddToCart,
   onToggleFavorite,
+  onNavigate,
 }: ProductCardProps) {
   const text = useStorefrontCopy()
   const [isHovered, setIsHovered] = useState(false)
@@ -121,6 +123,7 @@ export function ProductCard({
             href={`/${language}/products/${productId}`}
             aria-label={name}
             className="absolute inset-0 z-10"
+            onClick={onNavigate}
           />
         ) : null}
 
@@ -183,6 +186,7 @@ export function ProductCard({
                 <Link
                   href={`/${language}/products/${productId}`}
                   className="transition-colors hover:text-primary"
+                  onClick={onNavigate}
                 >
                   {name}
                 </Link>

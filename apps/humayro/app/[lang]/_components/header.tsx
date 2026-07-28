@@ -120,7 +120,7 @@ export default function Header({ language }: { language: Language }) {
   }
 
   const homeHref = `/${language}`
-  const catalogHref = `${homeHref}#catalog`
+  const catalogHref = `/${language}/products`
 
   return (
     <>

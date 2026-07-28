@@ -4,6 +4,7 @@ import { Search01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { useRouter } from "next/navigation"
 
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
@@ -31,6 +32,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
   const [query, setQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsId = useId()
+  const router = useRouter()
   const text = useStorefrontCopy()
   const hasToken = useHasAuthToken()
   const actions = useStorefrontActions(language)
@@ -66,6 +68,17 @@ export function AdvancedSearch({ language }: { language: Language }) {
     }
   }, [isOpen])
 
+  function openProductsPage() {
+    const search = query.trim()
+    const searchParams = new URLSearchParams()
+    if (search) searchParams.set("search", search)
+
+    setIsOpen(false)
+    router.push(
+      `/${language}/products${searchParams.size ? `?${searchParams}` : ""}`
+    )
+  }
+
   const searchOverlay = isOpen ? (
     <div className="fixed inset-0 z-100" role="dialog" aria-modal="true">
       <button
@@ -90,6 +103,10 @@ export function AdvancedSearch({ language }: { language: Language }) {
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Escape") setIsOpen(false)
+              if (event.key === "Enter") {
+                event.preventDefault()
+                openProductsPage()
+              }
             }}
           />
           {productsQuery.isFetching ? (
@@ -137,6 +154,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
                   isTogglingFavorite={actions.pendingFavoriteId === product.id}
                   onAddToCart={actions.addProductToCart}
                   onToggleFavorite={actions.toggleFavorite}
+                  onNavigate={() => setIsOpen(false)}
                 />
               ))}
             </div>

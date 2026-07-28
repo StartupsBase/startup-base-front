@@ -127,9 +127,12 @@ export function Chat({
   const [view, setView] = useState<"conversation" | "rooms">("conversation")
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null)
   const [message, setMessage] = useState("")
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [showActions, setShowActions] = useState(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const imagePreviewUrlRef = useRef<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
@@ -192,8 +195,28 @@ export function Chat({
 
   useEffect(() => {
     if (!isOpen || view !== "conversation") return
-    messagesEndRef.current?.scrollIntoView({ block: "end" })
+    const container = messagesContainerRef.current
+    if (container) container.scrollTop = container.scrollHeight
   }, [isOpen, messages.length, view])
+
+  useEffect(
+    () => () => {
+      if (imagePreviewUrlRef.current) {
+        URL.revokeObjectURL(imagePreviewUrlRef.current)
+      }
+    },
+    []
+  )
+
+  function clearSelectedImage() {
+    if (imagePreviewUrlRef.current) {
+      URL.revokeObjectURL(imagePreviewUrlRef.current)
+      imagePreviewUrlRef.current = null
+    }
+    setSelectedImage(null)
+    setImagePreviewUrl(null)
+    if (imageInputRef.current) imageInputRef.current.value = ""
+  }
 
   async function ensureRoom() {
     if (activeRoomId != null) return activeRoomId
@@ -230,26 +253,49 @@ export function Chat({
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const cleanMessage = message.trim()
-    if (!cleanMessage || !hasToken || isBusy) return
+    if ((!cleanMessage && !selectedImage) || !hasToken || isBusy) return
 
     try {
       const roomId = await ensureRoom()
-      await sendMessageMutation.mutateAsync({
-        roomId,
-        data: {
-          type: "TEXT",
-          text: cleanMessage,
-        },
-      })
-      setMessage("")
+
+      if (selectedImage) {
+        const attachment = await uploadImageMutation.mutateAsync({
+          data: { file: selectedImage },
+        })
+
+        if (attachment.id == null) {
+          throw new Error("Uploaded attachment has no id")
+        }
+
+        await sendMessageMutation.mutateAsync({
+          roomId,
+          data: {
+            type: "IMAGE",
+            attachmentId: attachment.id,
+          },
+        })
+        clearSelectedImage()
+      }
+
+      if (cleanMessage) {
+        await sendMessageMutation.mutateAsync({
+          roomId,
+          data: {
+            type: "TEXT",
+            text: cleanMessage,
+          },
+        })
+        setMessage("")
+      }
+
       setShowEmojiPicker(false)
       await refreshChat(roomId)
     } catch {
-      toast.error(text.sendError)
+      toast.error(selectedImage ? text.imageError : text.sendError)
     }
   }
 
-  async function sendImage(file: File) {
+  function selectImage(file: File) {
     if (!CHAT_IMAGE_TYPES.has(file.type)) {
       toast.error(text.imageTypeError)
       return
@@ -260,30 +306,13 @@ export function Chat({
       return
     }
 
-    try {
-      const roomId = await ensureRoom()
-      const attachment = await uploadImageMutation.mutateAsync({
-        data: { file },
-      })
-
-      if (attachment.id == null) {
-        throw new Error("Uploaded attachment has no id")
-      }
-
-      await sendMessageMutation.mutateAsync({
-        roomId,
-        data: {
-          type: "IMAGE",
-          attachmentId: attachment.id,
-        },
-      })
-      setShowEmojiPicker(false)
-      await refreshChat(roomId)
-    } catch {
-      toast.error(text.imageError)
-    } finally {
-      if (imageInputRef.current) imageInputRef.current.value = ""
-    }
+    clearSelectedImage()
+    const previewUrl = URL.createObjectURL(file)
+    imagePreviewUrlRef.current = previewUrl
+    setSelectedImage(file)
+    setImagePreviewUrl(previewUrl)
+    setShowEmojiPicker(false)
+    requestAnimationFrame(() => textareaRef.current?.focus())
   }
 
   function appendEmoji(emoji: string) {
@@ -315,11 +344,11 @@ export function Chat({
   }
 
   return (
-    <div className="fixed right-4 bottom-24 z-60 sm:right-5 lg:bottom-22">
+    <div className="fixed inset-x-2 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-60 flex flex-col items-end sm:inset-x-auto sm:right-5 lg:bottom-5">
       {isOpen ? (
         <section
           aria-label={text.chats}
-          className="mb-3 flex h-[min(42rem,calc(100svh-8rem))] w-[min(25rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.75rem] border border-border/70 bg-background text-foreground shadow-[0_28px_90px_-24px_rgba(0,0,0,.65)]"
+          className="mb-3 flex h-[calc(100dvh-11rem)] max-h-[42rem] w-full max-w-[25rem] flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-background text-foreground shadow-[0_28px_90px_-24px_rgba(0,0,0,.65)] sm:rounded-[1.75rem] lg:h-[calc(100dvh-7rem)]"
         >
           {view === "rooms" ? (
             <RoomsView
@@ -422,7 +451,10 @@ export function Chat({
                 </div>
               ) : (
                 <>
-                  <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
+                  <div
+                    ref={messagesContainerRef}
+                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4 sm:py-5"
+                  >
                     {messagesQuery.isPending && activeRoomId != null ? (
                       <p className="text-center text-sm text-muted-foreground">
                         {text.loading}
@@ -452,13 +484,46 @@ export function Chat({
                         </p>
                       </div>
                     )}
-                    <div ref={messagesEndRef} />
                   </div>
 
                   <form
-                    className="m-3 mt-0 rounded-2xl border-2 border-primary bg-background p-2"
+                    className="m-2 mt-0 rounded-2xl border-2 border-primary bg-background p-2 sm:m-3 sm:mt-0"
                     onSubmit={submitMessage}
                   >
+                    {selectedImage && imagePreviewUrl ? (
+                      <div className="mb-2 flex items-center gap-2 rounded-xl bg-muted/60 p-2">
+                        <div className="relative size-18 shrink-0">
+                          <img
+                            src={imagePreviewUrl}
+                            alt={selectedImage.name}
+                            className="size-full rounded-xl border object-cover shadow-sm"
+                          />
+                          <button
+                            type="button"
+                            aria-label={
+                              language === "uz"
+                                ? "Rasmni olib tashlash"
+                                : "Удалить изображение"
+                            }
+                            className="absolute -top-1.5 -right-1.5 grid size-6 place-items-center rounded-full border bg-background text-foreground shadow-md transition hover:bg-muted"
+                            onClick={clearSelectedImage}
+                          >
+                            <HugeiconsIcon
+                              icon={Cancel01Icon}
+                              className="size-3.5"
+                            />
+                          </button>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-semibold">
+                            {selectedImage.name}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
+                            {(selectedImage.size / 1024 / 1024).toFixed(1)} MB
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
                     <textarea
                       ref={textareaRef}
                       rows={2}
@@ -525,7 +590,8 @@ export function Chat({
                             className="sr-only"
                             onChange={(event) => {
                               const file = event.target.files?.[0]
-                              if (file) void sendImage(file)
+                              if (file) selectImage(file)
+                              event.currentTarget.value = ""
                             }}
                           />
                           <button
@@ -549,7 +615,7 @@ export function Chat({
                         type="submit"
                         aria-label={text.placeholder}
                         disabled={
-                          !message.trim() ||
+                          (!message.trim() && !selectedImage) ||
                           isBusy ||
                           activeRoom?.status === "CLOSED"
                         }
