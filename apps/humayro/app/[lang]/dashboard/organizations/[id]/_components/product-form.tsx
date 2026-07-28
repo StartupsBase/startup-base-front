@@ -38,6 +38,7 @@ import {
   useUpdate3,
 } from "@/lib/api/generated/product/product"
 import { useGetAll1 as useGetSizes } from "@/lib/api/generated/size/size"
+import { ProductCreationProblemDialog } from "./product-creation-problem-dialog"
 import {
   Attachment,
   AttachmentAction,
@@ -117,6 +118,17 @@ type ProductVariant = {
 }
 
 const steps = ["basic", "media", "variants", "review"] as const
+const basicFields = [
+  "name",
+  "nameRu",
+  "descriptionUz",
+  "descriptionRu",
+  "categoryId",
+  "branchId",
+  "basePrice",
+  "discountPercent",
+  "active",
+] as const
 
 const PRICE_SUFFIX = "UZS"
 
@@ -244,10 +256,12 @@ function productVariants(product?: ProductDTO): ProductVariant[] {
 }
 
 export function ProductForm({
+  onCancel,
   organizationId,
   productId,
   onComplete,
 }: {
+  onCancel?: () => void
   organizationId: number
   productId?: number
   onComplete: () => void
@@ -276,6 +290,7 @@ export function ProductForm({
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [editorVersion, setEditorVersion] = useState(0)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [creationProblem, setCreationProblem] = useState<string | null>(null)
   const form = useForm<ProductInputs, unknown, ProductValues>({
     resolver: zodResolver(createProductSchema(t)),
     defaultValues: productValues(),
@@ -337,20 +352,38 @@ export function ProductForm({
       size.organizationId === organizationId
   )
 
+  function reportCreationProblem(message: string, targetStep = step) {
+    setStep(targetStep)
+
+    if (!editing && onCancel) {
+      setCreationProblem(message)
+      return
+    }
+
+    toast.error(message)
+  }
+
+  function firstBasicError() {
+    return basicFields
+      .map((field) => form.getFieldState(field).error?.message)
+      .find((message): message is string => Boolean(message))
+  }
+
   async function nextStep() {
     if (step === 0) {
-      const valid = await form.trigger([
-        "name",
-        "nameRu",
-        "descriptionUz",
-        "descriptionRu",
-        "categoryId",
-        "branchId",
-        "basePrice",
-        "discountPercent",
-        "active",
-      ])
-      if (!valid) return
+      if (categoriesQuery.isError || branchesQuery.isError) {
+        reportCreationProblem(t("product.referenceDataFailed"), 0)
+        return
+      }
+
+      const valid = await form.trigger(basicFields)
+      if (!valid) {
+        reportCreationProblem(
+          firstBasicError() ?? t("product.formIncomplete"),
+          0
+        )
+        return
+      }
     }
 
     if (step === 2 && !validateVariants()) return
@@ -379,6 +412,9 @@ export function ProductForm({
               },
             ]
       )
+      if (validUploads.length !== selectedFiles.length) {
+        throw new Error("Some product images are missing attachment IDs")
+      }
 
       setImages((current) => {
         const startIndex = current.length
@@ -393,7 +429,7 @@ export function ProductForm({
       })
       toast.success(t("product.imagesUploaded"))
     } catch {
-      toast.error(t("product.mediaUploadFailed"))
+      reportCreationProblem(t("product.mediaUploadFailed"), 1)
     } finally {
       if (imageInputRef.current) imageInputRef.current.value = ""
     }
@@ -419,7 +455,7 @@ export function ProductForm({
       setVideoUrl(attachment.s3Url)
       toast.success(t("product.videoUploaded"))
     } catch {
-      toast.error(t("product.mediaUploadFailed"))
+      reportCreationProblem(t("product.mediaUploadFailed"), 1)
     } finally {
       if (videoInputRef.current) videoInputRef.current.value = ""
     }
@@ -490,11 +526,11 @@ export function ProductForm({
     )
 
     if (invalid) {
-      toast.error(t("product.variantIncomplete"))
+      reportCreationProblem(t("product.variantIncomplete"), 2)
       return false
     }
     if (new Set(combinations).size !== combinations.length) {
-      toast.error(t("product.variantDuplicate"))
+      reportCreationProblem(t("product.variantDuplicate"), 2)
       return false
     }
     return true
@@ -575,10 +611,20 @@ export function ProductForm({
       )
       onComplete()
     } catch {
-      toast.error(
+      reportCreationProblem(
         t(editing ? "notifications.updateFailed" : "notifications.createFailed")
       )
     }
+  }
+
+  function handleInvalidSubmit() {
+    reportCreationProblem(firstBasicError() ?? t("product.formIncomplete"), 0)
+  }
+
+  function returnToCreationForm() {
+    setCreationProblem(null)
+    if (categoriesQuery.isError) void categoriesQuery.refetch()
+    if (branchesQuery.isError) void branchesQuery.refetch()
   }
 
   const pending =
@@ -599,7 +645,7 @@ export function ProductForm({
   return (
     <form
       className="grid gap-6"
-      onSubmit={form.handleSubmit(submit, () => setStep(0))}
+      onSubmit={form.handleSubmit(submit, handleInvalidSubmit)}
       noValidate
     >
       <div className="grid gap-8">
@@ -791,6 +837,21 @@ export function ProductForm({
           </div>
         </DialogContent>
       </Dialog>
+
+      {!editing && onCancel ? (
+        <ProductCreationProblemDialog
+          open={creationProblem !== null}
+          message={creationProblem ?? t("product.formIncomplete")}
+          onOpenChange={(open) => {
+            if (!open) setCreationProblem(null)
+          }}
+          onReturn={returnToCreationForm}
+          onCancelCreation={() => {
+            setCreationProblem(null)
+            onCancel()
+          }}
+        />
+      ) : null}
     </form>
   )
 }

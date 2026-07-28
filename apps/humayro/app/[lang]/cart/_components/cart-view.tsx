@@ -111,10 +111,13 @@ export function CartView({ language }: { language: Language }) {
 
   function submitCheckout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const recipientName = checkoutData.recipientName?.trim()
+    const deliveryAddress = checkoutData.deliveryAddress?.trim()
+
     if (
-      !checkoutData.recipientName.trim() ||
+      !recipientName ||
       !/^\+998\d{9}$/.test(checkoutData.recipientPhone) ||
-      !checkoutData.deliveryAddress.trim()
+      !deliveryAddress
     ) {
       toast.error(text.checkoutError)
       return
@@ -123,8 +126,8 @@ export function CartView({ language }: { language: Language }) {
     checkoutMutation.mutate({
       data: {
         ...checkoutData,
-        recipientName: checkoutData.recipientName.trim(),
-        deliveryAddress: checkoutData.deliveryAddress.trim(),
+        recipientName,
+        deliveryAddress,
         note: checkoutData.note?.trim() || undefined,
       },
     })

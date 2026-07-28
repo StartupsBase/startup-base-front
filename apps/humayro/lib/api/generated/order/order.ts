@@ -26,7 +26,8 @@ import type {
 
 import type {
   CheckoutDTO,
-  OrderDTO
+  OrderDTO,
+  OrderLocationUpdateDTO
 } from '../../model';
 
 import { customInstance } from '../../mutator';
@@ -109,6 +110,65 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCheckoutMutationOptions(options), queryClient);
+    }
+    export const updateLocation = (
+    id: number,
+    orderLocationUpdateDTO: BodyType<OrderLocationUpdateDTO>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<OrderDTO>(
+      {url: `/api/orders/${id}/location`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: orderLocationUpdateDTO, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUpdateLocationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLocation>>, TError,{id: number;data: BodyType<OrderLocationUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLocation>>, TError,{id: number;data: BodyType<OrderLocationUpdateDTO>}, TContext> => {
+
+const mutationKey = ['updateLocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLocation>>, {id: number;data: BodyType<OrderLocationUpdateDTO>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateLocation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLocationMutationResult = NonNullable<Awaited<ReturnType<typeof updateLocation>>>
+    export type UpdateLocationMutationBody = BodyType<OrderLocationUpdateDTO>
+    export type UpdateLocationMutationError = ErrorType<unknown>
+
+    export const useUpdateLocation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLocation>>, TError,{id: number;data: BodyType<OrderLocationUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateLocation>>,
+        TError,
+        {id: number;data: BodyType<OrderLocationUpdateDTO>},
+        TContext
+      > => {
+      return useMutation(getUpdateLocationMutationOptions(options), queryClient);
     }
     export const cancel = (
     id: number,

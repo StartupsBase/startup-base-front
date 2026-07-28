@@ -35,6 +35,7 @@ import {
   useCreate4,
   useDelete4,
   useGetAll4,
+  useMove,
   useUpdate5,
 } from "@/lib/api/generated/category/category"
 import {
@@ -60,6 +61,7 @@ import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
+import { BulkCategoryForm } from "./bulk-category-form"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
 import {
@@ -96,7 +98,10 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
-import { SortableList } from "@workspace/ui/components/sortable-list"
+import {
+  SortableList,
+  type SortableListMovement,
+} from "@workspace/ui/components/sortable-list"
 
 const ROOT_CATEGORY = "__root_category__"
 
@@ -185,6 +190,13 @@ function readImageAttachmentId(category: CategoryDTO) {
   return Number.isSafeInteger(imageId) ? imageId : undefined
 }
 
+function compareCategoryOrder(a: CategoryDTO, b: CategoryDTO) {
+  return (
+    (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+    (a.name ?? "").localeCompare(b.name ?? "")
+  )
+}
+
 export function OrganizationCategoriesPage({
   language,
   organizationId,
@@ -227,10 +239,11 @@ export function OrganizationCategoriesPage({
     "users" | "categories" | "branches" | "products"
   >("users")
   const [createOpen, setCreateOpen] = useState(false)
+  const [bulkCreateOpen, setBulkCreateOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [createBranchOpen, setCreateBranchOpen] = useState(false)
   const [orderedCategories, setOrderedCategories] = useState<CategoryDTO[]>([])
-  const reorderCategory = useUpdate5()
+  const moveCategory = useMove()
 
   useEffect(() => {
     if (!meQuery.isError) return
@@ -254,59 +267,47 @@ export function OrganizationCategoriesPage({
   )
 
   useEffect(() => {
-    setOrderedCategories(
-      [...categories].sort(
-        (a, b) =>
-          (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
-          (a.name ?? "").localeCompare(b.name ?? "")
-      )
-    )
+    setOrderedCategories([...categories].sort(compareCategoryOrder))
   }, [categories])
 
-  async function reorderCategorySiblings(items: CategoryDTO[]) {
+  async function reorderCategorySiblings(
+    items: CategoryDTO[],
+    movement: SortableListMovement<CategoryDTO>
+  ) {
+    const movedCategory = movement.item
+    if (movedCategory.id === undefined) return
+
+    const previousCategories = orderedCategories
     const nextOrder = new Map(
       items.flatMap((item, index) =>
         item.id === undefined ? [] : [[item.id, index] as const]
       )
     )
     setOrderedCategories((current) =>
-      current.map((item) =>
-        item.id !== undefined && nextOrder.has(item.id)
-          ? { ...item, sortOrder: nextOrder.get(item.id) }
-          : item
-      )
+      current
+        .map((item) =>
+          item.id !== undefined && nextOrder.has(item.id)
+            ? { ...item, sortOrder: nextOrder.get(item.id) }
+            : item
+        )
+        .sort(compareCategoryOrder)
     )
 
     try {
-      await Promise.all(
-        items.flatMap((item, sortOrder) =>
-          item.id === undefined
-            ? []
-            : [
-                reorderCategory.mutateAsync({
-                  id: item.id,
-                  data: {
-                    name: item.name ?? "",
-                    nameRu: item.nameRu,
-                    nameEng: item.nameEng,
-                    descriptionUz: item.descriptionUz,
-                    descriptionRu: item.descriptionRu,
-                    descriptionEng: item.descriptionEng,
-                    sizeType: item.sizeType ?? "LETTER",
-                    organizationId,
-                    parentId: item.parentId,
-                    imageId: readImageAttachmentId(item),
-                    sortOrder,
-                    active: item.active ?? true,
-                  },
-                }),
-              ]
-        )
-      )
+      await moveCategory.mutateAsync({
+        id: movedCategory.id,
+        data: {
+          ...(movedCategory.parentId != null
+            ? { parentId: movedCategory.parentId }
+            : {}),
+          sortOrder: movement.toIndex,
+        },
+      })
       await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.success(t("category.orderSaved"))
     } catch {
-      setOrderedCategories(categories)
+      setOrderedCategories(previousCategories)
+      void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.error(t("category.orderFailed"))
     }
   }
@@ -703,24 +704,47 @@ export function OrganizationCategoriesPage({
               </DialogContent>
             </Dialog>
           ) : activeTab === "categories" ? (
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger asChild>
-                <Button>{t("category.new")}</Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
-                <DialogHeader>
-                  <DialogTitle>{t("category.new")}</DialogTitle>
-                  <DialogDescription>
-                    {t("category.createDescription")}
-                  </DialogDescription>
-                </DialogHeader>
-                <CategoryForm
-                  organizationId={organizationId}
-                  categories={categories}
-                  onComplete={() => setCreateOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex flex-wrap gap-2">
+              <Dialog open={bulkCreateOpen} onOpenChange={setBulkCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <HugeiconsIcon icon={Add01Icon} />
+                    {t("category.bulkNew")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
+                  <DialogHeader>
+                    <DialogTitle>{t("category.bulkTitle")}</DialogTitle>
+                    <DialogDescription>
+                      {t("category.bulkDescription")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <BulkCategoryForm
+                    organizationId={organizationId}
+                    categories={categories}
+                    onComplete={() => setBulkCreateOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button>{t("category.new")}</Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
+                  <DialogHeader>
+                    <DialogTitle>{t("category.new")}</DialogTitle>
+                    <DialogDescription>
+                      {t("category.createDescription")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CategoryForm
+                    organizationId={organizationId}
+                    categories={categories}
+                    onComplete={() => setCreateOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           ) : activeTab === "branches" ? (
             <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}>
               <DialogTrigger asChild>
@@ -818,7 +842,7 @@ export function OrganizationCategoriesPage({
           ) : (
             <CategoryHierarchyList
               categories={orderedCategories}
-              disabled={reorderCategory.isPending}
+              disabled={moveCategory.isPending}
               onReorder={reorderCategorySiblings}
             />
           )}
@@ -869,7 +893,10 @@ function CategoryHierarchyList({
 }: {
   categories: CategoryDTO[]
   disabled: boolean
-  onReorder: (items: CategoryDTO[]) => void | Promise<void>
+  onReorder: (
+    items: CategoryDTO[],
+    movement: SortableListMovement<CategoryDTO>
+  ) => void | Promise<void>
 }) {
   const { t } = useTranslation()
   const roots = categories.filter((category) => category.parentId == null)
@@ -1141,7 +1168,7 @@ function ProductDetailsPreview({
           <h2 className="mt-3 text-4xl font-bold tracking-tight">
             {name || "—"}
           </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm font-medium text-primary">
             ★ {product.ratingAvg?.toFixed(1) ?? "0.0"} ·{" "}
             {product.ratingCount ?? 0}
           </p>

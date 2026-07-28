@@ -203,7 +203,7 @@ export function ProductCard({
             ) : null}
           </div>
           {product.ratingAvg != null ? (
-            <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
+            <span className="shrink-0 text-[11px] font-semibold text-primary">
               ★ {product.ratingAvg.toFixed(1)}
             </span>
           ) : null}
