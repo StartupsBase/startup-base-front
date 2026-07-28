@@ -82,7 +82,7 @@ jobs:
               echo "container-name=humayro-development-front" >>"$GITHUB_OUTPUT"
               echo "default-deploy-path=/opt/humayro-development-front" >>"$GITHUB_OUTPUT"
               echo "environment-file=.env.development" >>"$GITHUB_OUTPUT"
-              echo "port=3001" >>"$GITHUB_OUTPUT"
+              echo "port=3003" >>"$GITHUB_OUTPUT"
               ;;
             main)
               echo "environment=production" >>"$GITHUB_OUTPUT"

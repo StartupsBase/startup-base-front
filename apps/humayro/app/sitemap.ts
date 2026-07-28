@@ -7,6 +7,11 @@ import { getLanguageAlternates, getLocalizedPath, getSiteUrl } from "@/lib/seo"
 
 const publicRoutes = [
   { path: "", changeFrequency: "daily" as const, priority: 1 },
+  {
+    path: "/products",
+    changeFrequency: "daily" as const,
+    priority: 0.9,
+  },
   { path: "/blogs", changeFrequency: "weekly" as const, priority: 0.7 },
   {
     path: "/book-demo",
