@@ -17,7 +17,6 @@ import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { formatPhoneNumberIntl } from "react-phone-number-input"
 
 import {
   type BranchDTO,
@@ -56,6 +55,7 @@ import {
   useGetAll2 as useGetProducts,
 } from "@/lib/api/generated/product/product"
 import { clearAuthToken } from "@/lib/auth-client"
+import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
@@ -344,7 +344,7 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) => {
           const phone = row.getValue<string>("phone")
-          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+          return phone ? formatPhoneNumberInternal(phone) : "—"
         },
       },
       {
@@ -475,7 +475,7 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) => {
           const phone = row.getValue<string>("phone")
-          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+          return phone ? formatPhoneNumberInternal(phone) : "—"
         },
       },
       {
@@ -761,9 +761,9 @@ export function OrganizationCategoriesPage({
                 [
                   organizationQuery.data.contactEmail,
                   organizationQuery.data.contactPhone
-                    ? formatPhoneNumberIntl(
+                    ? formatPhoneNumberInternal(
                         organizationQuery.data.contactPhone
-                      ) || organizationQuery.data.contactPhone
+                      )
                     : undefined,
                 ]
                   .filter(Boolean)

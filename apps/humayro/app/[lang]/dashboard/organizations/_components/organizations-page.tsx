@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -24,6 +23,7 @@ import {
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import { useUploadImage } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { clearAuthToken } from "@/lib/auth-client"
+import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -136,9 +136,7 @@ export function OrganizationsPage({ language }: { language: string }) {
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { retry: false } })
   const canManageOrganizations =
-    meQuery.data?.roles?.some(
-      (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
-    ) ?? false
+    meQuery.data?.roles?.includes("ROLE_SUPER_ADMIN") ?? false
   const organizationsQuery = useGetAll6(undefined, {
     query: { enabled: canManageOrganizations, retry: false },
   })
@@ -224,7 +222,7 @@ export function OrganizationsPage({ language }: { language: string }) {
         cell: ({ row }) => {
           const { contactPerson, contactEmail, contactPhone } = row.original
           const formattedPhone = contactPhone
-            ? formatPhoneNumberIntl(contactPhone) || contactPhone
+            ? formatPhoneNumberInternal(contactPhone)
             : null
 
           return (

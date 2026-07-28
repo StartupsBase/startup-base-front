@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { isLanguage } from "@/i18n/config"
+import { requireDashboardPageAccess } from "@/lib/dashboard-auth"
 import { createTranslatedPageMetadata } from "@/lib/seo"
 
 import { ProductEditPage } from "./_components/product-edit-page"
@@ -35,6 +36,12 @@ export default async function EditProductPage({
   ) {
     notFound()
   }
+
+  await requireDashboardPageAccess({
+    language: lang,
+    organizationId,
+    page: "organization",
+  })
 
   return (
     <ProductEditPage

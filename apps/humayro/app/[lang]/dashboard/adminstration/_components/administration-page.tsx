@@ -67,9 +67,7 @@ import {
 export function AdministrationPage({ language }: { language: string }) {
   const { t } = useTranslation()
   const meQuery = useMe1({ query: { retry: false } })
-  const canManage = meQuery.data?.roles?.some(
-    (role) => role === "ROLE_ADMIN" || role === "ROLE_SUPER_ADMIN"
-  )
+  const canManage = meQuery.data?.roles?.includes("ROLE_SUPER_ADMIN")
 
   if (meQuery.isLoading) {
     return (

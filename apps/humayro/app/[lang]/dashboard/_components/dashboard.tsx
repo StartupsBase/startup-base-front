@@ -6,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { formatPhoneNumberIntl } from "react-phone-number-input"
 import { toast } from "sonner"
 
 import { UserCreateForm } from "./user-create-form"
@@ -24,6 +23,7 @@ import {
 import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import { useGetAll5 as useBranches } from "@/lib/api/generated/branch/branch"
 import { clearAuthToken } from "@/lib/auth-client"
+import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { Button } from "@workspace/ui/components/button"
@@ -139,9 +139,6 @@ export function Dashboard({ language }: { language: string }) {
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
     .join(" ")
-  const canManageOrganizations = meQuery.data?.roles?.some(
-    (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
-  )
   const columns = useMemo<ColumnDef<UserDTO>[]>(
     () => [
       {
@@ -183,7 +180,7 @@ export function Dashboard({ language }: { language: string }) {
         cell: ({ row }) => {
           const phone = row.getValue<string>("phone")
 
-          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+          return phone ? formatPhoneNumberInternal(phone) : "—"
         },
       },
       {

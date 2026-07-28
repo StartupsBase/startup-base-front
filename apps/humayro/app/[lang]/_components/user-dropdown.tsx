@@ -14,7 +14,9 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useMe1 } from "@/lib/api"
+import { getDashboardLandingPath, hasDashboardRole } from "@/lib/auth"
 import { clearAuthToken, hasAuthToken } from "@/lib/auth-client"
+import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -47,7 +49,11 @@ export function UserDropdown({
   const name = [currentUser?.firstname, currentUser?.lastname]
     .filter(Boolean)
     .join(" ")
-  const contact = identifier ?? currentUser?.email ?? currentUser?.phone
+  const contact = formatPhoneNumberInternal(
+    identifier ?? currentUser?.email ?? currentUser?.phone ?? ""
+  )
+  const canAccessDashboard = hasDashboardRole(currentUser?.roles)
+  const isDashboardPath = pathname.startsWith(`/${language}/dashboard`)
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -84,7 +90,7 @@ export function UserDropdown({
           "shrink-0 rounded-full",
           compact
             ? "size-11 px-0"
-            : "xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-xs 3xl:h-12 3xl:text-base h-8 px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
+            : "xs:h-9 xs:px-2 xs:text-[11px] 2xs:px-2.5 2xs:text-sm 3xl:h-12 3xl:text-base h-8 px-1.5 text-[10px] sm:h-10 sm:px-3 sm:text-sm lg:h-9 xl:h-10 2xl:h-11 2xl:px-4"
         )}
       >
         <Link
@@ -145,11 +151,11 @@ export function UserDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        sideOffset={8}
-        className="w-[min(calc(100vw-1rem),18rem)] rounded-2xl p-2 shadow-xl"
+        sideOffset={6}
+        className="w-[min(calc(100vw-1rem),15rem)] rounded-xl p-1.5 shadow-xl"
       >
-        <DropdownMenuLabel className="flex items-center gap-3 rounded-xl bg-muted/60 px-3 py-3">
-          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background text-primary ring-1 ring-border">
+        <DropdownMenuLabel className="flex items-center gap-2.5 rounded-lg bg-muted/60 px-2.5 py-2">
+          <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-background text-primary ring-1 ring-border">
             {currentUser.photo?.s3Url ? (
               <img
                 src={currentUser.photo.s3Url}
@@ -157,7 +163,7 @@ export function UserDropdown({
                 className="size-full object-cover"
               />
             ) : (
-              <HugeiconsIcon icon={UserCircleIcon} className="size-6" />
+              <HugeiconsIcon icon={UserCircleIcon} className="size-5" />
             )}
           </span>
           <span className="min-w-0">
@@ -165,38 +171,54 @@ export function UserDropdown({
               {name || t("home.account")}
             </span>
             {contact ? (
-              <span className="mt-0.5 block truncate text-xs font-normal text-muted-foreground">
+              <span className="mt-0.5 block truncate text-sm font-normal text-muted-foreground">
                 {contact}
               </span>
             ) : null}
           </span>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="my-2" />
-        <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
+        <DropdownMenuSeparator className="my-1" />
+        <DropdownMenuItem
+          asChild
+          className="min-h-9 cursor-pointer px-2.5 text-sm"
+        >
           <Link href={`/${language}/dashboard/profile`}>
             <HugeiconsIcon icon={UserCircleIcon} />
             {t("profile.title")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
-          <Link href={`/${language}/orders`}>
-            <HugeiconsIcon icon={ShoppingCart02Icon} />
-            {t("storefront.myOrders")}
-          </Link>
-        </DropdownMenuItem>
-        {pathname !== `/${language}/dashboard` && (
-          <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-3">
-            <Link href={`/${language}/dashboard`}>
+        {!canAccessDashboard ? (
+          <DropdownMenuItem
+            asChild
+            className="min-h-9 cursor-pointer px-2.5 text-sm"
+          >
+            <Link href={`/${language}/orders`}>
+              <HugeiconsIcon icon={ShoppingCart02Icon} />
+              {t("storefront.myOrders")}
+            </Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            asChild
+            className="min-h-9 cursor-pointer px-2.5 text-sm"
+          >
+            <Link
+              href={
+                isDashboardPath
+                  ? `/${language}`
+                  : getDashboardLandingPath(language, currentUser)
+              }
+            >
               <HugeiconsIcon icon={Home01Icon} />
-              {t("home.landingAction")}
+              {t(isDashboardPath ? "home.landingAction" : "dashboard.home")}
             </Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem
           onSelect={signOut}
           variant="destructive"
-          className="min-h-11 cursor-pointer px-3"
+          className="min-h-9 cursor-pointer px-2.5 text-sm"
         >
           <HugeiconsIcon icon={Logout02Icon} />
           {t("home.signOut")}
