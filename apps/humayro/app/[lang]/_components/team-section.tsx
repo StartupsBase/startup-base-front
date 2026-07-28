@@ -21,7 +21,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
   uz: [
     {
       name: "Xasanjon Abdunabiyev",
-      role: "ASOSCHI VA FRONTEND DASTURCHI",
+      role: "ASOSCHI",
       description:
         "Humayro asoschisi. Ta'lim markazlari uchun sodda va ishonchli boshqaruv tizimini yaratadi.",
       location: "Toshkent",
@@ -31,7 +31,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
     },
     {
       name: "Mavlon Akmalov",
-      role: "ASOSCHI VA BACKEND DASTURCHI",
+      role: "ASOSCHI",
       description:
         "Mahsulot va biznes jarayonlariga mas'ul. Har bir o'quv markazi tezroq ishlashi uchun yechimlar yaratadi.",
       location: "Toshkent",
@@ -41,7 +41,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
     },
     {
       name: "Rovshanbek Mirvoxitov",
-      role: "FRONTEND DASTURCHI",
+      role: "",
       description:
         "Humayro texnik yo'nalishini boshqaradi va platformaning barqaror, qulay ishlashini ta'minlaydi.",
       location: "Toshkent",
@@ -54,7 +54,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
   ru: [
     {
       name: "Хасанжон Абдунабиев",
-      role: "ОСНОВАТЕЛЬ И FRONTEND-РАЗРАБОТЧИК",
+      role: "ОСНОВАТЕЛЬ",
       description:
         "Основатель Humayro. Создаёт простую и надёжную систему управления для учебных центров.",
       location: "Ташкент",
@@ -64,7 +64,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
     },
     {
       name: "Мавлон Акмалов",
-      role: "ОСНОВАТЕЛЬ И BACKEND-РАЗРАБОТЧИК",
+      role: "ОСНОВАТЕЛЬ",
       description:
         "Отвечает за продукт и бизнес-процессы, создавая решения для более быстрой работы учебных центров.",
       location: "Ташкент",
@@ -74,7 +74,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
     },
     {
       name: "Ровшанбек Мирвохитов",
-      role: "FRONTEND-РАЗРАБОТЧИК",
+      role: "",
       description:
         "Развивает техническое направление Humayro и отвечает за стабильность и удобство платформы.",
       location: "Ташкент",
