@@ -3,16 +3,9 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 
 import { Button } from "@workspace/ui/components/button"
-import type { JwtDTO } from "@/lib/api"
-import { getPostLoginPath, googleReturnPathKey } from "@/lib/auth"
-import { saveAuthToken } from "@/lib/auth-client"
-import { useAuthStore } from "@/lib/stores/use-auth-store"
-
-const googleCallbackPath = "/api/auth/google/callback"
-const popupTimeoutMs = 2 * 60 * 1000
+import { googleReturnPathKey } from "@/lib/auth"
 
 function getSafeReturnPath(pathname: string, search: string) {
   const language = pathname.split("/")[1] ?? "ru"
@@ -27,18 +20,11 @@ function getSafeReturnPath(pathname: string, search: string) {
 export function GoogleLoginButton() {
   const { t } = useTranslation()
   const pathname = usePathname()
-  const setSession = useAuthStore((state) => state.setSession)
   const [redirecting, setRedirecting] = useState(false)
 
-  async function signInWithGoogle() {
+  function signInWithGoogle() {
     const language = pathname.split("/")[1] ?? "ru"
     const returnPath = getSafeReturnPath(pathname, window.location.search)
-    const popup = openGooglePopup()
-
-    if (!popup) {
-      toast.error(t("login.googleFailed"))
-      return
-    }
 
     if (returnPath) {
       sessionStorage.setItem(googleReturnPathKey, returnPath)
@@ -47,40 +33,7 @@ export function GoogleLoginButton() {
     }
 
     setRedirecting(true)
-
-    try {
-      popup.location.replace(`/${language}/auth/google/start`)
-      const result = await waitForGooglePopup(popup, language)
-
-      if (result.type === "redirect") {
-        window.location.assign(result.destination)
-        return
-      }
-
-      const { session } = result
-
-      if (!session.accessToken) {
-        throw new Error("Google session is missing an access token")
-      }
-
-      saveAuthToken(session.accessToken)
-      setSession(session.user ?? null, session.user?.email ?? "")
-      popup.close()
-
-      const storedReturnPath = sessionStorage.getItem(googleReturnPathKey)
-      sessionStorage.removeItem(googleReturnPathKey)
-      const destination =
-        storedReturnPath?.startsWith(`/${language}/`) &&
-        !storedReturnPath.startsWith("//")
-          ? storedReturnPath
-          : getPostLoginPath(language, session.user?.roles)
-
-      window.location.assign(destination)
-    } catch {
-      popup.close()
-      setRedirecting(false)
-      toast.error(t("login.googleFailed"))
-    }
+    window.location.assign(`/${language}/auth/google/start`)
   }
 
   return (
@@ -97,100 +50,6 @@ export function GoogleLoginButton() {
         : t("login.continueWithGoogle")}
     </Button>
   )
-}
-
-function openGooglePopup() {
-  const width = 520
-  const height = 700
-  const left = Math.max(0, window.screenX + (window.outerWidth - width) / 2)
-  const top = Math.max(0, window.screenY + (window.outerHeight - height) / 2)
-
-  return window.open(
-    "about:blank",
-    "humayro-google-auth",
-    `popup=yes,width=${width},height=${height},left=${Math.round(left)},top=${Math.round(top)}`
-  )
-}
-
-type GooglePopupResult =
-  | { type: "session"; session: JwtDTO }
-  | { type: "redirect"; destination: string }
-
-function waitForGooglePopup(
-  popup: Window,
-  language: string
-): Promise<GooglePopupResult> {
-  return new Promise((resolve, reject) => {
-    const startedAt = Date.now()
-    const interval = window.setInterval(() => {
-      if (popup.closed) {
-        finish(() => reject(new Error("Google sign-in was cancelled")))
-        return
-      }
-
-      if (Date.now() - startedAt > popupTimeoutMs) {
-        finish(() => reject(new Error("Google sign-in timed out")))
-        return
-      }
-
-      try {
-        const popupUrl = new URL(popup.location.href)
-
-        if (popupUrl.origin !== window.location.origin) return
-
-        if (popupUrl.pathname === googleCallbackPath) {
-          if (popupUrl.searchParams.has("error")) {
-            finish(() => reject(new Error("Google returned an OAuth error")))
-            return
-          }
-
-          const responseText = popup.document.body?.innerText.trim()
-
-          if (!responseText) return
-
-          try {
-            const session = JSON.parse(responseText) as JwtDTO
-
-            if (session.accessToken) {
-              finish(() => resolve({ type: "session", session }))
-            }
-          } catch {
-            // The frontend callback can briefly render an HTML completion page.
-          }
-          return
-        }
-
-        const localizedCallbackPath = `/${language}/auth/google/callback`
-
-        if (popupUrl.pathname === localizedCallbackPath) {
-          if (popupUrl.searchParams.has("error")) {
-            finish(() => reject(new Error("Google callback failed")))
-          }
-          return
-        }
-
-        const isCompletedAppNavigation =
-          popupUrl.pathname === `/${language}` ||
-          popupUrl.pathname.startsWith(`/${language}/dashboard`)
-
-        if (isCompletedAppNavigation) {
-          finish(() =>
-            resolve({
-              type: "redirect",
-              destination: `${popupUrl.pathname}${popupUrl.search}${popupUrl.hash}`,
-            })
-          )
-        }
-      } catch {
-        // Google pages are cross-origin until OAuth returns to humayro.uz.
-      }
-    }, 250)
-
-    function finish(callback: () => void) {
-      window.clearInterval(interval)
-      callback()
-    }
-  })
 }
 
 function GoogleIcon() {

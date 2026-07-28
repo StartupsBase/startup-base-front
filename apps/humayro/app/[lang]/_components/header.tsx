@@ -9,14 +9,18 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { LogoBrand } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Language } from "@/i18n/config"
+import { useGetAll4 } from "@/lib/api/generated/category/category"
+import type { CategoryDTO } from "@/lib/api/model/categoryDTO"
+import { useCatalogStore } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import {
   Sheet,
   SheetClose,
@@ -36,6 +40,43 @@ export default function Header({ language }: { language: Language }) {
   const { t } = useTranslation()
   const [isSticky, setIsSticky] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false)
+  const [activeParentId, setActiveParentId] = useState<number | null>(null)
+  const catalogMenuRef = useRef<HTMLDivElement>(null)
+  const setCategoryId = useCatalogStore((state) => state.setCategoryId)
+  const isHeaderHidden =
+    pathname.startsWith(`/${language}/dashboard`) ||
+    pathname.startsWith(`/${language}/login`)
+  const categoriesQuery = useGetAll4(
+    { active: true },
+    {
+      query: {
+        enabled: !isHeaderHidden,
+        staleTime: 5 * 60_000,
+      },
+    }
+  )
+  const categories = [...(categoriesQuery.data ?? [])].sort(
+    (first, second) =>
+      (first.sortOrder ?? 0) - (second.sortOrder ?? 0) ||
+      getCategoryName(first, language).localeCompare(
+        getCategoryName(second, language)
+      )
+  )
+  const parentCategories = categories.filter(
+    (category) => category.parentId == null && category.id != null
+  )
+  const selectedParentId =
+    activeParentId != null &&
+    parentCategories.some((category) => category.id === activeParentId)
+      ? activeParentId
+      : (parentCategories[0]?.id ?? null)
+  const selectedParent = parentCategories.find(
+    (category) => category.id === selectedParentId
+  )
+  const childCategories = categories.filter(
+    (category) => category.parentId === selectedParentId
+  )
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,15 +88,39 @@ export default function Header({ language }: { language: Language }) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  if (
-    pathname.startsWith(`/${language}/dashboard`) ||
-    pathname.startsWith(`/${language}/login`)
-  ) {
+  useEffect(() => {
+    if (!isCatalogOpen) return
+
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !catalogMenuRef.current?.contains(event.target)
+      ) {
+        setIsCatalogOpen(false)
+      }
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsCatalogOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsideClick)
+    document.addEventListener("keydown", closeOnEscape)
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick)
+      document.removeEventListener("keydown", closeOnEscape)
+    }
+  }, [isCatalogOpen])
+
+  if (isHeaderHidden) {
     return null
   }
 
   const homeHref = `/${language}`
-  const catalogHref = `${homeHref}#catalog`
+  const catalogHref = `/${language}/products`
 
   return (
     <>
@@ -83,12 +148,36 @@ export default function Header({ language }: { language: Language }) {
           <LogoBrand />
 
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <Button asChild className="h-10 shrink-0 rounded-xl px-4 xl:h-11">
-              <Link href={catalogHref}>
+            <div ref={catalogMenuRef}>
+              <Button
+                type="button"
+                aria-expanded={isCatalogOpen}
+                aria-controls="desktop-catalog-menu"
+                className="h-10 shrink-0 rounded-xl px-4 xl:h-11"
+                onClick={() => setIsCatalogOpen((current) => !current)}
+              >
                 <HugeiconsIcon icon={SearchList01Icon} className="size-5" />
                 <span>{t("productDetails.catalog")}</span>
-              </Link>
-            </Button>
+              </Button>
+
+              {isCatalogOpen ? (
+                <DesktopCatalogMenu
+                  language={language}
+                  categories={categories}
+                  parentCategories={parentCategories}
+                  selectedParent={selectedParent}
+                  selectedParentId={selectedParentId}
+                  childCategories={childCategories}
+                  isPending={categoriesQuery.isPending}
+                  catalogHref={catalogHref}
+                  onParentChange={setActiveParentId}
+                  onCategorySelect={(categoryId) => {
+                    setCategoryId(categoryId)
+                    setIsCatalogOpen(false)
+                  }}
+                />
+              ) : null}
+            </div>
             <AdvancedSearch language={language} />
           </div>
 
@@ -187,6 +276,196 @@ export default function Header({ language }: { language: Language }) {
       </Sheet>
     </>
   )
+}
+
+type DesktopCatalogMenuProps = {
+  language: Language
+  categories: CategoryDTO[]
+  parentCategories: CategoryDTO[]
+  selectedParent?: CategoryDTO
+  selectedParentId: number | null
+  childCategories: CategoryDTO[]
+  isPending: boolean
+  catalogHref: string
+  onParentChange: (categoryId: number) => void
+  onCategorySelect: (categoryId: number | null) => void
+}
+
+function DesktopCatalogMenu({
+  language,
+  categories,
+  parentCategories,
+  selectedParent,
+  selectedParentId,
+  childCategories,
+  isPending,
+  catalogHref,
+  onParentChange,
+  onCategorySelect,
+}: DesktopCatalogMenuProps) {
+  const copy =
+    language === "uz"
+      ? {
+          allProducts: "Barcha mahsulotlar",
+          loading: "Kategoriyalar yuklanmoqda...",
+          empty: "Kategoriyalar topilmadi",
+        }
+      : {
+          allProducts: "Все товары",
+          loading: "Загружаем категории...",
+          empty: "Категории не найдены",
+        }
+
+  return (
+    <div
+      id="desktop-catalog-menu"
+      className="absolute top-[calc(100%+0.5rem)] left-1/2 z-60 flex max-h-[min(72svh,46rem)] w-[calc(100vw-4rem)] max-w-[1580px] -translate-x-1/2 overflow-hidden rounded-3xl border border-border/70 bg-background text-foreground shadow-[0_28px_80px_-28px_rgba(0,0,0,.55)]"
+    >
+      {isPending ? (
+        <p className="w-full p-10 text-center text-sm text-muted-foreground">
+          {copy.loading}
+        </p>
+      ) : parentCategories.length === 0 ? (
+        <p className="w-full p-10 text-center text-sm text-muted-foreground">
+          {copy.empty}
+        </p>
+      ) : (
+        <>
+          <nav
+            aria-label={copy.allProducts}
+            className="w-72 shrink-0 overflow-y-auto border-r border-border/70 bg-muted/35 p-3"
+          >
+            <Link
+              href={catalogHref}
+              className="mb-2 flex min-h-12 items-center rounded-xl px-3 text-sm font-bold transition-colors hover:bg-primary/10 hover:text-primary"
+              onClick={() => onCategorySelect(null)}
+            >
+              {copy.allProducts}
+            </Link>
+
+            {parentCategories.map((category) => {
+              const categoryId = category.id
+              if (categoryId == null) return null
+
+              return (
+                <button
+                  key={categoryId}
+                  type="button"
+                  aria-current={
+                    selectedParentId === categoryId ? "true" : undefined
+                  }
+                  className={cn(
+                    "flex min-h-12 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors",
+                    selectedParentId === categoryId
+                      ? "bg-primary/12 text-primary"
+                      : "hover:bg-muted"
+                  )}
+                  onMouseEnter={() => onParentChange(categoryId)}
+                  onFocus={() => onParentChange(categoryId)}
+                  onClick={() => onParentChange(categoryId)}
+                >
+                  {category.imageUrl ? (
+                    <img
+                      src={category.imageUrl}
+                      alt=""
+                      className="size-8 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                      {getCategoryName(category, language)
+                        .charAt(0)
+                        .toLocaleUpperCase()}
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1 truncate">
+                    {getCategoryName(category, language)}
+                  </span>
+                  <span aria-hidden="true" className="text-lg opacity-45">
+                    ›
+                  </span>
+                </button>
+              )
+            })}
+          </nav>
+
+          <section className="min-w-0 flex-1 overflow-y-auto p-7">
+            {selectedParent?.id != null ? (
+              <Link
+                href={catalogHref}
+                className="inline-flex items-center gap-2 text-2xl font-bold tracking-[-0.025em] hover:text-primary"
+                onClick={() => onCategorySelect(selectedParent.id!)}
+              >
+                {getCategoryName(selectedParent, language)}
+                <span aria-hidden="true">›</span>
+              </Link>
+            ) : null}
+
+            {childCategories.length ? (
+              <div className="mt-6 grid grid-cols-2 gap-x-10 gap-y-8 xl:grid-cols-3">
+                {childCategories.map((child) => {
+                  const childId = child.id
+                  if (childId == null) return null
+                  const grandchildren = categories.filter(
+                    (category) => category.parentId === childId
+                  )
+
+                  return (
+                    <div key={childId} className="min-w-0">
+                      <Link
+                        href={catalogHref}
+                        className="flex items-center gap-2 font-bold hover:text-primary"
+                        onClick={() => onCategorySelect(childId)}
+                      >
+                        {child.imageUrl ? (
+                          <img
+                            src={child.imageUrl}
+                            alt=""
+                            className="size-9 shrink-0 rounded-xl object-cover"
+                          />
+                        ) : null}
+                        <span>{getCategoryName(child, language)}</span>
+                      </Link>
+
+                      {grandchildren.length ? (
+                        <div className="mt-3 space-y-2">
+                          {grandchildren.map((grandchild) =>
+                            grandchild.id == null ? null : (
+                              <Link
+                                key={grandchild.id}
+                                href={catalogHref}
+                                className="block truncate text-sm text-muted-foreground transition-colors hover:text-primary"
+                                onClick={() => onCategorySelect(grandchild.id!)}
+                              >
+                                {getCategoryName(grandchild, language)}
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      ) : child.descriptionUz || child.descriptionRu ? (
+                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                          {language === "ru"
+                            ? child.descriptionRu || child.descriptionUz
+                            : child.descriptionUz || child.descriptionRu}
+                        </p>
+                      ) : null}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : selectedParent ? (
+              <p className="mt-6 text-sm text-muted-foreground">{copy.empty}</p>
+            ) : null}
+          </section>
+        </>
+      )}
+    </div>
+  )
+}
+
+function getCategoryName(category: CategoryDTO, language: Language) {
+  return language === "ru"
+    ? category.nameRu || category.name || category.nameEng || "—"
+    : category.name || category.nameRu || category.nameEng || "—"
 }
 
 function MobileMenuLink({
