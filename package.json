@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "husky",
     "dev": "turbo dev",
-    "dev:humayro": "turbo dev --filter=humayro",
+    "dev:humayro": "turbo dev --filter=humayro -- --port=3003",
     "dev:parking-avto": "turbo dev --filter=parking-avto",
     "dev:stadion24": "turbo dev --filter=stadion24",
     "dev:wending": "turbo dev --filter=wending",

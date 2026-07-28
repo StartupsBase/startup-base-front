@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation"
 
-import { RegisterForm } from "./_components/register-form"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { createTranslatedPageMetadata } from "@/lib/seo"
+import { RegisterForm } from "./_components/register-form"
 
 export async function generateMetadata({
   params,
@@ -41,10 +41,6 @@ export default async function RegisterPage({
         />
 
         <div className="mb-8 space-y-2.5">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-xs font-semibold tracking-[0.08em] text-primary uppercase dark:border-[#20cdb4]/20 dark:bg-[#20cdb4]/8 dark:text-[#5ee3cf]">
-            <span className="size-1.5 rounded-full bg-current shadow-[0_0_10px_currentColor]" />
-            Humayro
-          </span>
           <h1 className="text-3xl font-bold tracking-[-0.04em] sm:text-[2rem]">
             {t("register.title")}
           </h1>
