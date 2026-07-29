@@ -2,6 +2,8 @@
 
 import {
   Add01Icon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
   Delete02Icon,
   PencilEdit02Icon,
   Trash,
@@ -1091,21 +1093,156 @@ function CategoryHierarchyList({
   const [draggedCategory, setDraggedCategory] = useState<CategoryDTO | null>(
     null
   )
+  const [moveDialogCategory, setMoveDialogCategory] =
+    useState<CategoryDTO | null>(null)
+  const [destinationParent, setDestinationParent] = useState(ROOT_CATEGORY)
+  const [destinationPosition, setDestinationPosition] = useState<
+    "first" | "last"
+  >("last")
   const roots = categories.filter((category) => category.parentId == null)
 
-  function canMoveInside(category: CategoryDTO) {
-    if (draggedCategory?.id === undefined || category.id === undefined)
+  function canUseCategoryAsParent(
+    movingCategory: CategoryDTO,
+    destinationCategory: CategoryDTO
+  ) {
+    if (movingCategory.id === undefined || destinationCategory.id === undefined)
       return false
+    if (movingCategory.id === destinationCategory.id) return false
+    return !isCategoryDescendant(
+      categories,
+      movingCategory.id,
+      destinationCategory.id
+    )
+  }
+
+  function canMoveInside(category: CategoryDTO) {
+    return draggedCategory
+      ? draggedCategory.parentId !== category.id &&
+          canUseCategoryAsParent(draggedCategory, category)
+      : false
+  }
+
+  function handlePointerDrop(category: CategoryDTO, target: Element | null) {
+    const dropZone = target?.closest<HTMLElement>("[data-category-drop-parent]")
+    const destination = dropZone?.dataset.categoryDropParent
+    if (!destination) return false
+
+    if (destination === "root") {
+      if (category.parentId == null) return false
+      void onMoveToParent(category, undefined, roots.length)
+      setDraggedCategory(null)
+      return true
+    }
+
+    const destinationId = Number(destination)
+    const destinationCategory = categories.find(
+      (item) => item.id === destinationId
+    )
     if (
-      draggedCategory.id === category.id ||
-      draggedCategory.parentId === category.id
+      !destinationCategory ||
+      category.parentId === destinationCategory.id ||
+      !canUseCategoryAsParent(category, destinationCategory)
     ) {
       return false
     }
-    return !isCategoryDescendant(categories, draggedCategory.id, category.id)
+
+    const destinationChildren = categories.filter(
+      (item) => item.parentId === destinationId
+    )
+    void onMoveToParent(category, destinationId, destinationChildren.length)
+    setDraggedCategory(null)
+    return true
   }
 
-  function categoryRow(category: CategoryDTO, depth: number) {
+  function reorderWithinSiblings(
+    category: CategoryDTO,
+    siblings: CategoryDTO[],
+    targetIndex: number
+  ) {
+    const fromIndex = siblings.findIndex((item) => item.id === category.id)
+    if (
+      fromIndex < 0 ||
+      targetIndex < 0 ||
+      targetIndex >= siblings.length ||
+      fromIndex === targetIndex
+    ) {
+      return
+    }
+
+    const reordered = [...siblings]
+    const [moved] = reordered.splice(fromIndex, 1)
+    if (!moved) return
+    reordered.splice(targetIndex, 0, moved)
+    void onReorder(reordered, {
+      item: moved,
+      fromIndex,
+      toIndex: targetIndex,
+    })
+  }
+
+  function openMoveDialog(category: CategoryDTO) {
+    setMoveDialogCategory(category)
+    setDestinationParent(
+      category.parentId === undefined
+        ? ROOT_CATEGORY
+        : category.parentId.toString()
+    )
+    setDestinationPosition("last")
+  }
+
+  function categoryPath(category: CategoryDTO) {
+    const path = [category.name || t("category.unnamed")]
+    const visited = new Set<number>()
+    let parentId = category.parentId
+
+    while (parentId !== undefined && !visited.has(parentId)) {
+      visited.add(parentId)
+      const parent = categories.find((item) => item.id === parentId)
+      if (!parent) break
+      path.unshift(parent.name || t("category.unnamed"))
+      parentId = parent.parentId
+    }
+
+    return path.join(" / ")
+  }
+
+  function applyButtonMove() {
+    if (!moveDialogCategory) return
+    const parentId =
+      destinationParent === ROOT_CATEGORY
+        ? undefined
+        : Number(destinationParent)
+    const destinationSiblings = categories
+      .filter(
+        (item) =>
+          sameCategoryParent(item.parentId, parentId) &&
+          item.id !== moveDialogCategory.id
+      )
+      .sort(compareCategoryOrder)
+    const targetIndex =
+      destinationPosition === "first" ? 0 : destinationSiblings.length
+
+    if (sameCategoryParent(moveDialogCategory.parentId, parentId)) {
+      const currentSiblings = categories
+        .filter((item) => sameCategoryParent(item.parentId, parentId))
+        .sort(compareCategoryOrder)
+      reorderWithinSiblings(
+        moveDialogCategory,
+        currentSiblings,
+        destinationPosition === "first" ? 0 : currentSiblings.length - 1
+      )
+    } else {
+      void onMoveToParent(moveDialogCategory, parentId, targetIndex)
+    }
+    setMoveDialogCategory(null)
+  }
+
+  function categoryRow(
+    category: CategoryDTO,
+    depth: number,
+    siblingIndex: number,
+    siblings: CategoryDTO[]
+  ) {
     const children = categories.filter((item) => item.parentId === category.id)
 
     return (
@@ -1139,13 +1276,51 @@ function CategoryHierarchyList({
               </p>
             </div>
           </div>
-          <CategoryActions category={category} categories={categories} />
+          <div className="flex flex-wrap items-center justify-end gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              disabled={disabled || siblingIndex === 0}
+              title={t("category.moveUp")}
+              aria-label={t("category.moveUp")}
+              onClick={() =>
+                reorderWithinSiblings(category, siblings, siblingIndex - 1)
+              }
+            >
+              <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              disabled={disabled || siblingIndex === siblings.length - 1}
+              title={t("category.moveDown")}
+              aria-label={t("category.moveDown")}
+              onClick={() =>
+                reorderWithinSiblings(category, siblings, siblingIndex + 1)
+              }
+            >
+              <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={disabled}
+              onClick={() => openMoveDialog(category)}
+            >
+              {t("category.moveCategory")}
+            </Button>
+            <CategoryActions category={category} categories={categories} />
+          </div>
         </div>
 
         {draggedCategory && canMoveInside(category) ? (
           <button
             type="button"
-            className="mt-3 w-full rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2 text-xs font-medium text-primary transition hover:border-primary hover:bg-primary/10"
+            data-category-drop-parent={category.id}
+            className="mt-3 flex min-h-12 w-full touch-none items-center justify-center rounded-xl border border-dashed border-primary/60 bg-primary/10 px-3 py-2 text-center text-sm font-medium text-primary transition hover:border-primary hover:bg-primary/15"
             onDragEnter={(event) => event.stopPropagation()}
             onDragOver={(event) => {
               event.preventDefault()
@@ -1179,8 +1354,11 @@ function CategoryHierarchyList({
               disabled={disabled}
               moveLabel={t("category.dragToReorder")}
               onDragStateChange={setDraggedCategory}
+              onPointerDrop={handlePointerDrop}
               onReorder={onReorder}
-              renderItem={(item) => categoryRow(item, depth + 1)}
+              renderItem={(item, index) =>
+                categoryRow(item, depth + 1, index, children)
+              }
             />
           </div>
         ) : null}
@@ -1209,7 +1387,8 @@ function CategoryHierarchyList({
       {draggedCategory && draggedCategory.parentId != null ? (
         <button
           type="button"
-          className="mb-3 w-full rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2 text-xs font-medium text-primary transition hover:border-primary hover:bg-primary/10"
+          data-category-drop-parent="root"
+          className="mb-3 flex min-h-12 w-full touch-none items-center justify-center rounded-xl border border-dashed border-primary/60 bg-primary/10 px-3 py-2 text-center text-sm font-medium text-primary transition hover:border-primary hover:bg-primary/15"
           onDragEnter={(event) => event.stopPropagation()}
           onDragOver={(event) => {
             event.preventDefault()
@@ -1232,9 +1411,103 @@ function CategoryHierarchyList({
         disabled={disabled}
         moveLabel={t("category.dragToReorder")}
         onDragStateChange={setDraggedCategory}
+        onPointerDrop={handlePointerDrop}
         onReorder={onReorder}
-        renderItem={(item) => categoryRow(item, 0)}
+        renderItem={(item, index) => categoryRow(item, 0, index, roots)}
       />
+
+      <Dialog
+        open={moveDialogCategory !== null}
+        onOpenChange={(open) => {
+          if (!open) setMoveDialogCategory(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("category.moveCategoryTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("category.moveCategoryDescription", {
+                name: moveDialogCategory?.name || t("category.unnamed"),
+              })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-5 py-2">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">
+                {t("category.destinationParent")}
+              </label>
+              <Select
+                value={destinationParent}
+                onValueChange={setDestinationParent}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ROOT_CATEGORY}>
+                    {t("category.root")}
+                  </SelectItem>
+                  {categories
+                    .filter(
+                      (category) =>
+                        moveDialogCategory &&
+                        canUseCategoryAsParent(moveDialogCategory, category)
+                    )
+                    .sort((first, second) =>
+                      categoryPath(first).localeCompare(categoryPath(second))
+                    )
+                    .map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id!.toString()}
+                      >
+                        {categoryPath(category)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">
+                {t("category.destinationPosition")}
+              </label>
+              <Select
+                value={destinationPosition}
+                onValueChange={(value) =>
+                  setDestinationPosition(value as "first" | "last")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="first">
+                    {t("category.positionFirst")}
+                  </SelectItem>
+                  <SelectItem value="last">
+                    {t("category.positionLast")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setMoveDialogCategory(null)}
+            >
+              {t("category.cancelMove")}
+            </Button>
+            <Button type="button" disabled={disabled} onClick={applyButtonMove}>
+              {t("category.applyMove")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
