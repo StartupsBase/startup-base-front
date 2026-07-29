@@ -8,10 +8,7 @@ import { toast } from "sonner"
 import type { Language } from "@/i18n/config"
 import { hasAuthToken } from "@/lib/auth-client"
 import { useGuestStorefront } from "@/lib/guest-storefront"
-import {
-  addItem,
-  getGetCartQueryKey,
-} from "@/lib/api/generated/cart/cart"
+import { addItem, getGetCartQueryKey } from "@/lib/api/generated/cart/cart"
 import {
   add as addFavorite,
   getGetFavoriteIdsQueryKey,
@@ -19,7 +16,7 @@ import {
   remove as removeFavorite,
 } from "@/lib/api/generated/favorite/favorite"
 import { getById2 } from "@/lib/api/generated/product/product"
-import { getLoginHref } from "@/lib/storefront"
+import { getAvailableStock, getLoginHref } from "@/lib/storefront"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 
 function getStatus(error: unknown) {
@@ -41,7 +38,9 @@ export function useStorefrontActions(language: Language) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [pendingCartId, setPendingCartId] = useState<number | null>(null)
-  const [pendingFavoriteId, setPendingFavoriteId] = useState<number | null>(null)
+  const [pendingFavoriteId, setPendingFavoriteId] = useState<number | null>(
+    null
+  )
   const text = useStorefrontCopy()
   const guestStorefront = useGuestStorefront()
 
@@ -60,17 +59,30 @@ export function useStorefrontActions(language: Language) {
     try {
       const product = await getById2(productId)
       const variant = product.variants?.find(
-        (item) => item.id != null && item.active !== false && (item.stock ?? 0) > 0
+        (item) =>
+          item.id != null &&
+          item.active !== false &&
+          (getAvailableStock(product, item.stock) ?? 0) > 0
       )
 
       if (variant?.id == null) {
         toast.info(text.outOfStock)
         return
       }
+      const variantStock = Math.max(0, variant.stock ?? 0)
+      const productStock = Math.max(0, product.amount ?? Infinity)
 
       if (!hasAuthToken()) {
-        guestStorefront.addToCart(productId, variant.id)
-        toast.success(text.addedToCart)
+        const added = guestStorefront.addToCart(
+          productId,
+          variant.id,
+          1,
+          variantStock,
+          productStock
+        )
+        toast[added ? "success" : "info"](
+          added ? text.addedToCart : text.outOfStock
+        )
         return
       }
 
@@ -100,7 +112,9 @@ export function useStorefrontActions(language: Language) {
       }
 
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getGetFavoriteIdsQueryKey() }),
+        queryClient.invalidateQueries({
+          queryKey: getGetFavoriteIdsQueryKey(),
+        }),
         queryClient.invalidateQueries({ queryKey: getGetFavoritesQueryKey() }),
       ])
       toast.success(

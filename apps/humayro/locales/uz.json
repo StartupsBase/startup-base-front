@@ -405,6 +405,7 @@
       "branch": "Mahsulot filiali",
       "selectBranch": "Filialni tanlang",
       "basePrice": "Asosiy narx",
+      "amount": "Mahsulot miqdori",
       "discountPercent": "Chegirma foizi",
       "finalPrice": "Chegirmadan keyingi narx",
       "stock": "Qoldiq",
@@ -491,6 +492,9 @@
         "branchRequired": "Mahsulot sotiladigan filialni tanlang.",
         "priceInvalid": "Narxni raqam bilan kiriting.",
         "priceNonNegative": "Narx manfiy bo'lishi mumkin emas.",
+        "amountInvalid": "Mahsulot miqdorini raqam bilan kiriting.",
+        "amountInteger": "Mahsulot miqdori butun son bo'lishi kerak.",
+        "amountNonNegative": "Mahsulot miqdori manfiy bo'lishi mumkin emas.",
         "discountInvalid": "Chegirma foizini raqam bilan kiriting.",
         "discountRange": "Chegirma foizi 0 dan 100 gacha bo'lishi kerak."
       }
@@ -622,7 +626,7 @@
       "addedToCart": "Mahsulot savatga qo'shildi",
       "addedToFavorites": "Sevimlilarga qo'shildi",
       "removedFromFavorites": "Sevimlilardan olib tashlandi",
-      "outOfStock": "Mahsulotning mavjud varianti yo'q",
+      "outOfStock": "Sotuvda qolmagan",
       "actionError": "Amalni bajarib bo'lmadi",
       "favoritesTitle": "Sevimlilar",
       "favoritesDescription": "Keyinroq ko'rish uchun saqlangan mahsulotlar.",

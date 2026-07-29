@@ -10,6 +10,7 @@ import { useGetById2 } from "@/lib/api/generated/product/product"
 import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import {
   formatStorefrontPrice,
+  getAvailableStock,
   getProductName,
   getProductPrice,
 } from "@/lib/storefront"
@@ -53,6 +54,7 @@ export function ProductCard({
   })
   const name = getProductName(product, language)
   const price = getProductPrice(product)
+  const soldOut = getAvailableStock(product) === 0
   const hasDiscount = (product.discountPercent ?? 0) > 0
   const imageUrls = useMemo(() => {
     const detailImages = [...(detailQuery.data?.images ?? [])]
@@ -229,7 +231,7 @@ export function ProductCard({
             type="button"
             size="sm"
             aria-label={text.addToCart}
-            disabled={productId == null || isAdding || product.totalStock === 0}
+            disabled={productId == null || isAdding || soldOut}
             className={cn(
               "w-full rounded-xl font-semibold",
               compact ? "mt-2 h-8 px-2 text-xs" : "mt-3 h-10"
@@ -238,7 +240,7 @@ export function ProductCard({
           >
             {isAdding ? (
               <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground/35 border-t-primary-foreground" />
-            ) : product.totalStock === 0 ? (
+            ) : soldOut ? (
               <span className="text-wrap text-destructive">
                 {text.outOfStock}
               </span>

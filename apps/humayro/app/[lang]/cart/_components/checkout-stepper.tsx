@@ -219,15 +219,18 @@ export function CheckoutStepper({
             </div>
 
             <Tabs className="mt-5" value={step} onValueChange={selectStep}>
-              <TabsList className="grid h-auto w-full grid-cols-3 rounded-xl">
+              <TabsList variant="stepper">
                 {checkoutSteps.map((stepValue, index) => (
                   <TabsTrigger
                     key={stepValue}
                     value={stepValue}
                     disabled={index > highestStep}
-                    className="h-auto min-h-12 gap-2 rounded-lg px-2 py-2 whitespace-normal"
+                    data-complete={index < currentStep || undefined}
                   >
-                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold">
+                    <span
+                      data-slot="step-indicator"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold"
+                    >
                       {index < currentStep ? (
                         <HugeiconsIcon
                           icon={CheckmarkCircle02Icon}

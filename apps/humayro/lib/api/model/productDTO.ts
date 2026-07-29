@@ -20,9 +20,16 @@ export interface ProductDTO {
   categoryName?: string;
   organizationId?: number;
   organizationName?: string;
+  organizationAddress?: string;
+  organizationLatitude?: number;
+  organizationLongitude?: number;
   branchId?: number;
   branchName?: string;
+  branchAddress?: string;
+  branchLatitude?: number;
+  branchLongitude?: number;
   basePrice?: number;
+  amount?: number;
   discountPercent?: number;
   discountedPrice?: number;
   active?: boolean;

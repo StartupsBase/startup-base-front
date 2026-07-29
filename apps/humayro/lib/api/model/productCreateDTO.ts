@@ -20,6 +20,7 @@ export interface ProductCreateDTO {
   organizationId?: number;
   branchId: number;
   basePrice: number;
+  amount: number;
   /**
      * @minimum 0
      * @maximum 100

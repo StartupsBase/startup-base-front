@@ -206,15 +206,18 @@ export function BookDemoStepper({
       <form onSubmit={submit} noValidate>
         <Tabs value={step} onValueChange={selectStep}>
           <div className="px-6 pt-6">
-            <TabsList className="grid h-auto w-full grid-cols-3 rounded-xl">
+            <TabsList variant="stepper">
               {steps.map((stepValue, index) => (
                 <TabsTrigger
                   key={stepValue}
                   value={stepValue}
                   disabled={index > highestStep}
-                  className="h-auto min-h-11 gap-2 rounded-lg px-2 py-2 whitespace-normal"
+                  data-complete={index < currentStep || undefined}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-xs">
+                  <span
+                    data-slot="step-indicator"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold"
+                  >
                     {index < currentStep ? (
                       <HugeiconsIcon
                         icon={CheckmarkCircle02Icon}

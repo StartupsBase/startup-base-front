@@ -706,11 +706,11 @@ export function OrganizationCategoriesPage({
           String(row.original.discountedPrice ?? row.original.basePrice ?? "—"),
       },
       {
-        accessorKey: "totalStock",
+        accessorKey: "amount",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.stock")} />
         ),
-        cell: ({ row }) => String(row.original.totalStock ?? 0),
+        cell: ({ row }) => String(row.original.amount ?? 0),
       },
       {
         id: "status",

@@ -4,7 +4,11 @@ import { notFound } from "next/navigation"
 import { isLanguage } from "@/i18n/config"
 import { getTranslation } from "@/i18n/server"
 import { createPageMetadata, getSiteUrl } from "@/lib/seo"
-import { getProductName, getProductPrice } from "@/lib/storefront"
+import {
+  getAvailableStock,
+  getProductName,
+  getProductPrice,
+} from "@/lib/storefront"
 import { ProductDetails } from "./_components/product-details"
 import {
   getProductDetails,
@@ -87,10 +91,11 @@ export default async function ProductDetailsPage({ params }: ProductPageProps) {
   const images = (product.images ?? [])
     .map((image) => image.url)
     .filter((image): image is string => Boolean(image))
-  const stock = (product.variants ?? []).reduce(
+  const variantStock = (product.variants ?? []).reduce(
     (total, variant) => total + Math.max(0, variant.stock ?? 0),
     0
   )
+  const stock = getAvailableStock(product, variantStock) ?? 0
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",

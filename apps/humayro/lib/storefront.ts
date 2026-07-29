@@ -1,10 +1,7 @@
 import type { Language } from "@/i18n/config"
 import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 
-export function getProductName(
-  product: ProductListDTO,
-  language: Language
-) {
+export function getProductName(product: ProductListDTO, language: Language) {
   return language === "ru"
     ? product.nameRu || product.name || product.nameEng || "—"
     : product.name || product.nameRu || product.nameEng || "—"
@@ -21,6 +18,23 @@ export function formatStorefrontPrice(
 
 export function getProductPrice(product: ProductListDTO) {
   return product.discountedPrice ?? product.basePrice
+}
+
+type ProductStockSource = {
+  amount?: number
+  totalStock?: number
+}
+
+export function getAvailableStock(
+  product: ProductStockSource,
+  variantStock?: number
+) {
+  const limits = [product.amount, product.totalStock, variantStock].filter(
+    (value): value is number => Number.isFinite(value)
+  )
+
+  if (!limits.length) return undefined
+  return Math.max(0, Math.floor(Math.min(...limits)))
 }
 
 export function getLoginHref(language: Language, returnPath?: string) {

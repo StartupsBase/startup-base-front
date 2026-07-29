@@ -73,31 +73,77 @@ export function useGuestStorefront() {
         cart: current.cart.filter((item) => item.variantId !== variantId),
       })
     },
-    updateCartQuantity(variantId: number, quantity: number) {
+    updateCartQuantity(
+      variantId: number,
+      quantity: number,
+      maxVariantQuantity = Infinity,
+      maxProductQuantity = Infinity
+    ) {
       const current = readState()
+      const target = current.cart.find((item) => item.variantId === variantId)
+      const otherProductQuantity = target
+        ? current.cart
+            .filter(
+              (item) =>
+                item.productId === target.productId &&
+                item.variantId !== variantId
+            )
+            .reduce((total, item) => total + item.quantity, 0)
+        : 0
+      const allowedQuantity = Math.max(
+        0,
+        Math.min(maxVariantQuantity, maxProductQuantity - otherProductQuantity)
+      )
+      const nextQuantity = Math.min(quantity, allowedQuantity)
       writeState({
         ...current,
         cart:
-          quantity <= 0
+          nextQuantity <= 0
             ? current.cart.filter((item) => item.variantId !== variantId)
             : current.cart.map((item) =>
-                item.variantId === variantId ? { ...item, quantity } : item
+                item.variantId === variantId
+                  ? { ...item, quantity: nextQuantity }
+                  : item
               ),
       })
     },
-    addToCart(productId: number, variantId: number, quantity = 1) {
+    addToCart(
+      productId: number,
+      variantId: number,
+      quantity = 1,
+      maxVariantQuantity = Infinity,
+      maxProductQuantity = Infinity
+    ) {
       const current = readState()
       const existing = current.cart.find((item) => item.variantId === variantId)
+      const currentQuantity = existing?.quantity ?? 0
+      const otherProductQuantity = current.cart
+        .filter(
+          (item) => item.productId === productId && item.variantId !== variantId
+        )
+        .reduce((total, item) => total + item.quantity, 0)
+      const allowedQuantity = Math.max(
+        0,
+        Math.min(maxVariantQuantity, maxProductQuantity - otherProductQuantity)
+      )
+      const nextQuantity = Math.min(
+        currentQuantity + Math.max(0, quantity),
+        allowedQuantity
+      )
+
+      if (nextQuantity <= currentQuantity) return false
+
       writeState({
         ...current,
         cart: existing
           ? current.cart.map((item) =>
               item.variantId === variantId
-                ? { ...item, quantity: item.quantity + quantity }
+                ? { ...item, quantity: nextQuantity }
                 : item
             )
-          : [...current.cart, { productId, quantity, variantId }],
+          : [...current.cart, { productId, quantity: nextQuantity, variantId }],
       })
+      return true
     },
     toggleFavorite(productId: number) {
       const current = readState()

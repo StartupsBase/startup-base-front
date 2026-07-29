@@ -32,6 +32,7 @@ import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import { useGuestStorefront } from "@/lib/guest-storefront"
 import {
   formatStorefrontPrice,
+  getAvailableStock,
   getLoginHref,
   getProductName,
   getProductPrice,
@@ -124,6 +125,9 @@ export function CartView({ language }: { language: Language }) {
 
   const cart = cartQuery.data
   const items = cart?.items ?? []
+  const productById = new Map(
+    (productsQuery.data?.content ?? []).map((product) => [product.id, product])
+  )
 
   if (items.length === 0 && !completedOrder) {
     return (
@@ -171,28 +175,33 @@ export function CartView({ language }: { language: Language }) {
         />
       }
     >
-      {items.map((item, index) => (
-        <CartItem
-          key={item.id ?? index}
-          item={item}
-          language={language}
-          isUpdating={
-            updateMutation.isPending &&
-            updateMutation.variables?.itemId === item.id
-          }
-          isRemoving={
-            removeMutation.isPending &&
-            removeMutation.variables?.itemId === item.id
-          }
-          onQuantity={(quantity) =>
-            item.id != null &&
-            updateMutation.mutate({ itemId: item.id, params: { quantity } })
-          }
-          onRemove={() =>
-            item.id != null && removeMutation.mutate({ itemId: item.id })
-          }
-        />
-      ))}
+      {items.map((item, index) => {
+        const product = productById.get(item.productId)
+        const stock = getAvailableStock(product ?? {}, item.stock) ?? item.stock
+
+        return (
+          <CartItem
+            key={item.id ?? index}
+            item={{ ...item, stock }}
+            language={language}
+            isUpdating={
+              updateMutation.isPending &&
+              updateMutation.variables?.itemId === item.id
+            }
+            isRemoving={
+              removeMutation.isPending &&
+              removeMutation.variables?.itemId === item.id
+            }
+            onQuantity={(quantity) =>
+              item.id != null &&
+              updateMutation.mutate({ itemId: item.id, params: { quantity } })
+            }
+            onRemove={() =>
+              item.id != null && removeMutation.mutate({ itemId: item.id })
+            }
+          />
+        )
+      })}
     </CartPageShell>
   )
 }
@@ -260,12 +269,18 @@ function GuestCartView({
               unitPrice: price,
               subtotal: price * item.quantity,
               quantity: item.quantity,
+              stock: getAvailableStock(product ?? {}),
             }}
             language={language}
             isUpdating={false}
             isRemoving={false}
             onQuantity={(quantity) =>
-              guest.updateCartQuantity(item.variantId, quantity)
+              guest.updateCartQuantity(
+                item.variantId,
+                quantity,
+                Infinity,
+                getAvailableStock(product ?? {}) ?? Infinity
+              )
             }
             onRemove={() => guest.removeFromCart(item.variantId)}
           />
