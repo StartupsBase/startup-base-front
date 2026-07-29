@@ -24,6 +24,7 @@ type SortableListProps<T> = {
   className?: string
   itemClassName?: string
   moveLabel?: string
+  onDragStateChange?: (item: T | null) => void
 }
 
 export function SortableList<T>({
@@ -35,6 +36,7 @@ export function SortableList<T>({
   className,
   itemClassName,
   moveLabel = "Drag to reorder",
+  onDragStateChange,
 }: SortableListProps<T>) {
   const [draggedId, setDraggedId] = React.useState<string | number | null>(null)
   const [overId, setOverId] = React.useState<string | number | null>(null)
@@ -75,42 +77,49 @@ export function SortableList<T>({
         return (
           <div
             key={id}
-            draggable={!disabled}
             className={cn(
               "group/sortable flex items-stretch rounded-2xl border bg-card transition",
               dragging && "scale-[.99] opacity-50",
               over && "border-primary bg-primary/5 ring-2 ring-primary/15",
               itemClassName
             )}
-            onDragStart={(event) => {
-              if (event.target !== event.currentTarget) return
-              setDraggedId(id)
-              event.dataTransfer.effectAllowed = "move"
-              event.dataTransfer.setData("text/plain", String(id))
-            }}
             onDragEnter={(event) => {
-              if (event.target === event.currentTarget) setOverId(id)
+              event.stopPropagation()
+              setOverId(id)
             }}
             onDragOver={(event) => {
               event.preventDefault()
+              event.stopPropagation()
               event.dataTransfer.dropEffect = "move"
             }}
             onDrop={(event) => {
               event.preventDefault()
+              event.stopPropagation()
               if (draggedId !== null) move(draggedId, id)
               setDraggedId(null)
               setOverId(null)
-            }}
-            onDragEnd={() => {
-              setDraggedId(null)
-              setOverId(null)
+              onDragStateChange?.(null)
             }}
           >
             <button
               type="button"
+              draggable={!disabled}
               className="grid w-12 shrink-0 cursor-grab place-items-center rounded-l-2xl border-r text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={moveLabel}
               disabled={disabled}
+              onDragStart={(event) => {
+                event.stopPropagation()
+                setDraggedId(id)
+                onDragStateChange?.(item)
+                event.dataTransfer.effectAllowed = "move"
+                event.dataTransfer.setData("text/plain", String(id))
+              }}
+              onDragEnd={(event) => {
+                event.stopPropagation()
+                setDraggedId(null)
+                setOverId(null)
+                onDragStateChange?.(null)
+              }}
               onKeyDown={(event) => {
                 if (event.key === "ArrowUp") {
                   event.preventDefault()

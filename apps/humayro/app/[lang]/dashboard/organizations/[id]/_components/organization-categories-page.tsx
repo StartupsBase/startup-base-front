@@ -198,6 +198,93 @@ function compareCategoryOrder(a: CategoryDTO, b: CategoryDTO) {
   )
 }
 
+function sameCategoryParent(first?: number, second?: number) {
+  return (first ?? null) === (second ?? null)
+}
+
+function isCategoryDescendant(
+  categories: CategoryDTO[],
+  ancestorId: number,
+  possibleDescendantId: number
+) {
+  const categoriesById = new Map(
+    categories.flatMap((category) =>
+      category.id === undefined ? [] : [[category.id, category] as const]
+    )
+  )
+  const visited = new Set<number>()
+  let current = categoriesById.get(possibleDescendantId)
+
+  while (current?.parentId !== undefined && !visited.has(current.parentId)) {
+    if (current.parentId === ancestorId) return true
+    visited.add(current.parentId)
+    current = categoriesById.get(current.parentId)
+  }
+
+  return false
+}
+
+function reparentCategory(
+  categories: CategoryDTO[],
+  categoryId: number,
+  destinationParentId: number | undefined,
+  destinationIndex: number
+) {
+  const movedCategory = categories.find(
+    (category) => category.id === categoryId
+  )
+  if (!movedCategory) return categories
+
+  const sourceSiblings = categories
+    .filter(
+      (category) =>
+        category.id !== categoryId &&
+        sameCategoryParent(category.parentId, movedCategory.parentId)
+    )
+    .sort(compareCategoryOrder)
+  const destinationSiblings = categories
+    .filter(
+      (category) =>
+        category.id !== categoryId &&
+        sameCategoryParent(category.parentId, destinationParentId)
+    )
+    .sort(compareCategoryOrder)
+  const insertionIndex = Math.min(
+    Math.max(destinationIndex, 0),
+    destinationSiblings.length
+  )
+  destinationSiblings.splice(insertionIndex, 0, {
+    ...movedCategory,
+    parentId: destinationParentId,
+  })
+
+  const placements = new Map<
+    number,
+    { parentId: number | undefined; sortOrder: number }
+  >()
+  sourceSiblings.forEach((category, sortOrder) => {
+    if (category.id !== undefined) {
+      placements.set(category.id, {
+        parentId: movedCategory.parentId,
+        sortOrder,
+      })
+    }
+  })
+  destinationSiblings.forEach((category, sortOrder) => {
+    if (category.id !== undefined) {
+      placements.set(category.id, { parentId: destinationParentId, sortOrder })
+    }
+  })
+
+  return categories
+    .map((category) => {
+      if (category.id === undefined) return category
+      const placement = placements.get(category.id)
+      return placement ? { ...category, ...placement } : category
+    })
+    .sort(compareCategoryOrder)
+}
+
 export function OrganizationCategoriesPage({
   language,
   organizationId,
@@ -307,6 +394,51 @@ export function OrganizationCategoriesPage({
       })
       await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.success(t("category.orderSaved"))
+    } catch {
+      setOrderedCategories(previousCategories)
+      void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      toast.error(t("category.orderFailed"))
+    }
+  }
+
+  async function moveCategoryToParent(
+    category: CategoryDTO,
+    parentId: number | undefined,
+    sortOrder: number
+  ) {
+    if (category.id === undefined) return
+    const categoryId = category.id
+
+    if (
+      parentId === categoryId ||
+      (parentId !== undefined &&
+        isCategoryDescendant(orderedCategories, categoryId, parentId))
+    ) {
+      toast.error(t("category.cannotMoveIntoDescendant"))
+      return
+    }
+    if (sameCategoryParent(category.parentId, parentId)) return
+
+    const previousCategories = orderedCategories
+    const destinationCount = orderedCategories.filter(
+      (item) =>
+        item.id !== categoryId && sameCategoryParent(item.parentId, parentId)
+    ).length
+    const destinationOrder = Math.min(Math.max(sortOrder, 0), destinationCount)
+    setOrderedCategories((current) =>
+      reparentCategory(current, categoryId, parentId, destinationOrder)
+    )
+
+    try {
+      await moveCategory.mutateAsync({
+        id: categoryId,
+        data: {
+          ...(parentId !== undefined ? { parentId } : {}),
+          sortOrder: destinationOrder,
+        },
+      })
+      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      toast.success(t("category.moveSaved"))
     } catch {
       setOrderedCategories(previousCategories)
       void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
@@ -894,6 +1026,7 @@ export function OrganizationCategoriesPage({
               categories={orderedCategories}
               disabled={moveCategory.isPending}
               onReorder={reorderCategorySiblings}
+              onMoveToParent={moveCategoryToParent}
             />
           )}
         </TabsContent>
@@ -940,6 +1073,7 @@ function CategoryHierarchyList({
   categories,
   disabled,
   onReorder,
+  onMoveToParent,
 }: {
   categories: CategoryDTO[]
   disabled: boolean
@@ -947,9 +1081,29 @@ function CategoryHierarchyList({
     items: CategoryDTO[],
     movement: SortableListMovement<CategoryDTO>
   ) => void | Promise<void>
+  onMoveToParent: (
+    category: CategoryDTO,
+    parentId: number | undefined,
+    sortOrder: number
+  ) => void | Promise<void>
 }) {
   const { t } = useTranslation()
+  const [draggedCategory, setDraggedCategory] = useState<CategoryDTO | null>(
+    null
+  )
   const roots = categories.filter((category) => category.parentId == null)
+
+  function canMoveInside(category: CategoryDTO) {
+    if (draggedCategory?.id === undefined || category.id === undefined)
+      return false
+    if (
+      draggedCategory.id === category.id ||
+      draggedCategory.parentId === category.id
+    ) {
+      return false
+    }
+    return !isCategoryDescendant(categories, draggedCategory.id, category.id)
+  }
 
   function categoryRow(category: CategoryDTO, depth: number) {
     const children = categories.filter((item) => item.parentId === category.id)
@@ -988,6 +1142,35 @@ function CategoryHierarchyList({
           <CategoryActions category={category} categories={categories} />
         </div>
 
+        {draggedCategory && canMoveInside(category) ? (
+          <button
+            type="button"
+            className="mt-3 w-full rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2 text-xs font-medium text-primary transition hover:border-primary hover:bg-primary/10"
+            onDragEnter={(event) => event.stopPropagation()}
+            onDragOver={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              event.dataTransfer.dropEffect = "move"
+            }}
+            onDrop={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              if (category.id !== undefined) {
+                void onMoveToParent(
+                  draggedCategory,
+                  category.id,
+                  children.length
+                )
+              }
+              setDraggedCategory(null)
+            }}
+          >
+            {t("category.dropInside", {
+              name: category.name || t("category.unnamed"),
+            })}
+          </button>
+        ) : null}
+
         {children.length ? (
           <div className="mt-3 border-l-2 border-primary/20 pl-4">
             <SortableList
@@ -995,6 +1178,7 @@ function CategoryHierarchyList({
               getId={(item) => item.id ?? `child-${item.name}`}
               disabled={disabled}
               moveLabel={t("category.dragToReorder")}
+              onDragStateChange={setDraggedCategory}
               onReorder={onReorder}
               renderItem={(item) => categoryRow(item, depth + 1)}
             />
@@ -1022,11 +1206,32 @@ function CategoryHierarchyList({
           {categories.length} {t("category.categoriesCount")}
         </span>
       </div>
+      {draggedCategory && draggedCategory.parentId != null ? (
+        <button
+          type="button"
+          className="mb-3 w-full rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2 text-xs font-medium text-primary transition hover:border-primary hover:bg-primary/10"
+          onDragEnter={(event) => event.stopPropagation()}
+          onDragOver={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            event.dataTransfer.dropEffect = "move"
+          }}
+          onDrop={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void onMoveToParent(draggedCategory, undefined, roots.length)
+            setDraggedCategory(null)
+          }}
+        >
+          {t("category.moveToRoot")}
+        </button>
+      ) : null}
       <SortableList
         items={roots}
         getId={(item) => item.id ?? `root-${item.name}`}
         disabled={disabled}
         moveLabel={t("category.dragToReorder")}
+        onDragStateChange={setDraggedCategory}
         onReorder={onReorder}
         renderItem={(item) => categoryRow(item, 0)}
       />
