@@ -17,7 +17,6 @@ import { z } from "zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { formatPhoneNumberIntl } from "react-phone-number-input"
 
 import {
   type BranchDTO,
@@ -36,6 +35,7 @@ import {
   useCreate4,
   useDelete4,
   useGetAll4,
+  useMove,
   useUpdate5,
 } from "@/lib/api/generated/category/category"
 import {
@@ -56,10 +56,13 @@ import {
   useGetAll2 as useGetProducts,
 } from "@/lib/api/generated/product/product"
 import { clearAuthToken } from "@/lib/auth-client"
+import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
+import { OrganizationForm } from "../../_components/organization-form"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
+import { BulkCategoryForm } from "./bulk-category-form"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarImage } from "@workspace/ui/components/avatar"
 import {
@@ -96,7 +99,10 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from "@workspace/ui/components/data-table"
-import { SortableList } from "@workspace/ui/components/sortable-list"
+import {
+  SortableList,
+  type SortableListMovement,
+} from "@workspace/ui/components/sortable-list"
 
 const ROOT_CATEGORY = "__root_category__"
 
@@ -185,6 +191,13 @@ function readImageAttachmentId(category: CategoryDTO) {
   return Number.isSafeInteger(imageId) ? imageId : undefined
 }
 
+function compareCategoryOrder(a: CategoryDTO, b: CategoryDTO) {
+  return (
+    (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+    (a.name ?? "").localeCompare(b.name ?? "")
+  )
+}
+
 export function OrganizationCategoriesPage({
   language,
   organizationId,
@@ -227,10 +240,12 @@ export function OrganizationCategoriesPage({
     "users" | "categories" | "branches" | "products"
   >("users")
   const [createOpen, setCreateOpen] = useState(false)
+  const [bulkCreateOpen, setBulkCreateOpen] = useState(false)
+  const [editOrganizationOpen, setEditOrganizationOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [createBranchOpen, setCreateBranchOpen] = useState(false)
   const [orderedCategories, setOrderedCategories] = useState<CategoryDTO[]>([])
-  const reorderCategory = useUpdate5()
+  const moveCategory = useMove()
 
   useEffect(() => {
     if (!meQuery.isError) return
@@ -254,59 +269,47 @@ export function OrganizationCategoriesPage({
   )
 
   useEffect(() => {
-    setOrderedCategories(
-      [...categories].sort(
-        (a, b) =>
-          (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
-          (a.name ?? "").localeCompare(b.name ?? "")
-      )
-    )
+    setOrderedCategories([...categories].sort(compareCategoryOrder))
   }, [categories])
 
-  async function reorderCategorySiblings(items: CategoryDTO[]) {
+  async function reorderCategorySiblings(
+    items: CategoryDTO[],
+    movement: SortableListMovement<CategoryDTO>
+  ) {
+    const movedCategory = movement.item
+    if (movedCategory.id === undefined) return
+
+    const previousCategories = orderedCategories
     const nextOrder = new Map(
       items.flatMap((item, index) =>
         item.id === undefined ? [] : [[item.id, index] as const]
       )
     )
     setOrderedCategories((current) =>
-      current.map((item) =>
-        item.id !== undefined && nextOrder.has(item.id)
-          ? { ...item, sortOrder: nextOrder.get(item.id) }
-          : item
-      )
+      current
+        .map((item) =>
+          item.id !== undefined && nextOrder.has(item.id)
+            ? { ...item, sortOrder: nextOrder.get(item.id) }
+            : item
+        )
+        .sort(compareCategoryOrder)
     )
 
     try {
-      await Promise.all(
-        items.flatMap((item, sortOrder) =>
-          item.id === undefined
-            ? []
-            : [
-                reorderCategory.mutateAsync({
-                  id: item.id,
-                  data: {
-                    name: item.name ?? "",
-                    nameRu: item.nameRu,
-                    nameEng: item.nameEng,
-                    descriptionUz: item.descriptionUz,
-                    descriptionRu: item.descriptionRu,
-                    descriptionEng: item.descriptionEng,
-                    sizeType: item.sizeType ?? "LETTER",
-                    organizationId,
-                    parentId: item.parentId,
-                    imageId: readImageAttachmentId(item),
-                    sortOrder,
-                    active: item.active ?? true,
-                  },
-                }),
-              ]
-        )
-      )
+      await moveCategory.mutateAsync({
+        id: movedCategory.id,
+        data: {
+          ...(movedCategory.parentId != null
+            ? { parentId: movedCategory.parentId }
+            : {}),
+          sortOrder: movement.toIndex,
+        },
+      })
       await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.success(t("category.orderSaved"))
     } catch {
-      setOrderedCategories(categories)
+      setOrderedCategories(previousCategories)
+      void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.error(t("category.orderFailed"))
     }
   }
@@ -344,7 +347,7 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) => {
           const phone = row.getValue<string>("phone")
-          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+          return phone ? formatPhoneNumberInternal(phone) : "—"
         },
       },
       {
@@ -475,7 +478,7 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) => {
           const phone = row.getValue<string>("phone")
-          return phone ? formatPhoneNumberIntl(phone) || phone : "—"
+          return phone ? formatPhoneNumberInternal(phone) : "—"
         },
       },
       {
@@ -660,17 +663,49 @@ export function OrganizationCategoriesPage({
                   {t("dashboard.organizations")}
                 </p>
                 {organizationQuery.data ? (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                      organizationQuery.data.active === false
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-emerald-500/10 text-emerald-600"
-                    }`}
-                  >
-                    {organizationQuery.data.active === false
-                      ? t("organization.inactive")
-                      : t("organization.active")}
-                  </span>
+                  <>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        organizationQuery.data.active === false
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-emerald-500/10 text-emerald-600"
+                      }`}
+                    >
+                      {organizationQuery.data.active === false
+                        ? t("organization.inactive")
+                        : t("organization.active")}
+                    </span>
+                    <Dialog
+                      open={editOrganizationOpen}
+                      onOpenChange={setEditOrganizationOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 rounded-full px-3"
+                        >
+                          <HugeiconsIcon
+                            icon={PencilEdit02Icon}
+                            className="size-4"
+                          />
+                          {t("organization.edit")}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-xl">
+                        <DialogHeader>
+                          <DialogTitle>{t("organization.edit")}</DialogTitle>
+                          <DialogDescription>
+                            {t("organization.editDescription")}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <OrganizationForm
+                          organization={organizationQuery.data}
+                          onComplete={() => setEditOrganizationOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </>
                 ) : null}
               </div>
               <h1 className="mt-1 truncate text-3xl font-semibold tracking-tight">
@@ -703,24 +738,47 @@ export function OrganizationCategoriesPage({
               </DialogContent>
             </Dialog>
           ) : activeTab === "categories" ? (
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger asChild>
-                <Button>{t("category.new")}</Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
-                <DialogHeader>
-                  <DialogTitle>{t("category.new")}</DialogTitle>
-                  <DialogDescription>
-                    {t("category.createDescription")}
-                  </DialogDescription>
-                </DialogHeader>
-                <CategoryForm
-                  organizationId={organizationId}
-                  categories={categories}
-                  onComplete={() => setCreateOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex flex-wrap gap-2">
+              <Dialog open={bulkCreateOpen} onOpenChange={setBulkCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <HugeiconsIcon icon={Add01Icon} />
+                    {t("category.bulkNew")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
+                  <DialogHeader>
+                    <DialogTitle>{t("category.bulkTitle")}</DialogTitle>
+                    <DialogDescription>
+                      {t("category.bulkDescription")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <BulkCategoryForm
+                    organizationId={organizationId}
+                    categories={categories}
+                    onComplete={() => setBulkCreateOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button>{t("category.new")}</Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[94vh] overflow-y-auto sm:max-w-[min(94vw,1000px)]">
+                  <DialogHeader>
+                    <DialogTitle>{t("category.new")}</DialogTitle>
+                    <DialogDescription>
+                      {t("category.createDescription")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CategoryForm
+                    organizationId={organizationId}
+                    categories={categories}
+                    onComplete={() => setCreateOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           ) : activeTab === "branches" ? (
             <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}>
               <DialogTrigger asChild>
@@ -750,7 +808,7 @@ export function OrganizationCategoriesPage({
           )}
         </header>
         {organizationQuery.data ? (
-          <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <OrganizationInfo
               label={t("organization.contactPerson")}
               value={organizationQuery.data.contactPerson}
@@ -761,9 +819,9 @@ export function OrganizationCategoriesPage({
                 [
                   organizationQuery.data.contactEmail,
                   organizationQuery.data.contactPhone
-                    ? formatPhoneNumberIntl(
+                    ? formatPhoneNumberInternal(
                         organizationQuery.data.contactPhone
-                      ) || organizationQuery.data.contactPhone
+                      )
                     : undefined,
                 ]
                   .filter(Boolean)
@@ -774,6 +832,22 @@ export function OrganizationCategoriesPage({
             <OrganizationInfo
               label={t("organization.address")}
               value={organizationQuery.data.address}
+            />
+            <OrganizationInfo
+              label={t("organization.latitude")}
+              value={
+                typeof organizationQuery.data.latitude === "number"
+                  ? organizationQuery.data.latitude.toFixed(6)
+                  : undefined
+              }
+            />
+            <OrganizationInfo
+              label={t("organization.longitude")}
+              value={
+                typeof organizationQuery.data.longitude === "number"
+                  ? organizationQuery.data.longitude.toFixed(6)
+                  : undefined
+              }
             />
           </section>
         ) : null}
@@ -818,7 +892,7 @@ export function OrganizationCategoriesPage({
           ) : (
             <CategoryHierarchyList
               categories={orderedCategories}
-              disabled={reorderCategory.isPending}
+              disabled={moveCategory.isPending}
               onReorder={reorderCategorySiblings}
             />
           )}
@@ -869,7 +943,10 @@ function CategoryHierarchyList({
 }: {
   categories: CategoryDTO[]
   disabled: boolean
-  onReorder: (items: CategoryDTO[]) => void | Promise<void>
+  onReorder: (
+    items: CategoryDTO[],
+    movement: SortableListMovement<CategoryDTO>
+  ) => void | Promise<void>
 }) {
   const { t } = useTranslation()
   const roots = categories.filter((category) => category.parentId == null)
@@ -1141,7 +1218,7 @@ function ProductDetailsPreview({
           <h2 className="mt-3 text-4xl font-bold tracking-tight">
             {name || "—"}
           </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm font-medium text-primary">
             ★ {product.ratingAvg?.toFixed(1) ?? "0.0"} ·{" "}
             {product.ratingCount ?? 0}
           </p>

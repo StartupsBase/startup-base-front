@@ -6,11 +6,20 @@ import { HugeiconsIcon } from "@hugeicons/react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+export type SortableListMovement<T> = {
+  item: T
+  fromIndex: number
+  toIndex: number
+}
+
 type SortableListProps<T> = {
   items: T[]
   getId: (item: T) => string | number
   renderItem: (item: T, index: number) => React.ReactNode
-  onReorder: (items: T[]) => void | Promise<void>
+  onReorder: (
+    items: T[],
+    movement: SortableListMovement<T>
+  ) => void | Promise<void>
   disabled?: boolean
   className?: string
   itemClassName?: string
@@ -39,7 +48,7 @@ export function SortableList<T>({
     const [moved] = reordered.splice(from, 1)
     if (!moved) return
     reordered.splice(to, 0, moved)
-    void onReorder(reordered)
+    void onReorder(reordered, { item: moved, fromIndex: from, toIndex: to })
   }
 
   function moveByKeyboard(index: number, direction: -1 | 1) {
@@ -49,7 +58,11 @@ export function SortableList<T>({
     const [moved] = reordered.splice(index, 1)
     if (!moved) return
     reordered.splice(target, 0, moved)
-    void onReorder(reordered)
+    void onReorder(reordered, {
+      item: moved,
+      fromIndex: index,
+      toIndex: target,
+    })
   }
 
   return (

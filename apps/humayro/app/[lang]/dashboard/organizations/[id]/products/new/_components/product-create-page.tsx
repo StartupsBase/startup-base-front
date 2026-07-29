@@ -41,6 +41,7 @@ export function ProductCreatePage({
       <ProductForm
         organizationId={organizationId}
         onComplete={() => router.push(organizationHref)}
+        onCancel={() => router.push(organizationHref)}
       />
     </main>
   )

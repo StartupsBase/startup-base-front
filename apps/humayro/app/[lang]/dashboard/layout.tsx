@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { DashboardShell } from "./_components/dashboard-shell"
 import { isLanguage } from "@/i18n/config"
+import { requireAuthenticatedUser } from "@/lib/dashboard-auth"
 
 export const metadata: Metadata = {
   robots: {
@@ -26,5 +27,11 @@ export default async function DashboardLayout({
     notFound()
   }
 
-  return <DashboardShell language={lang}>{children}</DashboardShell>
+  const user = await requireAuthenticatedUser(lang)
+
+  return (
+    <DashboardShell language={lang} initialUser={user}>
+      {children}
+    </DashboardShell>
+  )
 }

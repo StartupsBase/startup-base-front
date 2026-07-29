@@ -7,14 +7,32 @@
  */
 
 export interface CheckoutDTO {
-  /** @minLength 1 */
-  recipientName: string;
+  recipientName?: string;
+  recipientFirstName?: string;
+  recipientLastName?: string;
   /**
      * @minLength 1
      * @pattern ^\+998\d{9}$
      */
   recipientPhone: string;
-  /** @minLength 1 */
-  deliveryAddress: string;
+  deliveryAddress?: string;
+  deliveryCity?: string;
+  deliveryDistrict?: string;
+  street?: string;
+  houseNumber?: string;
+  apartmentNumber?: string;
+  entrance?: string;
+  floor?: string;
+  /**
+     * @minimum -90
+     * @maximum 90
+     */
+  latitude?: number;
+  /**
+     * @minimum -180
+     * @maximum 180
+     */
+  longitude?: number;
+  addressComment?: string;
   note?: string;
 }

@@ -122,6 +122,7 @@ export * from './orderDTO';
 export * from './orderDTOStatus';
 export * from './orderInfo';
 export * from './orderItemDTO';
+export * from './orderLocationUpdateDTO';
 export * from './organizationCreateDTO';
 export * from './organizationDTO';
 export * from './organizationUpdateDTO';

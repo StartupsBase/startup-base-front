@@ -265,7 +265,7 @@ export function RatingInput({
           </span>
         ))}
       </div>
-      <output className="min-w-12 rounded-full bg-amber-400/15 px-2.5 py-1 text-center text-sm font-bold text-amber-600 dark:text-amber-300">
+      <output className="min-w-12 rounded-full bg-primary/10 px-2.5 py-1 text-center text-sm font-bold text-primary">
         {value.toFixed(1)}
       </output>
     </div>
@@ -280,7 +280,7 @@ function StarGlyph({ className, fill }: { className?: string; fill: number }) {
     >
       <svg
         viewBox="0 0 24 24"
-        className="absolute inset-0 size-full fill-muted stroke-muted-foreground/25"
+        className="absolute inset-0 size-full fill-primary/10 stroke-primary/25"
       >
         <path d="m12 2.7 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 16.9l-5.56 2.92 1.06-6.2L3 9.23l6.22-.9L12 2.7Z" />
       </svg>
@@ -290,7 +290,7 @@ function StarGlyph({ className, fill }: { className?: string; fill: number }) {
       >
         <svg
           viewBox="0 0 24 24"
-          className="absolute inset-0 size-full fill-amber-400 stroke-amber-500"
+          className="absolute inset-0 size-full fill-primary stroke-primary"
         >
           <path d="m12 2.7 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 16.9l-5.56 2.92 1.06-6.2L3 9.23l6.22-.9L12 2.7Z" />
         </svg>

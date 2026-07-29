@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { Dashboard } from "./_components/dashboard"
 import { isLanguage } from "@/i18n/config"
+import { requireDashboardPageAccess } from "@/lib/dashboard-auth"
 import { createTranslatedPageMetadata } from "@/lib/seo"
 
 export async function generateMetadata({
@@ -28,6 +29,8 @@ export default async function DashboardPage({
   if (!isLanguage(lang)) {
     notFound()
   }
+
+  await requireDashboardPageAccess({ language: lang, page: "dashboard" })
 
   return <Dashboard language={lang} />
 }

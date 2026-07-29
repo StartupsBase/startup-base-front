@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { OrganizationCategoriesPage } from "./_components/organization-categories-page"
 import { defaultLanguage, isLanguage } from "@/i18n/config"
+import { requireDashboardPageAccess } from "@/lib/dashboard-auth"
 import { createTranslatedPageMetadata } from "@/lib/seo"
 
 export async function generateMetadata({
@@ -33,6 +34,12 @@ export default async function OrganizationDetailsPage({
   ) {
     notFound()
   }
+
+  await requireDashboardPageAccess({
+    language: lang,
+    organizationId,
+    page: "organization",
+  })
 
   return (
     <OrganizationCategoriesPage
