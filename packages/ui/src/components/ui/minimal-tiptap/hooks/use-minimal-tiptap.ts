@@ -75,7 +75,7 @@ const createExtensions = ({
     // underline
     // trailingNode
   }),
-  
+
   Image.configure({
     allowedMimeTypes: ["image/*"],
     maxFileSize: 5 * 1024 * 1024,
@@ -153,29 +153,31 @@ const createExtensions = ({
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
   // Add MarkdownPaste extension when output is markdown
-  ...(output === "markdown" ? [
-    // Markdown with GFM support for tables, task lists, etc.
-    Markdown.configure({
-      markedOptions: {
-        gfm: true,
-      },
-    }),
-    // Task lists (checkboxes)
-    TaskList.configure({
-      HTMLAttributes: { class: "task-list-node" },
-    }),
-    TaskItem.configure({
-      nested: true,
-    }),
-    // Tables
-    TableKit.configure({
-      table: {
-        resizable: true,
-        HTMLAttributes: { class: "table-node" },
-      },
-    }),
-    MarkdownPaste
-  ] : []),
+  ...(output === "markdown"
+    ? [
+        // Markdown with GFM support for tables, task lists, etc.
+        Markdown.configure({
+          markedOptions: {
+            gfm: true,
+          },
+        }),
+        // Task lists (checkboxes)
+        TaskList.configure({
+          HTMLAttributes: { class: "task-list-node" },
+        }),
+        TaskItem.configure({
+          nested: true,
+        }),
+        // Tables
+        TableKit.configure({
+          table: {
+            resizable: true,
+            HTMLAttributes: { class: "table-node" },
+          },
+        }),
+        MarkdownPaste,
+      ]
+    : []),
 ]
 
 async function uploadAndInsertImages(
@@ -224,6 +226,7 @@ export const useMinimalTiptapEditor = ({
   onUpdate,
   onBlur,
   uploader,
+  editorProps,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   const throttledSetValue = useThrottle(
@@ -256,11 +259,24 @@ export const useMinimalTiptapEditor = ({
     immediatelyRender: false,
     extensions: createExtensions({ placeholder, uploader, output }),
     editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autoUpperCase: "off",
-        class: cn("focus:outline-hidden", editorClassName),
+      ...editorProps,
+      attributes: (state) => {
+        const attributes =
+          typeof editorProps?.attributes === "function"
+            ? editorProps.attributes(state)
+            : editorProps?.attributes
+
+        return {
+          ...attributes,
+          autocomplete: attributes?.autocomplete ?? "off",
+          autocorrect: attributes?.autocorrect ?? "off",
+          autoUpperCase: attributes?.autoUpperCase ?? "off",
+          class: cn(
+            "focus:outline-hidden",
+            editorClassName,
+            attributes?.class
+          ),
+        }
       },
     },
     onUpdate: ({ editor }) => handleUpdate(editor),
