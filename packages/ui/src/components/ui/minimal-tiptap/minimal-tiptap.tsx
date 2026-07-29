@@ -26,12 +26,12 @@ export interface MinimalTiptapProps extends Omit<
   onChange?: (value: Content) => void
   className?: string
   editorContentClassName?: string
+  showToolbar?: boolean
 }
 
 const Toolbar = ({ editor }: { editor: Editor }) => (
-  <TooltipProvider>
-    <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
-      <div className="flex w-max items-center gap-px">
+  <div className="flex h-12 shrink-0 overflow-x-auto border-b border-border p-2">
+    <div className="flex w-max items-center gap-px">
       <SectionOne editor={editor} activeLevels={[1, 2, 3, 4, 5, 6]} />
 
       <Separator orientation="vertical" className="mx-2" />
@@ -68,9 +68,8 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
         activeActions={["codeBlock", "blockquote", "horizontalRule"]}
         mainActionCount={0}
       />
-      </div>
     </div>
-  </TooltipProvider>
+  </div>
 )
 
 export const MinimalTiptapEditor = ({
@@ -78,6 +77,7 @@ export const MinimalTiptapEditor = ({
   onChange,
   className,
   editorContentClassName,
+  showToolbar = true,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
@@ -96,6 +96,7 @@ export const MinimalTiptapEditor = ({
         editor={editor}
         className={className}
         editorContentClassName={editorContentClassName}
+        showToolbar={showToolbar}
       />
     </EditorContext.Provider>
   )
@@ -109,6 +110,7 @@ export const MainMinimalTiptapEditor = ({
   editor: providedEditor,
   className,
   editorContentClassName,
+  showToolbar = true,
 }: MinimalTiptapProps & { editor: Editor }) => {
   const { editor } = useTiptapEditor(providedEditor)
 
@@ -117,21 +119,23 @@ export const MainMinimalTiptapEditor = ({
   }
 
   return (
-    <MeasuredContainer
-      as="div"
-      name="editor"
-      className={cn(
-        "border-input min-data-[orientation=vertical]:h-72 flex h-auto w-full flex-col rounded-md border shadow-xs",
-        "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        className
-      )}
-    >
-      <Toolbar editor={editor} />
-      <EditorContent
-        editor={editor}
-        className={cn("minimal-tiptap-editor", editorContentClassName)}
-      />
-      <LinkBubbleMenu editor={editor} />
-    </MeasuredContainer>
+    <TooltipProvider>
+      <MeasuredContainer
+        as="div"
+        name="editor"
+        className={cn(
+          "min-data-[orientation=vertical]:h-72 flex h-auto w-full flex-col rounded-md border border-input shadow-xs",
+          "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+          className
+        )}
+      >
+        {showToolbar ? <Toolbar editor={editor} /> : null}
+        <EditorContent
+          editor={editor}
+          className={cn("minimal-tiptap-editor", editorContentClassName)}
+        />
+        <LinkBubbleMenu editor={editor} />
+      </MeasuredContainer>
+    </TooltipProvider>
   )
 }

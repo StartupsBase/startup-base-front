@@ -8,6 +8,7 @@ import {
   useGetAll2,
 } from "@/lib/api/generated/product/product"
 import { useGetAll1 } from "@/lib/api/generated/size/size"
+import type { CategoryDTO } from "@/lib/api/model/categoryDTO"
 import type { ColorDTO } from "@/lib/api/model/colorDTO"
 import type { SizeDTO } from "@/lib/api/model/sizeDTO"
 import type { Language } from "@/i18n/config"
@@ -17,6 +18,7 @@ import {
   type CatalogSort,
 } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
+import { Sheet, SheetContent, SheetTitle } from "@workspace/ui/components/sheet"
 import { Slider } from "@workspace/ui/components/slider"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
@@ -73,6 +75,7 @@ const catalogFilterCopy = {
     priceRange: "Диапазон цен",
     priceFrom: "От",
     priceTo: "До",
+    subcategories: "Подкатегории",
     colors: "Цвет",
     sizes: "Размер",
     showMore: "Ещё",
@@ -87,6 +90,7 @@ const catalogFilterCopy = {
     priceRange: "Narx oralig‘i",
     priceFrom: "Dan",
     priceTo: "Gacha",
+    subcategories: "Ichki turkumlar",
     colors: "Rang",
     sizes: "O‘lcham",
     showMore: "Yana",
@@ -128,6 +132,8 @@ export function CatalogSection({
   const [colorId, setColorId] = useState<number | null>(null)
   const [sizeId, setSizeId] = useState<number | null>(null)
   const [page, setPage] = useState(0)
+  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false)
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const categoriesQuery = useGetAll4(
     { active: true },
@@ -264,6 +270,9 @@ export function CatalogSection({
     setPriceRange(initialRange)
     setColorId(null)
     setSizeId(null)
+    if (selectedCategory?.parentId != null) {
+      setCategoryId(selectedCategory.parentId)
+    }
     setPage(0)
   }
 
@@ -291,7 +300,10 @@ export function CatalogSection({
       )}
     >
       <div
-        className={cn("mx-auto", isProductsPage ? "max-w-8xl" : "max-w-7xl")}
+        className={cn(
+          "mx-auto",
+          isProductsPage ? "max-w-[96rem]" : "max-w-7xl"
+        )}
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
@@ -306,118 +318,112 @@ export function CatalogSection({
             </p>
           </div>
 
-          <Select
-            value={sort}
-            onValueChange={(value) => {
-              setSort(value as CatalogSort)
-              setPage(0)
-            }}
-          >
-            <SelectTrigger className="h-11 min-w-48 rounded-2xl bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" align="end">
-              {(Object.keys(sortLabels) as CatalogSort[]).map((value) => (
-                <SelectItem key={value} value={value}>
-                  {sortLabels[value]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex w-full items-center gap-2 lg:w-auto">
+            <Select
+              value={sort}
+              onValueChange={(value) => {
+                setSort(value as CatalogSort)
+                setPage(0)
+              }}
+            >
+              <SelectTrigger className="h-11 min-w-0 flex-1 rounded-2xl bg-background sm:min-w-48 lg:flex-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper" align="end">
+                {(Object.keys(sortLabels) as CatalogSort[]).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {sortLabels[value]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="flex h-11 shrink-0 rounded-2xl lg:hidden"
+              aria-expanded={mobileFiltersOpen}
+              onClick={() => setMobileFiltersOpen(true)}
+            >
+              {catalogFilterCopy[language].filters}
+            </Button>
+          </div>
         </div>
 
-        <div className="mt-9 flex gap-3 overflow-x-auto border-b pb-4">
-          <button
-            type="button"
-            className={cn(
-              "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-              categoryId == null
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background hover:border-primary/50"
-            )}
-            onClick={() => selectCategory(null)}
-          >
-            {text.allCategories}
-          </button>
-          {parentCategories.map((category) => {
-            if (category.id == null) return null
-            const name =
-              language === "ru"
-                ? category.nameRu || category.name || category.nameEng
-                : category.name || category.nameRu || category.nameEng
+        <div className="mt-9 flex items-center gap-3 border-b pb-4">
+          <div className="flex min-w-0 flex-1 scrollbar-none gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+            <button
+              type="button"
+              className={cn(
+                "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                categoryId == null
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:border-primary/50"
+              )}
+              onClick={() => selectCategory(null)}
+            >
+              {text.allCategories}
+            </button>
+            {parentCategories.map((category) => {
+              if (category.id == null) return null
+              const name =
+                language === "ru"
+                  ? category.nameRu || category.name || category.nameEng
+                  : category.name || category.nameRu || category.nameEng
 
-            return (
-              <button
-                key={category.id}
-                type="button"
-                className={cn(
-                  "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                  activeParentId === category.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background hover:border-primary/50"
-                )}
-                onClick={() => selectCategory(category.id ?? null)}
-              >
-                {category.imageUrl ? (
-                  <img
-                    src={category.imageUrl}
-                    alt=""
-                    className="mr-2 inline-block size-7 rounded-full object-cover"
-                  />
-                ) : null}
-                {name || "—"}
-              </button>
-            )
-          })}
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={cn(
+                    "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                    activeParentId === category.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background hover:border-primary/50"
+                  )}
+                  onClick={() => selectCategory(category.id ?? null)}
+                >
+                  {category.imageUrl ? (
+                    <img
+                      src={category.imageUrl}
+                      alt=""
+                      className="mr-2 inline-block size-7 rounded-full object-cover"
+                    />
+                  ) : null}
+                  {name || "—"}
+                </button>
+              )
+            })}
+          </div>
+
+          <Button
+            type="button"
+            variant={desktopFiltersOpen ? "default" : "outline"}
+            className="hidden h-11 shrink-0 rounded-full px-5 lg:inline-flex"
+            aria-expanded={desktopFiltersOpen}
+            onClick={() => setDesktopFiltersOpen((current) => !current)}
+          >
+            {catalogFilterCopy[language].filters}
+          </Button>
         </div>
       </div>
-      <div className="max-w-8xl mx-auto">
-        {isProductsPage ? (
-          <details className="mt-6 rounded-2xl border bg-card/60 p-4 shadow-sm lg:hidden">
-            <summary className="cursor-pointer list-none font-semibold marker:hidden">
-              <span className="flex items-center justify-between gap-3">
-                {pageText.mobileFilters}
-                <span
-                  aria-hidden="true"
-                  className="text-lg text-muted-foreground"
-                >
-                  +
-                </span>
-              </span>
-            </summary>
-            {childCategories.length ? (
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                {childCategories.map((category) => {
-                  if (category.id == null) return null
-                  const name =
-                    language === "ru"
-                      ? category.nameRu || category.name || category.nameEng
-                      : category.name || category.nameRu || category.nameEng
-
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      className={cn(
-                        "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
-                        categoryId === category.id
-                          ? "bg-primary/12 text-primary ring-1 ring-primary/25"
-                          : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                      onClick={() => selectCategory(category.id ?? null)}
-                    >
-                      {name || "—"}
-                    </button>
-                  )
-                })}
-              </div>
-            ) : null}
+      <div className="mx-auto max-w-[96rem]">
+        <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+          <SheetContent
+            side="right"
+            className="w-screen! max-w-none! overflow-y-auto px-4 pt-14 pb-8 sm:max-w-none! lg:hidden"
+          >
+            <SheetTitle className="sr-only">
+              {pageText.mobileFilters}
+            </SheetTitle>
             <CatalogFilters
               language={language}
+              categories={childCategories}
               colors={colors}
               sizes={sizes}
               draftPriceRange={draftPriceRange}
               appliedPriceRange={priceRange}
+              selectedCategoryId={categoryId}
               selectedColorId={colorId}
               selectedSizeId={sizeId}
               optionsLoading={
@@ -427,61 +433,42 @@ export function CatalogSection({
               }
               onDraftPriceChange={setDraftPriceRange}
               onApplyPriceRange={applyPriceRange}
+              onCategoryChange={selectCategory}
               onColorChange={toggleColor}
               onSizeChange={toggleSize}
               onReset={resetFilters}
+              className="mt-0 border-0 bg-transparent p-0 shadow-none"
             />
-          </details>
-        ) : null}
-        <div className="flex gap-10">
-          <div className="hidden lg:sticky lg:top-24 lg:block lg:min-w-52.5 lg:self-start xl:min-w-62.5">
-            {childCategories.length ? (
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                {childCategories.map((category) => {
-                  if (category.id == null) return null
-                  const name =
-                    language === "ru"
-                      ? category.nameRu || category.name || category.nameEng
-                      : category.name || category.nameRu || category.nameEng
+          </SheetContent>
+        </Sheet>
 
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      className={cn(
-                        "shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition",
-                        categoryId === category.id
-                          ? "bg-primary/12 text-primary ring-1 ring-primary/25"
-                          : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                      onClick={() => selectCategory(category.id ?? null)}
-                    >
-                      {name || "—"}
-                    </button>
-                  )
-                })}
-              </div>
-            ) : null}
-            <CatalogFilters
-              language={language}
-              colors={colors}
-              sizes={sizes}
-              draftPriceRange={draftPriceRange}
-              appliedPriceRange={priceRange}
-              selectedColorId={colorId}
-              selectedSizeId={sizeId}
-              optionsLoading={
-                colorsQuery.isPending ||
-                sizesQuery.isPending ||
-                filterProductQueries.some((query) => query.isPending)
-              }
-              onDraftPriceChange={setDraftPriceRange}
-              onApplyPriceRange={applyPriceRange}
-              onColorChange={toggleColor}
-              onSizeChange={toggleSize}
-              onReset={resetFilters}
-            />
-          </div>
+        <div className="flex justify-center gap-10">
+          {desktopFiltersOpen ? (
+            <div className="hidden lg:sticky lg:top-24 lg:block lg:min-w-52.5 lg:self-start xl:min-w-62.5">
+              <CatalogFilters
+                language={language}
+                categories={childCategories}
+                colors={colors}
+                sizes={sizes}
+                draftPriceRange={draftPriceRange}
+                appliedPriceRange={priceRange}
+                selectedCategoryId={categoryId}
+                selectedColorId={colorId}
+                selectedSizeId={sizeId}
+                optionsLoading={
+                  colorsQuery.isPending ||
+                  sizesQuery.isPending ||
+                  filterProductQueries.some((query) => query.isPending)
+                }
+                onDraftPriceChange={setDraftPriceRange}
+                onApplyPriceRange={applyPriceRange}
+                onCategoryChange={selectCategory}
+                onColorChange={toggleColor}
+                onSizeChange={toggleSize}
+                onReset={resetFilters}
+              />
+            </div>
+          ) : null}
 
           <div
             className={cn(
@@ -611,37 +598,46 @@ export function CatalogSection({
 
 type CatalogFiltersProps = {
   language: Language
+  categories: CategoryDTO[]
   colors: ColorDTO[]
   sizes: SizeDTO[]
   draftPriceRange: [number, number]
   appliedPriceRange: [number, number]
+  selectedCategoryId: number | null
   selectedColorId: number | null
   selectedSizeId: number | null
   optionsLoading: boolean
   onDraftPriceChange: (range: [number, number]) => void
   onApplyPriceRange: (range: number[]) => void
+  onCategoryChange: (id: number) => void
   onColorChange: (id: number) => void
   onSizeChange: (id: number) => void
   onReset: () => void
+  className?: string
 }
 
 function CatalogFilters({
   language,
+  categories,
   colors,
   sizes,
   draftPriceRange,
   appliedPriceRange,
+  selectedCategoryId,
   selectedColorId,
   selectedSizeId,
   optionsLoading,
   onDraftPriceChange,
   onApplyPriceRange,
+  onCategoryChange,
   onColorChange,
   onSizeChange,
   onReset,
+  className,
 }: CatalogFiltersProps) {
   const text = catalogFilterCopy[language]
   const isFiltered =
+    categories.some((category) => category.id === selectedCategoryId) ||
     appliedPriceRange[0] !== PRICE_MIN ||
     appliedPriceRange[1] !== PRICE_MAX ||
     selectedColorId != null ||
@@ -658,7 +654,12 @@ function CatalogFilters({
   }
 
   return (
-    <aside className="mt-10 rounded-2xl border bg-card/60 p-4 shadow-sm">
+    <aside
+      className={cn(
+        "mt-10 rounded-2xl border bg-card/60 p-4 shadow-sm",
+        className
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-commerce text-lg font-bold">{text.filters}</h3>
         {isFiltered ? (
@@ -671,6 +672,40 @@ function CatalogFilters({
           </button>
         ) : null}
       </div>
+
+      {categories.length ? (
+        <fieldset className="mt-6 border-t pt-5">
+          <legend className="text-sm font-semibold">
+            {text.subcategories}
+          </legend>
+          <div className="mt-3 flex flex-col gap-2">
+            {categories.map((category) => {
+              if (category.id == null) return null
+              const name =
+                language === "ru"
+                  ? category.nameRu || category.name || category.nameEng
+                  : category.name || category.nameRu || category.nameEng
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  aria-pressed={selectedCategoryId === category.id}
+                  className={cn(
+                    "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
+                    selectedCategoryId === category.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => onCategoryChange(category.id!)}
+                >
+                  {name || "—"}
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+      ) : null}
 
       <fieldset className="mt-5">
         <legend className="text-sm font-semibold">{text.priceRange}</legend>
