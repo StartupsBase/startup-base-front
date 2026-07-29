@@ -2,6 +2,7 @@ import {
   Building03Icon,
   Home01Icon,
   Settings02Icon,
+  ShoppingCart02Icon,
   UserCircleIcon,
 } from "@hugeicons/core-free-icons"
 import type { IconSvgElement } from "@hugeicons/react"
@@ -13,6 +14,7 @@ export type DashboardPermission =
   | "dashboard:read"
   | "organization:manage-own"
   | "organizations:read-all"
+  | "orders:read-own"
   | "profile:read"
 
 export type DashboardNavigationItem = {
@@ -27,6 +29,7 @@ export type DashboardNavigationItem = {
 type NavigationLabels = {
   administration: string
   dashboard: string
+  orders: string
   organizations: string
   profile: string
 }
@@ -49,6 +52,7 @@ export function getDashboardNavigationItems({
   const dashboardHref = `/${language}/dashboard`
   const administrationHref = `${dashboardHref}/adminstration`
   const organizationsHref = `${dashboardHref}/organizations`
+  const ordersHref = `${dashboardHref}/orders`
   const profileHref = `${dashboardHref}/profile`
 
   const items: DashboardNavigationItem[] = []
@@ -93,14 +97,24 @@ export function getDashboardNavigationItems({
     })
   }
 
-  items.push({
-    active: pathname.startsWith(profileHref),
-    href: profileHref,
-    icon: UserCircleIcon,
-    id: "profile",
-    label: labels.profile,
-    permission: "profile:read",
-  })
+  items.push(
+    {
+      active: pathname.startsWith(ordersHref),
+      href: ordersHref,
+      icon: ShoppingCart02Icon,
+      id: "orders",
+      label: labels.orders,
+      permission: "orders:read-own",
+    },
+    {
+      active: pathname.startsWith(profileHref),
+      href: profileHref,
+      icon: UserCircleIcon,
+      id: "profile",
+      label: labels.profile,
+      permission: "profile:read",
+    }
+  )
 
   // When the API exposes granular permissions, filter `items` by `permission`
   // here. Sidebar rendering does not need to change.
