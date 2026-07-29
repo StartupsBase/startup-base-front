@@ -470,7 +470,12 @@ export function CheckoutStepper({
                   <div className="grid gap-4 rounded-2xl bg-muted/40 p-4 sm:grid-cols-2">
                     <ReviewValue
                       label={text.checkoutContactStep}
-                      value={`${values.recipientFirstName} ${values.recipientLastName}`.trim()}
+                      value={[
+                        values.recipientFirstName,
+                        values.recipientLastName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       detail={formatPhoneNumberInternal(
                         values.recipientPhone ?? ""
                       )}
@@ -670,7 +675,7 @@ function SummaryLine({
   )
 }
 
-function formatDeliveryAddress(values: CheckoutValues) {
+function formatDeliveryAddress(values: Partial<CheckoutValues>) {
   const street = [values.street, values.houseNumber].filter(Boolean).join(" ")
   const apartment = values.apartmentNumber ? `${values.apartmentNumber}` : ""
   const entrance = values.entrance ? `${values.entrance}` : ""
