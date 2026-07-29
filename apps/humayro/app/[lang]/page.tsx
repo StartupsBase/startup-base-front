@@ -90,7 +90,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             <Button
               asChild
               size="lg"
-              className="xs:px-2 xs:text-[11px] h-10 w-full min-w-0 px-1 text-[10px] sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg xl:text-xl"
+              className="xs:px-2 xs:text-[10px]! h-10 w-full min-w-0 px-1 text-[9px]! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
             >
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
@@ -98,7 +98,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               asChild
               variant="outline"
               size="lg"
-              className="xs:px-2 xs:text-[11px] h-10 w-full min-w-0 px-1 text-[10px] sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg xl:text-xl"
+              className="xs:px-2 xs:text-[10px]! h-10 w-full min-w-0 px-1 text-[9px]! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
             >
               <Link href={`/${lang}/register`}>
                 {t("home.secondaryAction")}
