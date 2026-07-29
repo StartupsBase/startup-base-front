@@ -70,6 +70,7 @@ export function DashboardShell({
     labels: {
       administration: t("administration.title"),
       dashboard: t("dashboard.home"),
+      orders: t("storefront.myOrders"),
       organizations: t("dashboard.organizations"),
       profile: t("profile.title"),
     },

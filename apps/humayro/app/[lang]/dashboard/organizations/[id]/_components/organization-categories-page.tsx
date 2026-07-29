@@ -217,7 +217,7 @@ function isCategoryDescendant(
   const visited = new Set<number>()
   let current = categoriesById.get(possibleDescendantId)
 
-  while (current?.parentId !== undefined && !visited.has(current.parentId)) {
+  while (current?.parentId != null && !visited.has(current.parentId)) {
     if (current.parentId === ancestorId) return true
     visited.add(current.parentId)
     current = categoriesById.get(current.parentId)
@@ -706,11 +706,11 @@ export function OrganizationCategoriesPage({
           String(row.original.discountedPrice ?? row.original.basePrice ?? "—"),
       },
       {
-        accessorKey: "totalStock",
+        accessorKey: "amount",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.stock")} />
         ),
-        cell: ({ row }) => String(row.original.totalStock ?? 0),
+        cell: ({ row }) => String(row.original.amount ?? 0),
       },
       {
         id: "status",
@@ -1183,9 +1183,7 @@ function CategoryHierarchyList({
   function openMoveDialog(category: CategoryDTO) {
     setMoveDialogCategory(category)
     setDestinationParent(
-      category.parentId === undefined
-        ? ROOT_CATEGORY
-        : category.parentId.toString()
+      category.parentId == null ? ROOT_CATEGORY : category.parentId.toString()
     )
     setDestinationPosition("last")
   }
@@ -1195,7 +1193,7 @@ function CategoryHierarchyList({
     const visited = new Set<number>()
     let parentId = category.parentId
 
-    while (parentId !== undefined && !visited.has(parentId)) {
+    while (parentId != null && !visited.has(parentId)) {
       visited.add(parentId)
       const parent = categories.find((item) => item.id === parentId)
       if (!parent) break
@@ -1276,11 +1274,12 @@ function CategoryHierarchyList({
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-1">
+          <div className="grid w-full grid-cols-[2.75rem_2.75rem_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-1">
             <Button
               type="button"
               variant="outline"
               size="icon-sm"
+              className="size-11 sm:size-8"
               disabled={disabled || siblingIndex === 0}
               title={t("category.moveUp")}
               aria-label={t("category.moveUp")}
@@ -1294,6 +1293,7 @@ function CategoryHierarchyList({
               type="button"
               variant="outline"
               size="icon-sm"
+              className="size-11 sm:size-8"
               disabled={disabled || siblingIndex === siblings.length - 1}
               title={t("category.moveDown")}
               aria-label={t("category.moveDown")}
@@ -1307,12 +1307,15 @@ function CategoryHierarchyList({
               type="button"
               variant="outline"
               size="sm"
+              className="h-11 w-full px-3 sm:h-8 sm:w-auto"
               disabled={disabled}
               onClick={() => openMoveDialog(category)}
             >
               {t("category.moveCategory")}
             </Button>
-            <CategoryActions category={category} categories={categories} />
+            <div className="col-span-3 flex justify-end sm:col-auto">
+              <CategoryActions category={category} categories={categories} />
+            </div>
           </div>
         </div>
 
@@ -1550,7 +1553,7 @@ function ProductActions({
   }
 
   return (
-    <div className="flex justify-end gap-1">
+    <div className="grid grid-cols-3 gap-2 sm:flex sm:justify-end sm:gap-1">
       {product.id !== undefined ? (
         <Dialog>
           <DialogTrigger asChild>
@@ -1989,7 +1992,7 @@ function CategoryForm({
       for (const item of categories) {
         if (
           item.id !== undefined &&
-          item.parentId !== undefined &&
+          item.parentId != null &&
           excluded.has(item.parentId) &&
           !excluded.has(item.id)
         ) {
@@ -2337,7 +2340,12 @@ function CategoryActions({
       {category.id !== undefined ? (
         <Dialog open={childOpen} onOpenChange={setChildOpen}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" title={t("category.addChild")}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 sm:size-9"
+              title={t("category.addChild")}
+            >
               <HugeiconsIcon icon={Add01Icon} className="size-4" />
               <span className="sr-only">{t("category.addChild")}</span>
             </Button>
@@ -2363,7 +2371,7 @@ function CategoryActions({
           <Button
             variant="ghost"
             size="sm"
-            className="size-10 p-0 lg:h-8 lg:w-auto lg:px-3"
+            className="size-11 p-0 sm:size-9 lg:h-8 lg:w-auto lg:px-3"
             title={t("category.edit")}
             aria-label={t("category.edit")}
           >
@@ -2392,7 +2400,7 @@ function CategoryActions({
           <Button
             variant="ghost"
             size="sm"
-            className="size-10 p-0 text-destructive hover:text-destructive lg:h-8 lg:w-auto lg:px-3"
+            className="size-11 p-0 text-destructive hover:text-destructive sm:size-9 lg:h-8 lg:w-auto lg:px-3"
             title={t("category.delete")}
             aria-label={t("category.delete")}
           >

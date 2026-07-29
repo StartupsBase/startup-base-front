@@ -153,7 +153,7 @@ export function ProfileForm({ language }: { language: string }) {
   const navItems = [
     { label: t("profile.myData"), active: true },
     { label: t("profile.myAddress") },
-    { label: t("profile.orders"), href: `/${language}/orders` },
+    { label: t("profile.orders"), href: `/${language}/dashboard/orders` },
     { label: t("profile.subscriptions") },
     { label: t("profile.notifications") },
     { label: t("profile.settings") },

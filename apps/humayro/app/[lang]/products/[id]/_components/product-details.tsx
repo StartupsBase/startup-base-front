@@ -28,6 +28,7 @@ import { useGuestStorefront } from "@/lib/guest-storefront"
 import { expandReviewEntries } from "@/lib/review-entries"
 import {
   formatStorefrontPrice,
+  getAvailableStock,
   getProductName,
   getProductPrice,
 } from "@/lib/storefront"
@@ -121,7 +122,7 @@ export function ProductDetails({
     selectedVariant?.effectivePrice ??
     selectedVariant?.price ??
     getProductPrice(product)
-  const selectedStock = selectedVariant?.stock ?? 0
+  const selectedStock = getAvailableStock(product, selectedVariant?.stock) ?? 0
   const isFavorite = hasToken
     ? (favoritesQuery.data ?? []).includes(productId)
     : actions.guestFavoriteIds.includes(productId)
@@ -135,7 +136,17 @@ export function ProductDetails({
     setIsAdding(true)
     try {
       if (!hasAuthToken()) {
-        guestStorefront.addToCart(productId, selectedVariant.id, quantity)
+        const added = guestStorefront.addToCart(
+          productId,
+          selectedVariant.id,
+          quantity,
+          Math.max(0, selectedVariant.stock ?? 0),
+          Math.max(0, product.amount ?? Infinity)
+        )
+        if (!added) {
+          toast.info(text.outOfStock)
+          return
+        }
       } else {
         await addItem({ variantId: selectedVariant.id, quantity })
         await queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() })
@@ -365,7 +376,8 @@ export function ProductDetails({
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {availableVariants.map((variant) => {
                     const active = variant.id === selectedVariant?.id
-                    const unavailable = (variant.stock ?? 0) <= 0
+                    const unavailable =
+                      (getAvailableStock(product, variant.stock) ?? 0) <= 0
                     return (
                       <button
                         key={variant.id}
@@ -432,7 +444,11 @@ export function ProductDetails({
                 onClick={addSelectedToCart}
               >
                 <HugeiconsIcon icon={ShoppingCart02Icon} className="size-5" />
-                {isAdding ? text.adding : text.addToCart}
+                {isAdding
+                  ? text.adding
+                  : selectedStock <= 0
+                    ? text.outOfStock
+                    : text.addToCart}
               </Button>
             </div>
 

@@ -187,17 +187,16 @@ export function UserDropdown({
             {t("profile.title")}
           </Link>
         </DropdownMenuItem>
-        {!canAccessDashboard ? (
-          <DropdownMenuItem
-            asChild
-            className="min-h-9 cursor-pointer px-2.5 text-sm"
-          >
-            <Link href={`/${language}/orders`}>
-              <HugeiconsIcon icon={ShoppingCart02Icon} />
-              {t("storefront.myOrders")}
-            </Link>
-          </DropdownMenuItem>
-        ) : (
+        <DropdownMenuItem
+          asChild
+          className="min-h-9 cursor-pointer px-2.5 text-sm"
+        >
+          <Link href={`/${language}/dashboard/orders`}>
+            <HugeiconsIcon icon={ShoppingCart02Icon} />
+            {t("storefront.myOrders")}
+          </Link>
+        </DropdownMenuItem>
+        {canAccessDashboard ? (
           <DropdownMenuItem
             asChild
             className="min-h-9 cursor-pointer px-2.5 text-sm"
@@ -213,7 +212,7 @@ export function UserDropdown({
               {t(isDashboardPath ? "home.landingAction" : "dashboard.home")}
             </Link>
           </DropdownMenuItem>
-        )}
+        ) : null}
         <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem
           onSelect={signOut}

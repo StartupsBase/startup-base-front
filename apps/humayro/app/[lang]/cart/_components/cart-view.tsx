@@ -8,7 +8,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
-import { useMemo, useState, type FormEvent, type ReactNode } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { toast } from "sonner"
 
 import { Input } from "@/components/input"
@@ -32,6 +32,7 @@ import type { ProductListDTO } from "@/lib/api/model/productListDTO"
 import { useGuestStorefront } from "@/lib/guest-storefront"
 import {
   formatStorefrontPrice,
+  getAvailableStock,
   getLoginHref,
   getProductName,
   getProductPrice,
@@ -39,25 +40,17 @@ import {
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
-import { Label } from "@workspace/ui/components/label"
 
 import { EmptyState } from "../../_components/storefront/empty-state"
 import { ProductCard } from "../../_components/storefront/product-card"
 import { useStorefrontActions } from "../../_components/storefront/use-storefront-actions"
-
-const initialCheckout: CheckoutDTO = {
-  recipientName: "",
-  recipientPhone: "+998",
-  deliveryAddress: "",
-  note: "",
-}
+import { CheckoutStepper } from "./checkout-stepper"
 
 export function CartView({ language }: { language: Language }) {
   const text = useStorefrontCopy()
   const hasToken = useHasAuthToken()
   const queryClient = useQueryClient()
   const [showCheckout, setShowCheckout] = useState(false)
-  const [checkoutData, setCheckoutData] = useState<CheckoutDTO>(initialCheckout)
   const [completedOrder, setCompletedOrder] = useState<OrderDTO | null>(null)
   const cartQuery = useGetCart({
     query: { enabled: hasToken, retry: false },
@@ -92,7 +85,6 @@ export function CartView({ language }: { language: Language }) {
     mutation: {
       onSuccess: async (order) => {
         setCompletedOrder(order)
-        setCheckoutData(initialCheckout)
         await Promise.all([
           refreshCart(),
           queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() }),
@@ -102,34 +94,9 @@ export function CartView({ language }: { language: Language }) {
     },
   })
 
-  function updateCheckout<K extends keyof CheckoutDTO>(
-    key: K,
-    value: CheckoutDTO[K]
-  ) {
-    setCheckoutData((current) => ({ ...current, [key]: value }))
-  }
-
-  function submitCheckout(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const recipientName = checkoutData.recipientName?.trim()
-    const deliveryAddress = checkoutData.deliveryAddress?.trim()
-
-    if (
-      !recipientName ||
-      !/^\+998\d{9}$/.test(checkoutData.recipientPhone) ||
-      !deliveryAddress
-    ) {
-      toast.error(text.checkoutError)
-      return
-    }
-
+  function submitCheckout(data: CheckoutDTO) {
     checkoutMutation.mutate({
-      data: {
-        ...checkoutData,
-        recipientName,
-        deliveryAddress,
-        note: checkoutData.note?.trim() || undefined,
-      },
+      data,
     })
   }
 
@@ -158,6 +125,9 @@ export function CartView({ language }: { language: Language }) {
 
   const cart = cartQuery.data
   const items = cart?.items ?? []
+  const productById = new Map(
+    (productsQuery.data?.content ?? []).map((product) => [product.id, product])
+  )
 
   if (items.length === 0 && !completedOrder) {
     return (
@@ -195,37 +165,43 @@ export function CartView({ language }: { language: Language }) {
       onClear={() => clearMutation.mutate()}
       clearPending={clearMutation.isPending}
       checkout={
-        <CheckoutForm
-          data={checkoutData}
+        <CheckoutStepper
+          items={items}
+          language={language}
+          total={cart.totalAmount ?? 0}
           pending={checkoutMutation.isPending}
           onBack={() => setShowCheckout(false)}
-          onChange={updateCheckout}
           onSubmit={submitCheckout}
         />
       }
     >
-      {items.map((item, index) => (
-        <CartItem
-          key={item.id ?? index}
-          item={item}
-          language={language}
-          isUpdating={
-            updateMutation.isPending &&
-            updateMutation.variables?.itemId === item.id
-          }
-          isRemoving={
-            removeMutation.isPending &&
-            removeMutation.variables?.itemId === item.id
-          }
-          onQuantity={(quantity) =>
-            item.id != null &&
-            updateMutation.mutate({ itemId: item.id, params: { quantity } })
-          }
-          onRemove={() =>
-            item.id != null && removeMutation.mutate({ itemId: item.id })
-          }
-        />
-      ))}
+      {items.map((item, index) => {
+        const product = productById.get(item.productId)
+        const stock = getAvailableStock(product ?? {}, item.stock) ?? item.stock
+
+        return (
+          <CartItem
+            key={item.id ?? index}
+            item={{ ...item, stock }}
+            language={language}
+            isUpdating={
+              updateMutation.isPending &&
+              updateMutation.variables?.itemId === item.id
+            }
+            isRemoving={
+              removeMutation.isPending &&
+              removeMutation.variables?.itemId === item.id
+            }
+            onQuantity={(quantity) =>
+              item.id != null &&
+              updateMutation.mutate({ itemId: item.id, params: { quantity } })
+            }
+            onRemove={() =>
+              item.id != null && removeMutation.mutate({ itemId: item.id })
+            }
+          />
+        )
+      })}
     </CartPageShell>
   )
 }
@@ -293,12 +269,18 @@ function GuestCartView({
               unitPrice: price,
               subtotal: price * item.quantity,
               quantity: item.quantity,
+              stock: getAvailableStock(product ?? {}),
             }}
             language={language}
             isUpdating={false}
             isRemoving={false}
             onQuantity={(quantity) =>
-              guest.updateCartQuantity(item.variantId, quantity)
+              guest.updateCartQuantity(
+                item.variantId,
+                quantity,
+                Infinity,
+                getAvailableStock(product ?? {}) ?? Infinity
+              )
             }
             onRemove={() => guest.removeFromCart(item.variantId)}
           />
@@ -348,34 +330,36 @@ function CartPageShell({
               {itemCount} {text.pieces}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            className="text-destructive hover:text-destructive"
-            disabled={clearPending}
-            onClick={onClear}
-          >
-            {text.clearCart}
-          </Button>
+          {!showCheckout ? (
+            <Button
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              disabled={clearPending}
+              onClick={onClear}
+            >
+              {text.clearCart}
+            </Button>
+          ) : null}
         </div>
 
-        <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <section>
-            <div className="mb-3 flex items-center gap-3 rounded-xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-xs text-orange-950 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-100">
-              <HugeiconsIcon
-                icon={DeliveryTruck01Icon}
-                className="size-5 shrink-0 text-orange-500"
-              />
-              <span className="flex-1">{text.cartDelivery}</span>
-              <span aria-hidden>×</span>
-            </div>
-            <div className="space-y-3">{children}</div>
-          </section>
+        {showCheckout ? (
+          <div className="mt-7">{checkout}</div>
+        ) : (
+          <>
+            <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <section>
+                <div className="mb-3 flex items-center gap-3 rounded-xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-xs text-orange-950 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-100">
+                  <HugeiconsIcon
+                    icon={DeliveryTruck01Icon}
+                    className="size-5 shrink-0 text-orange-500"
+                  />
+                  <span className="flex-1">{text.cartDelivery}</span>
+                  <span aria-hidden>×</span>
+                </div>
+                <div className="space-y-3">{children}</div>
+              </section>
 
-          <aside className="space-y-3 lg:sticky lg:top-24">
-            {showCheckout ? (
-              checkout
-            ) : (
-              <>
+              <aside className="space-y-3 lg:sticky lg:top-24">
                 <OrderSummary
                   language={language}
                   total={total}
@@ -383,16 +367,16 @@ function CartPageShell({
                   onCheckout={onCheckout}
                 />
                 <PromoPanel />
-              </>
-            )}
-          </aside>
-        </div>
+              </aside>
+            </div>
 
-        <Recommendations
-          language={language}
-          products={recommendations}
-          loading={productsLoading}
-        />
+            <Recommendations
+              language={language}
+              products={recommendations}
+              loading={productsLoading}
+            />
+          </>
+        )}
       </div>
     </main>
   )
@@ -485,83 +469,6 @@ function PromoPanel() {
         />
       ) : null}
     </div>
-  )
-}
-
-function CheckoutForm({
-  data,
-  pending,
-  onBack,
-  onChange,
-  onSubmit,
-}: {
-  data: CheckoutDTO
-  pending: boolean
-  onBack: () => void
-  onChange: <K extends keyof CheckoutDTO>(key: K, value: CheckoutDTO[K]) => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-}) {
-  const text = useStorefrontCopy()
-  return (
-    <form
-      className="rounded-2xl border bg-card p-5 shadow-sm"
-      onSubmit={onSubmit}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">{text.checkout}</h2>
-        <button
-          type="button"
-          className="text-xs text-muted-foreground hover:text-foreground"
-          onClick={onBack}
-        >
-          {text.backToCart}
-        </button>
-      </div>
-      <div className="mt-5 space-y-4">
-        <Field label={text.recipientName}>
-          <Input
-            required
-            value={data.recipientName}
-            onChange={(event) => onChange("recipientName", event.target.value)}
-          />
-        </Field>
-        <Field label={text.recipientPhone}>
-          <Input
-            required
-            type="tel"
-            inputMode="tel"
-            placeholder="+998901234567"
-            pattern="\+998[0-9]{9}"
-            value={data.recipientPhone}
-            onChange={(event) => onChange("recipientPhone", event.target.value)}
-          />
-        </Field>
-        <Field label={text.deliveryAddress}>
-          <Input
-            required
-            value={data.deliveryAddress}
-            onChange={(event) =>
-              onChange("deliveryAddress", event.target.value)
-            }
-          />
-        </Field>
-        <Field label={text.note}>
-          <textarea
-            rows={3}
-            value={data.note}
-            className="flex w-full resize-none rounded-xl border border-input bg-input/30 px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            onChange={(event) => onChange("note", event.target.value)}
-          />
-        </Field>
-        <Button
-          type="submit"
-          className="h-11 w-full rounded-xl font-semibold"
-          disabled={pending}
-        >
-          {pending ? text.placingOrder : text.placeOrder}
-        </Button>
-      </div>
-    </form>
   )
 }
 
@@ -696,15 +603,6 @@ function Recommendations({
   )
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      {children}
-    </div>
-  )
-}
-
 function OrderSuccess({
   order,
   language,
@@ -736,7 +634,7 @@ function OrderSuccess({
       </div>
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         <Button asChild size="lg" className="rounded-xl">
-          <Link href={`/${language}/orders`}>{text.myOrders}</Link>
+          <Link href={`/${language}/dashboard/orders`}>{text.myOrders}</Link>
         </Button>
         <Button asChild size="lg" variant="outline" className="rounded-xl">
           <Link href={`/${language}/#catalog`}>{text.popularProducts}</Link>

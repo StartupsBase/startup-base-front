@@ -17,6 +17,7 @@ type DashboardPage =
   | "dashboard"
   | "organization"
   | "organizations"
+  | "orders"
   | "profile"
 
 const getCurrentUser = cache(async () => {
@@ -56,6 +57,7 @@ export async function requireDashboardPageAccess({
   const access = getDashboardAccess(user.roles)
   const canAccess =
     page === "profile" ||
+    page === "orders" ||
     access === "all" ||
     (access === "organization" &&
       page === "organization" &&

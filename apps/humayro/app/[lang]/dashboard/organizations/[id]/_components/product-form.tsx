@@ -91,6 +91,10 @@ function createProductSchema(t: Translation) {
     basePrice: z.coerce
       .number({ error: t("product.validation.priceInvalid") })
       .nonnegative(t("product.validation.priceNonNegative")),
+    amount: z.coerce
+      .number({ error: t("product.validation.amountInvalid") })
+      .int(t("product.validation.amountInteger"))
+      .nonnegative(t("product.validation.amountNonNegative")),
     discountPercent: z.coerce
       .number({ error: t("product.validation.discountInvalid") })
       .min(0, t("product.validation.discountRange"))
@@ -126,6 +130,7 @@ const basicFields = [
   "categoryId",
   "branchId",
   "basePrice",
+  "amount",
   "discountPercent",
   "active",
 ] as const
@@ -222,6 +227,7 @@ function productValues(product?: ProductDTO): ProductInputs {
     categoryId: product?.categoryId ?? "",
     branchId: product?.branchId ?? "",
     basePrice: product?.basePrice ?? 0,
+    amount: product?.amount ?? 0,
     discountPercent: product?.discountPercent ?? 0,
     active: product?.active ?? true,
   }
@@ -581,6 +587,7 @@ export function ProductForm({
       organizationId,
       branchId: values.branchId,
       basePrice: values.basePrice,
+      amount: values.amount,
       discountPercent: values.discountPercent,
       active: values.active,
       ...(videoAttachmentId !== undefined ? { videoAttachmentId } : {}),
@@ -1030,7 +1037,7 @@ function BasicStep({
           />
         </ProductField>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <ProductField
           label={t("product.basePrice")}
           error={form.formState.errors.basePrice?.message}
@@ -1045,6 +1052,19 @@ function BasicStep({
                 onValueChange={field.onChange}
               />
             )}
+          />
+        </ProductField>
+        <ProductField
+          label={t("product.amount")}
+          error={form.formState.errors.amount?.message}
+        >
+          <Input
+            type="number"
+            min="0"
+            step="1"
+            inputMode="numeric"
+            className="tabular-nums"
+            {...form.register("amount")}
           />
         </ProductField>
         <ProductField
@@ -1672,12 +1692,7 @@ function ReviewStep({
           <div className="grid grid-cols-2 gap-3 border-t pt-5 text-sm">
             <div className="rounded-2xl bg-muted/60 p-4">
               <p className="text-muted-foreground">{t("product.stock")}</p>
-              <p className="mt-1 text-lg font-semibold">
-                {variants.reduce(
-                  (total, variant) => total + Number(variant.stock || 0),
-                  0
-                )}
-              </p>
+              <p className="mt-1 text-lg font-semibold">{values.amount}</p>
             </div>
             <div className="rounded-2xl bg-muted/60 p-4">
               <p className="text-muted-foreground">{t("product.status")}</p>
