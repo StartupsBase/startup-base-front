@@ -23,6 +23,9 @@ import type { Language } from "@/i18n/config"
 import { addItem, getGetCartQueryKey } from "@/lib/api/generated/cart/cart"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useGetByProduct } from "@/lib/api/generated/review/review"
+import type { ProductDTO } from "@/lib/api/model/productDTO"
+import type { ProductListDTO } from "@/lib/api/model/productListDTO"
+import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
 import { hasAuthToken } from "@/lib/auth-client"
 import { useGuestStorefront } from "@/lib/guest-storefront"
 import { expandReviewEntries } from "@/lib/review-entries"
@@ -34,9 +37,14 @@ import {
 } from "@/lib/storefront"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
-import type { ProductDTO } from "@/lib/api/model/productDTO"
-import type { ProductListDTO } from "@/lib/api/model/productListDTO"
-import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@workspace/ui/components/breadcrumb"
 import { Button } from "@workspace/ui/components/button"
 import {
   Popover,
@@ -47,19 +55,11 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
 import { VideoPlayer } from "@workspace/ui/components/video-player"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@workspace/ui/components/breadcrumb"
 import { cn } from "@workspace/ui/lib/utils"
 
-import { useStorefrontActions } from "../../../_components/storefront/use-storefront-actions"
-import { ProductCard } from "../../../_components/storefront/product-card"
 import { Chat } from "../../../_components/chat"
+import { ProductCard } from "../../../_components/storefront/product-card"
+import { useStorefrontActions } from "../../../_components/storefront/use-storefront-actions"
 import { ReviewStars } from "./review-card"
 import { ReviewsSection as ReviewsCarouselSection } from "./reviews-section"
 
@@ -450,12 +450,6 @@ export function ProductDetails({
                     ? text.outOfStock
                     : text.addToCart}
               </Button>
-            </div>
-
-            <div className="mt-6 grid grid-cols-3 divide-x rounded-2xl border bg-muted/20 py-4 text-center">
-              <ProductPromise title={t("productDetails.secure")} />
-              <ProductPromise title={t("productDetails.fastDelivery")} />
-              <ProductPromise title={t("productDetails.support")} />
             </div>
           </div>
         </section>

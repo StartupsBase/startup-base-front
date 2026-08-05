@@ -45,62 +45,6 @@ const PRICE_MIN = 0
 const PRICE_MAX = 10_000_000
 const PRODUCTS_PAGE_SIZE = 24
 
-const productsPageCopy = {
-  ru: {
-    eyebrow: "Каталог",
-    title: "Все товары",
-    found: "Найдено товаров: {{count}}",
-    foundFor: "По запросу «{{query}}» найдено товаров: {{count}}",
-    mobileFilters: "Фильтры и категории",
-    previous: "Назад",
-    next: "Вперёд",
-    page: "Страница {{current}} из {{total}}",
-  },
-  uz: {
-    eyebrow: "Katalog",
-    title: "Barcha mahsulotlar",
-    found: "{{count}} ta mahsulot topildi",
-    foundFor: "“{{query}}” bo‘yicha {{count}} ta mahsulot topildi",
-    mobileFilters: "Filterlar va turkumlar",
-    previous: "Oldingi",
-    next: "Keyingi",
-    page: "{{current}} / {{total}}-sahifa",
-  },
-} satisfies Record<Language, Record<string, string>>
-
-const catalogFilterCopy = {
-  ru: {
-    filters: "Фильтры",
-    clearFilters: "Сбросить",
-    priceRange: "Диапазон цен",
-    priceFrom: "От",
-    priceTo: "До",
-    subcategories: "Подкатегории",
-    colors: "Цвет",
-    sizes: "Размер",
-    showMore: "Ещё",
-    showLess: "Показать меньше",
-    unnamedColor: "Цвет без названия",
-    loadingOptions: "Загружаем варианты...",
-    noOptions: "Нет доступных вариантов",
-  },
-  uz: {
-    filters: "Filtrlar",
-    clearFilters: "Tozalash",
-    priceRange: "Narx oralig‘i",
-    priceFrom: "Dan",
-    priceTo: "Gacha",
-    subcategories: "Ichki turkumlar",
-    colors: "Rang",
-    sizes: "O‘lcham",
-    showMore: "Yana",
-    showLess: "Kamroq ko‘rsatish",
-    unnamedColor: "Nomsiz rang",
-    loadingOptions: "Variantlar yuklanmoqda...",
-    noOptions: "Mavjud variantlar yo‘q",
-  },
-} satisfies Record<Language, Record<string, string>>
-
 type CatalogSectionProps = {
   language: Language
   mode?: "homepage" | "products"
@@ -113,7 +57,6 @@ export function CatalogSection({
   searchQuery = "",
 }: CatalogSectionProps) {
   const text = useStorefrontCopy()
-  const pageText = productsPageCopy[language]
   const isProductsPage = mode === "products"
   const hasToken = useHasAuthToken()
   const categoryId = useCatalogStore((state) => state.categoryId)
@@ -246,7 +189,9 @@ export function CatalogSection({
     "price-low": text.priceLow,
     "price-high": text.priceHigh,
   }
-  const resultSummary = (searchQuery ? pageText.foundFor : pageText.found)
+  const resultSummary = (
+    searchQuery ? text.productsFoundFor : text.productsFound
+  )
     .replace("{{query}}", searchQuery)
     .replace(
       "{{count}}",
@@ -308,10 +253,10 @@ export function CatalogSection({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-bold tracking-[0.2em] text-primary capitalize">
-              {isProductsPage ? pageText.eyebrow : text.catalogEyebrow}
+              {isProductsPage ? text.productsEyebrow : text.catalogEyebrow}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">
-              {isProductsPage ? pageText.title : text.catalogTitle}
+              {isProductsPage ? text.productsTitle : text.catalogTitle}
             </h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
               {isProductsPage ? resultSummary : text.catalogDescription}
@@ -345,7 +290,7 @@ export function CatalogSection({
               aria-expanded={mobileFiltersOpen}
               onClick={() => setMobileFiltersOpen(true)}
             >
-              {catalogFilterCopy[language].filters}
+              {text.filters}
             </Button>
           </div>
         </div>
@@ -403,7 +348,7 @@ export function CatalogSection({
             aria-expanded={desktopFiltersOpen}
             onClick={() => setDesktopFiltersOpen((current) => !current)}
           >
-            {catalogFilterCopy[language].filters}
+            {text.filters}
           </Button>
         </div>
       </div>
@@ -414,7 +359,7 @@ export function CatalogSection({
             className="w-screen! max-w-none! overflow-y-auto px-4 pt-14 pb-8 sm:max-w-none! lg:hidden"
           >
             <SheetTitle className="sr-only">
-              {pageText.mobileFilters}
+              {text.mobileFilters}
             </SheetTitle>
             <CatalogFilters
               language={language}
@@ -555,7 +500,7 @@ export function CatalogSection({
             )}
             {isProductsPage && totalPages > 1 ? (
               <nav
-                aria-label={pageText.page
+                aria-label={text.paginationPage
                   .replace("{{current}}", String(page + 1))
                   .replace("{{total}}", String(totalPages))}
                 className="mt-10 flex flex-wrap items-center justify-center gap-3"
@@ -569,10 +514,10 @@ export function CatalogSection({
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >
-                  {pageText.previous}
+                  {text.previousPage}
                 </Button>
                 <span className="min-w-32 text-center text-sm font-semibold text-muted-foreground">
-                  {pageText.page
+                  {text.paginationPage
                     .replace("{{current}}", String(page + 1))
                     .replace("{{total}}", String(totalPages))}
                 </span>
@@ -585,7 +530,7 @@ export function CatalogSection({
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >
-                  {pageText.next}
+                  {text.nextPage}
                 </Button>
               </nav>
             ) : null}
@@ -635,7 +580,7 @@ function CatalogFilters({
   onReset,
   className,
 }: CatalogFiltersProps) {
-  const text = catalogFilterCopy[language]
+  const text = useStorefrontCopy()
   const isFiltered =
     categories.some((category) => category.id === selectedCategoryId) ||
     appliedPriceRange[0] !== PRICE_MIN ||
@@ -781,7 +726,7 @@ function CatalogFilters({
             <div className="mt-3 space-y-1">
               {colors.map((color) => {
                 if (color.id == null) return null
-                const name = getCatalogColorName(color, language)
+                const name = getCatalogColorName(color, language, text)
 
                 return (
                   <button
@@ -859,7 +804,26 @@ function getColorHex(hexCode?: string) {
   return /^#[\da-f]{3,8}$/i.test(normalized) ? normalized : "var(--muted)"
 }
 
-function getCatalogColorName(color: ColorDTO, language: Language) {
+type CatalogColorCopy = Pick<
+  ReturnType<typeof useStorefrontCopy>,
+  | "colorRed"
+  | "colorGreen"
+  | "colorBlue"
+  | "colorBlack"
+  | "colorWhite"
+  | "colorYellow"
+  | "colorBrown"
+  | "colorGray"
+  | "colorPink"
+  | "colorPurple"
+  | "colorKhaki"
+>
+
+function getCatalogColorName(
+  color: ColorDTO,
+  language: Language,
+  text: CatalogColorCopy
+) {
   if (language === "ru" && color.nameRu) return color.nameRu
   if (language === "uz" && color.nameUz) return color.nameUz
 
@@ -870,44 +834,46 @@ function getCatalogColorName(color: ColorDTO, language: Language) {
     .replaceAll("‘", "'")
     .replaceAll("’", "'")
 
-  const knownColors: Record<string, Record<Language, string>> = {
-    qizil: { uz: "Qizil", ru: "Красный" },
-    red: { uz: "Qizil", ru: "Красный" },
-    красный: { uz: "Qizil", ru: "Красный" },
-    yashil: { uz: "Yashil", ru: "Зелёный" },
-    green: { uz: "Yashil", ru: "Зелёный" },
-    зелёный: { uz: "Yashil", ru: "Зелёный" },
-    kok: { uz: "Ko‘k", ru: "Синий" },
-    "ko'k": { uz: "Ko‘k", ru: "Синий" },
-    blue: { uz: "Ko‘k", ru: "Синий" },
-    синий: { uz: "Ko‘k", ru: "Синий" },
-    qora: { uz: "Qora", ru: "Чёрный" },
-    black: { uz: "Qora", ru: "Чёрный" },
-    чёрный: { uz: "Qora", ru: "Чёрный" },
-    oq: { uz: "Oq", ru: "Белый" },
-    white: { uz: "Oq", ru: "Белый" },
-    белый: { uz: "Oq", ru: "Белый" },
-    sariq: { uz: "Sariq", ru: "Жёлтый" },
-    yellow: { uz: "Sariq", ru: "Жёлтый" },
-    жёлтый: { uz: "Sariq", ru: "Жёлтый" },
-    jigarrang: { uz: "Jigarrang", ru: "Коричневый" },
-    brown: { uz: "Jigarrang", ru: "Коричневый" },
-    коричневый: { uz: "Jigarrang", ru: "Коричневый" },
-    kulrang: { uz: "Kulrang", ru: "Серый" },
-    gray: { uz: "Kulrang", ru: "Серый" },
-    grey: { uz: "Kulrang", ru: "Серый" },
-    серый: { uz: "Kulrang", ru: "Серый" },
-    pushti: { uz: "Pushti", ru: "Розовый" },
-    pink: { uz: "Pushti", ru: "Розовый" },
-    розовый: { uz: "Pushti", ru: "Розовый" },
-    binafsha: { uz: "Binafsha", ru: "Фиолетовый" },
-    binafsharang: { uz: "Binafsharang", ru: "Фиолетовый" },
-    purple: { uz: "Binafsha", ru: "Фиолетовый" },
-    фиолетовый: { uz: "Binafsha", ru: "Фиолетовый" },
-    xaki: { uz: "Xaki", ru: "Хаки" },
-    khaki: { uz: "Xaki", ru: "Хаки" },
-    хаки: { uz: "Xaki", ru: "Хаки" },
+  const knownColorKeys: Record<string, keyof CatalogColorCopy> = {
+    qizil: "colorRed",
+    red: "colorRed",
+    красный: "colorRed",
+    yashil: "colorGreen",
+    green: "colorGreen",
+    зелёный: "colorGreen",
+    kok: "colorBlue",
+    "ko'k": "colorBlue",
+    blue: "colorBlue",
+    синий: "colorBlue",
+    qora: "colorBlack",
+    black: "colorBlack",
+    чёрный: "colorBlack",
+    oq: "colorWhite",
+    white: "colorWhite",
+    белый: "colorWhite",
+    sariq: "colorYellow",
+    yellow: "colorYellow",
+    жёлтый: "colorYellow",
+    jigarrang: "colorBrown",
+    brown: "colorBrown",
+    коричневый: "colorBrown",
+    kulrang: "colorGray",
+    gray: "colorGray",
+    grey: "colorGray",
+    серый: "colorGray",
+    pushti: "colorPink",
+    pink: "colorPink",
+    розовый: "colorPink",
+    binafsha: "colorPurple",
+    binafsharang: "colorPurple",
+    purple: "colorPurple",
+    фиолетовый: "colorPurple",
+    xaki: "colorKhaki",
+    khaki: "colorKhaki",
+    хаки: "colorKhaki",
   }
 
-  return knownColors[normalizedName]?.[language] || fallbackName
+  const colorKey = knownColorKeys[normalizedName]
+
+  return colorKey ? text[colorKey] : fallbackName
 }
