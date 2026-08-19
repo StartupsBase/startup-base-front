@@ -13,6 +13,7 @@ export const seoPages = [
   "cart",
   "favourites",
   "orders",
+  "payments",
   "privacy",
   "login",
   "register",

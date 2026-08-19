@@ -81,8 +81,14 @@ function getOrganizationValues(
     contactPhone: organization?.contactPhone ?? "",
     inn: organization?.inn ?? "",
     address: organization?.address ?? "",
-    latitude: organization?.latitude,
-    longitude: organization?.longitude,
+    latitude:
+      typeof organization?.latitude === "number"
+        ? organization.latitude
+        : undefined,
+    longitude:
+      typeof organization?.longitude === "number"
+        ? organization.longitude
+        : undefined,
     active: organization?.active ?? true,
   }
 }

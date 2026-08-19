@@ -18,6 +18,7 @@ type DashboardPage =
   | "organization"
   | "organizations"
   | "orders"
+  | "payments"
   | "profile"
 
 const getCurrentUser = cache(async () => {
@@ -55,9 +56,13 @@ export async function requireDashboardPageAccess({
 }) {
   const user = await requireAuthenticatedUser(language)
   const access = getDashboardAccess(user.roles)
+  const canManagePayments = user.roles?.some(
+    (role) => role === "ROLE_EMPLOYER" || role === "ROLE_SUPER_ADMIN"
+  )
   const canAccess =
     page === "profile" ||
     page === "orders" ||
+    (page === "payments" && canManagePayments) ||
     access === "all" ||
     (access === "organization" &&
       page === "organization" &&

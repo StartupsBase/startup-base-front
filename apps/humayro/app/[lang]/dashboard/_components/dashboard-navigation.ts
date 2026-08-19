@@ -1,5 +1,6 @@
 import {
   Building03Icon,
+  CreditCardIcon,
   Home01Icon,
   Settings02Icon,
   ShoppingCart02Icon,
@@ -15,6 +16,7 @@ export type DashboardPermission =
   | "organization:manage-own"
   | "organizations:read-all"
   | "orders:read-own"
+  | "payments:manage"
   | "profile:read"
 
 export type DashboardNavigationItem = {
@@ -30,12 +32,14 @@ type NavigationLabels = {
   administration: string
   dashboard: string
   orders: string
+  payments: string
   organizations: string
   profile: string
 }
 
 export function getDashboardNavigationItems({
   access,
+  canManagePayments,
   labels,
   language,
   organizationId,
@@ -43,6 +47,7 @@ export function getDashboardNavigationItems({
   pathname,
 }: {
   access: DashboardAccess
+  canManagePayments: boolean
   labels: NavigationLabels
   language: string
   organizationId?: number
@@ -53,6 +58,7 @@ export function getDashboardNavigationItems({
   const administrationHref = `${dashboardHref}/adminstration`
   const organizationsHref = `${dashboardHref}/organizations`
   const ordersHref = `${dashboardHref}/orders`
+  const paymentsHref = `${dashboardHref}/payments`
   const profileHref = `${dashboardHref}/profile`
 
   const items: DashboardNavigationItem[] = []
@@ -94,6 +100,17 @@ export function getDashboardNavigationItems({
       id: "organization",
       label: organizationName || labels.organizations,
       permission: "organization:manage-own",
+    })
+  }
+
+  if (canManagePayments) {
+    items.push({
+      active: pathname.startsWith(paymentsHref),
+      href: paymentsHref,
+      icon: CreditCardIcon,
+      id: "payments",
+      label: labels.payments,
+      permission: "payments:manage",
     })
   }
 
