@@ -6,8 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetAll7Params = {
-organizationId?: number;
-page?: number;
-size?: number;
-};
+export interface DistrictDTO {
+  id?: number;
+  name?: string;
+  nameUz?: string;
+  regionId?: number;
+  regionName?: string;
+}

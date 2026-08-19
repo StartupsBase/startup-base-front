@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetAll7Params = {
+export type GetPublicParams = {
 organizationId?: number;
 page?: number;
 size?: number;

@@ -6,8 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetAll7Params = {
+export type GetAll10Params = {
+search?: string;
 organizationId?: number;
+branchId?: number;
 page?: number;
 size?: number;
 };

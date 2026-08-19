@@ -5,10 +5,10 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { GetAll8Status } from './getAll8Status';
 
 export type GetAll8Params = {
-status?: GetAll8Status;
+id?: number;
+name?: string;
 page?: number;
 size?: number;
 };
