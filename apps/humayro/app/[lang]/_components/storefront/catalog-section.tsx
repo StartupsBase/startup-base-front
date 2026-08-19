@@ -14,11 +14,23 @@ import type { SizeDTO } from "@/lib/api/model/sizeDTO"
 import type { Language } from "@/i18n/config"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Delete02Icon,
+  Search01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
   useCatalogStore,
   type CatalogSort,
 } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
-import { Sheet, SheetContent, SheetTitle } from "@workspace/ui/components/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@workspace/ui/components/dialog"
 import { Slider } from "@workspace/ui/components/slider"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
@@ -30,6 +42,7 @@ import {
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
 import { useQueries } from "@tanstack/react-query"
+import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
 import { ProductCard } from "./product-card"
@@ -75,8 +88,7 @@ export function CatalogSection({
   const [colorId, setColorId] = useState<number | null>(null)
   const [sizeId, setSizeId] = useState<number | null>(null)
   const [page, setPage] = useState(0)
-  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false)
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const categoriesQuery = useGetAll4(
     { active: true },
@@ -215,9 +227,7 @@ export function CatalogSection({
     setPriceRange(initialRange)
     setColorId(null)
     setSizeId(null)
-    if (selectedCategory?.parentId != null) {
-      setCategoryId(selectedCategory.parentId)
-    }
+    setCategoryId(null)
     setPage(0)
   }
 
@@ -287,8 +297,8 @@ export function CatalogSection({
               type="button"
               variant="outline"
               className="flex h-11 shrink-0 rounded-2xl lg:hidden"
-              aria-expanded={mobileFiltersOpen}
-              onClick={() => setMobileFiltersOpen(true)}
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen(true)}
             >
               {text.filters}
             </Button>
@@ -298,22 +308,22 @@ export function CatalogSection({
         <div className="mt-9 hidden justify-end border-b pb-4 lg:flex">
           <Button
             type="button"
-            variant={desktopFiltersOpen ? "default" : "outline"}
+            variant={filtersOpen ? "default" : "outline"}
             className="h-11 shrink-0 rounded-full px-5"
-            aria-expanded={desktopFiltersOpen}
-            onClick={() => setDesktopFiltersOpen((current) => !current)}
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen(true)}
           >
             {text.filters}
           </Button>
         </div>
       </div>
       <div className="mx-auto max-w-[96rem]">
-        <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-          <SheetContent
-            side="right"
-            className="w-screen! max-w-none! overflow-y-auto px-4 pt-14 pb-8 sm:max-w-none! lg:hidden"
+        <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <DialogContent
+            showCloseButton={false}
+            className="h-[min(92dvh,800px)] max-w-[calc(100%-1rem)] gap-0 overflow-hidden rounded-[2rem] border border-border/60 bg-background p-0 shadow-2xl sm:max-w-xl"
           >
-            <SheetTitle className="sr-only">{text.mobileFilters}</SheetTitle>
+            <DialogTitle className="sr-only">{text.mobileFilters}</DialogTitle>
             <CatalogFilters
               language={language}
               parentCategories={parentCategories}
@@ -336,40 +346,12 @@ export function CatalogSection({
               onColorChange={toggleColor}
               onSizeChange={toggleSize}
               onReset={resetFilters}
-              className="mt-0 border-0 bg-transparent p-0 shadow-none"
+              onClose={() => setFiltersOpen(false)}
             />
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
 
-        <div className="flex justify-center gap-10">
-          {desktopFiltersOpen ? (
-            <div className="hidden lg:sticky lg:top-24 lg:block lg:min-w-52.5 lg:self-start xl:min-w-62.5">
-              <CatalogFilters
-                language={language}
-                parentCategories={parentCategories}
-                categories={childCategories}
-                colors={colors}
-                sizes={sizes}
-                draftPriceRange={draftPriceRange}
-                appliedPriceRange={priceRange}
-                selectedCategoryId={categoryId}
-                selectedColorId={colorId}
-                selectedSizeId={sizeId}
-                optionsLoading={
-                  colorsQuery.isPending ||
-                  sizesQuery.isPending ||
-                  filterProductQueries.some((query) => query.isPending)
-                }
-                onDraftPriceChange={setDraftPriceRange}
-                onApplyPriceRange={applyPriceRange}
-                onCategoryChange={selectCategory}
-                onColorChange={toggleColor}
-                onSizeChange={toggleSize}
-                onReset={resetFilters}
-              />
-            </div>
-          ) : null}
-
+        <div className="flex justify-center">
           <div
             className={cn(
               "w-full min-w-0 flex-1",
@@ -514,7 +496,23 @@ type CatalogFiltersProps = {
   onColorChange: (id: number) => void
   onSizeChange: (id: number) => void
   onReset: () => void
-  className?: string
+  onClose: () => void
+}
+
+type FilterView = "overview" | "categories" | "colors" | "sizes"
+
+const filterViewVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 72 : -72,
+    opacity: 0,
+    filter: "blur(8px)",
+  }),
+  center: { x: 0, opacity: 1, filter: "blur(0px)" },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -72 : 72,
+    opacity: 0,
+    filter: "blur(8px)",
+  }),
 }
 
 function CatalogFilters({
@@ -535,20 +533,46 @@ function CatalogFilters({
   onColorChange,
   onSizeChange,
   onReset,
-  className,
+  onClose,
 }: CatalogFiltersProps) {
   const text = useStorefrontCopy()
+  const [view, setView] = useState<FilterView>("overview")
+  const [direction, setDirection] = useState(1)
+  const [categorySearch, setCategorySearch] = useState("")
   const selectedCategory = [...parentCategories, ...categories].find(
     (category) => category.id === selectedCategoryId
   )
   const selectedParentId =
     selectedCategory?.parentId ?? selectedCategory?.id ?? null
+  const selectedColor = colors.find((color) => color.id === selectedColorId)
+  const selectedSize = sizes.find((size) => size.id === selectedSizeId)
+  const normalizedCategorySearch = categorySearch.trim().toLocaleLowerCase()
+  const getCategoryName = (category: CategoryDTO) =>
+    language === "ru"
+      ? category.nameRu || category.name || category.nameEng || "—"
+      : category.name || category.nameRu || category.nameEng || "—"
+  const filteredParentCategories = parentCategories.filter((category) =>
+    getCategoryName(category)
+      .toLocaleLowerCase()
+      .includes(normalizedCategorySearch)
+  )
+  const filteredCategories = categories.filter((category) =>
+    getCategoryName(category)
+      .toLocaleLowerCase()
+      .includes(normalizedCategorySearch)
+  )
   const isFiltered =
-    categories.some((category) => category.id === selectedCategoryId) ||
+    selectedCategoryId != null ||
     appliedPriceRange[0] !== PRICE_MIN ||
     appliedPriceRange[1] !== PRICE_MAX ||
     selectedColorId != null ||
     selectedSizeId != null
+
+  function navigate(nextView: FilterView) {
+    setDirection(nextView === "overview" ? -1 : 1)
+    setView(nextView)
+    if (nextView !== "categories") setCategorySearch("")
+  }
 
   function updatePrice(index: 0 | 1, value: number) {
     const clamped = Math.max(PRICE_MIN, Math.min(value || 0, PRICE_MAX))
