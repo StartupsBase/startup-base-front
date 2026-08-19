@@ -542,8 +542,6 @@ function CatalogFilters({
   const selectedCategory = [...parentCategories, ...categories].find(
     (category) => category.id === selectedCategoryId
   )
-  const selectedParentId =
-    selectedCategory?.parentId ?? selectedCategory?.id ?? null
   const selectedColor = colors.find((color) => color.id === selectedColorId)
   const selectedSize = sizes.find((size) => size.id === selectedSizeId)
   const normalizedCategorySearch = categorySearch.trim().toLocaleLowerCase()
@@ -585,256 +583,476 @@ function CatalogFilters({
   }
 
   return (
-    <aside
-      className={cn(
-        "mt-10 rounded-2xl border bg-card/60 p-4 shadow-sm",
-        className
-      )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-commerce text-lg font-bold">{text.filters}</h3>
-        {isFiltered ? (
-          <button
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="flex shrink-0 items-center gap-3 border-b border-border/60 px-5 py-4 sm:px-6 sm:py-5">
+        {view !== "overview" ? (
+          <motion.button
             type="button"
-            className="text-xs font-semibold text-primary hover:underline"
+            aria-label={text.previousPage}
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-foreground transition-colors outline-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary/40"
+            whileHover={{ x: -3 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => navigate("overview")}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-5" />
+          </motion.button>
+        ) : null}
+        <h3 className="font-commerce min-w-0 flex-1 text-xl font-bold sm:text-2xl">
+          {view === "overview"
+            ? text.filters
+            : view === "categories"
+              ? text.categories
+              : view === "colors"
+                ? text.colors
+                : text.sizes}
+        </h3>
+        {isFiltered ? (
+          <motion.button
+            type="button"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
+            whileTap={{ scale: 0.96 }}
             onClick={onReset}
           >
+            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
             {text.clearFilters}
-          </button>
+          </motion.button>
         ) : null}
+      </header>
+
+      <div className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 sm:px-6">
+        <AnimatePresence mode="wait" custom={direction} initial={false}>
+          {view === "categories" ? (
+            <motion.div
+              key="categories"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <label className="relative block">
+                <span className="sr-only">{text.searchCategories}</span>
+                <HugeiconsIcon
+                  icon={Search01Icon}
+                  className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                  type="search"
+                  value={categorySearch}
+                  placeholder={text.searchCategories}
+                  className="h-14 w-full rounded-2xl bg-muted/70 pr-4 pl-12 text-base font-medium transition outline-none focus:ring-2 focus:ring-primary/30"
+                  onChange={(event) => setCategorySearch(event.target.value)}
+                />
+              </label>
+
+              {parentCategories.length ? (
+                <fieldset className="mt-5">
+                  <legend className="sr-only">{text.categories}</legend>
+                  <div className="flex flex-col gap-2">
+                    {!normalizedCategorySearch ? (
+                      <motion.button
+                        type="button"
+                        aria-pressed={selectedCategoryId == null}
+                        className={cn(
+                          "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                          selectedCategoryId == null
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                            : "bg-muted/60 text-foreground hover:bg-muted"
+                        )}
+                        whileTap={{ scale: 0.985 }}
+                        onClick={() => onCategoryChange(null)}
+                      >
+                        <span
+                          className={cn(
+                            "grid size-7 shrink-0 place-items-center rounded-lg border",
+                            selectedCategoryId == null
+                              ? "border-primary-foreground/40 bg-primary-foreground/15"
+                              : "border-border bg-background/40"
+                          )}
+                        >
+                          {selectedCategoryId == null ? (
+                            <HugeiconsIcon
+                              icon={Tick02Icon}
+                              className="size-4"
+                            />
+                          ) : null}
+                        </span>
+                        {text.allCategories}
+                      </motion.button>
+                    ) : null}
+                    {filteredParentCategories.map((category, index) => {
+                      if (category.id == null) return null
+                      const name = getCategoryName(category)
+                      const selected = selectedCategoryId === category.id
+
+                      return (
+                        <motion.button
+                          key={category.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onCategoryChange(category.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          <span className="min-w-0 break-words">{name}</span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              ) : null}
+
+              {filteredCategories.length ? (
+                <fieldset className="mt-6 border-t pt-5">
+                  <legend className="text-sm font-semibold">
+                    {text.subcategories}
+                  </legend>
+                  <div className="mt-3 flex flex-col gap-2">
+                    {filteredCategories.map((category, index) => {
+                      if (category.id == null) return null
+                      const name = getCategoryName(category)
+                      const selected = selectedCategoryId === category.id
+
+                      return (
+                        <motion.button
+                          key={category.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onCategoryChange(category.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          {name}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              ) : null}
+            </motion.div>
+          ) : null}
+
+          {view === "overview" ? (
+            <motion.div
+              key="overview"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              className="space-y-3"
+            >
+              {[
+                {
+                  view: "categories" as const,
+                  label: text.categories,
+                  value: selectedCategory
+                    ? getCategoryName(selectedCategory)
+                    : text.allCategories,
+                },
+                {
+                  view: "colors" as const,
+                  label: text.colors,
+                  value: selectedColor
+                    ? getCatalogColorName(selectedColor, language, text)
+                    : null,
+                },
+                {
+                  view: "sizes" as const,
+                  label: text.sizes,
+                  value: selectedSize?.value || null,
+                },
+              ].map((item, index) => (
+                <motion.button
+                  key={item.view}
+                  type="button"
+                  className="flex min-h-16 w-full items-center gap-4 rounded-3xl bg-muted/55 px-5 text-left transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/40"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.06 }}
+                  whileHover={{ x: 3 }}
+                  whileTap={{ scale: 0.985 }}
+                  onClick={() => navigate(item.view)}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold sm:text-lg">
+                      {item.label}
+                    </span>
+                    {item.value ? (
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:text-sm">
+                        {item.value}
+                      </span>
+                    ) : null}
+                  </span>
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    className="size-5 shrink-0 text-muted-foreground"
+                  />
+                </motion.button>
+              ))}
+
+              <motion.fieldset
+                className="rounded-3xl bg-muted/40 p-5"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+              >
+                <legend className="text-sm font-semibold">
+                  {text.priceRange}
+                </legend>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="min-w-0">
+                    <span className="sr-only">{text.priceFrom}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={draftPriceRange[0].toLocaleString("ru-RU")}
+                      aria-label={text.priceFrom}
+                      className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                      onChange={(event) => {
+                        const rawValue = event.target.value.replace(/\D/g, "")
+                        const value = rawValue ? Number(rawValue) : 0
+
+                        updatePrice(
+                          0,
+                          Math.max(
+                            PRICE_MIN,
+                            Math.min(value, draftPriceRange[1])
+                          )
+                        )
+                      }}
+                      onBlur={() => onApplyPriceRange(draftPriceRange)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          onApplyPriceRange(draftPriceRange)
+                          event.currentTarget.blur()
+                        }
+                      }}
+                    />
+                  </label>
+                  <label className="min-w-0">
+                    <span className="sr-only">{text.priceTo}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={draftPriceRange[1].toLocaleString("ru-RU")}
+                      aria-label={text.priceTo}
+                      className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                      onChange={(event) => {
+                        const rawValue = event.target.value.replace(/\D/g, "")
+                        const value = Number(rawValue)
+
+                        updatePrice(1, Math.min(value, PRICE_MAX))
+                      }}
+                      onBlur={() => onApplyPriceRange(draftPriceRange)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          onApplyPriceRange(draftPriceRange)
+                          event.currentTarget.blur()
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <Slider
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={10_000}
+                  value={draftPriceRange}
+                  aria-label={text.priceRange}
+                  className="mt-4 py-2 [&_[data-slot=slider-track]]:h-1.5"
+                  onValueChange={(value) =>
+                    onDraftPriceChange(value as [number, number])
+                  }
+                  onValueCommit={onApplyPriceRange}
+                />
+              </motion.fieldset>
+            </motion.div>
+          ) : null}
+
+          {view === "colors" ? (
+            <motion.div
+              key="colors"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <fieldset>
+                <legend className="sr-only">{text.colors}</legend>
+                {colors.length ? (
+                  <>
+                    <div className="mt-3 space-y-1">
+                      {colors.map((color) => {
+                        if (color.id == null) return null
+                        const name = getCatalogColorName(color, language, text)
+
+                        return (
+                          <motion.button
+                            key={color.id}
+                            type="button"
+                            aria-pressed={selectedColorId === color.id}
+                            className={cn(
+                              "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                              selectedColorId === color.id
+                                ? "bg-primary/12 font-semibold text-primary ring-1 ring-primary/25"
+                                : "hover:bg-muted"
+                            )}
+                            whileTap={{ scale: 0.985 }}
+                            onClick={() => onColorChange(color.id!)}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="size-5 shrink-0 rounded-full border border-black/10 shadow-sm"
+                              style={{
+                                backgroundColor: getColorHex(color.hexCode),
+                              }}
+                            />
+                            <span className="truncate">
+                              {name || text.unnamedColor}
+                            </span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {optionsLoading ? text.loadingOptions : text.noOptions}
+                  </p>
+                )}
+              </fieldset>
+            </motion.div>
+          ) : null}
+
+          {view === "sizes" ? (
+            <motion.div
+              key="sizes"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <fieldset>
+                <legend className="sr-only">{text.sizes}</legend>
+                {sizes.length ? (
+                  <div className="mt-3 space-y-1">
+                    {sizes.map((size, index) => {
+                      if (size.id == null) return null
+                      const selected = selectedSizeId === size.id
+
+                      return (
+                        <motion.button
+                          key={size.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onSizeChange(size.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          <span>{size.value || "—"}</span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {optionsLoading ? text.loadingOptions : text.noOptions}
+                  </p>
+                )}
+              </fieldset>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
-      {parentCategories.length ? (
-        <fieldset className="mt-6 border-t pt-5">
-          <legend className="text-sm font-semibold">
-            {text.mobileFilters}
-          </legend>
-          <div className="mt-3 flex flex-col gap-2">
-            <button
-              type="button"
-              aria-pressed={selectedCategoryId == null}
-              className={cn(
-                "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
-                selectedCategoryId == null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-              onClick={() => onCategoryChange(null)}
-            >
-              {text.allCategories}
-            </button>
-            {parentCategories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  aria-pressed={selectedParentId === category.id}
-                  className={cn(
-                    "flex min-h-16 w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
-                    selectedParentId === category.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  onClick={() => onCategoryChange(category.id!)}
-                >
-                  {category.imageUrl ? (
-                    <img
-                      src={category.imageUrl}
-                      alt=""
-                      className="size-9 shrink-0 rounded-lg object-cover"
-                    />
-                  ) : null}
-                  <span className="min-w-0 break-words">{name || "—"}</span>
-                </button>
-              )
-            })}
-          </div>
-        </fieldset>
-      ) : null}
-
-      {categories.length ? (
-        <fieldset className="mt-6 border-t pt-5">
-          <legend className="text-sm font-semibold">
-            {text.subcategories}
-          </legend>
-          <div className="mt-3 flex flex-col gap-2">
-            {categories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  aria-pressed={selectedCategoryId === category.id}
-                  className={cn(
-                    "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
-                    selectedCategoryId === category.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  onClick={() => onCategoryChange(category.id!)}
-                >
-                  {name || "—"}
-                </button>
-              )
-            })}
-          </div>
-        </fieldset>
-      ) : null}
-
-      <fieldset className="mt-5">
-        <legend className="text-sm font-semibold">{text.priceRange}</legend>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <label className="min-w-0">
-            <span className="sr-only">{text.priceFrom}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={draftPriceRange[0].toLocaleString("ru-RU")}
-              aria-label={text.priceFrom}
-              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              onChange={(event) => {
-                const rawValue = event.target.value.replace(/\D/g, "")
-                const value = rawValue ? Number(rawValue) : 0
-
-                updatePrice(
-                  0,
-                  Math.max(PRICE_MIN, Math.min(value, draftPriceRange[1]))
-                )
-              }}
-              onBlur={() => onApplyPriceRange(draftPriceRange)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onApplyPriceRange(draftPriceRange)
-                  event.currentTarget.blur()
-                }
-              }}
-            />
-          </label>
-          <label className="min-w-0">
-            <span className="sr-only">{text.priceTo}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={draftPriceRange[1].toLocaleString("ru-RU")}
-              aria-label={text.priceTo}
-              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              onChange={(event) => {
-                const rawValue = event.target.value.replace(/\D/g, "")
-                const value = Number(rawValue)
-
-                updatePrice(1, Math.min(value, PRICE_MAX))
-              }}
-              onBlur={() => onApplyPriceRange(draftPriceRange)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onApplyPriceRange(draftPriceRange)
-                  event.currentTarget.blur()
-                }
-              }}
-            />
-          </label>
-        </div>
-        <Slider
-          min={PRICE_MIN}
-          max={PRICE_MAX}
-          step={10_000}
-          value={draftPriceRange}
-          aria-label={text.priceRange}
-          className="mt-4 py-2 [&_[data-slot=slider-track]]:h-1.5"
-          onValueChange={(value) =>
-            onDraftPriceChange(value as [number, number])
-          }
-          onValueCommit={onApplyPriceRange}
-        />
-      </fieldset>
-
-      <fieldset className="mt-6 border-t pt-5">
-        <legend className="text-sm font-semibold">{text.colors}</legend>
-        {colors.length ? (
-          <>
-            <div className="mt-3 space-y-1">
-              {colors.map((color) => {
-                if (color.id == null) return null
-                const name = getCatalogColorName(color, language, text)
-
-                return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    aria-pressed={selectedColorId === color.id}
-                    className={cn(
-                      "flex min-h-9 w-full items-center gap-3 rounded-xl px-2 text-left text-sm transition",
-                      selectedColorId === color.id
-                        ? "bg-primary/12 font-semibold text-primary ring-1 ring-primary/25"
-                        : "hover:bg-muted"
-                    )}
-                    onClick={() => onColorChange(color.id!)}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="size-5 shrink-0 rounded-full border border-black/10 shadow-sm"
-                      style={{ backgroundColor: getColorHex(color.hexCode) }}
-                    />
-                    <span className="truncate">
-                      {name || text.unnamedColor}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {optionsLoading ? text.loadingOptions : text.noOptions}
-          </p>
-        )}
-      </fieldset>
-
-      <fieldset className="mt-6 border-t pt-5">
-        <legend className="text-sm font-semibold">{text.sizes}</legend>
-        {sizes.length ? (
-          <>
-            <div className="mt-3 space-y-1">
-              {sizes.map((size) =>
-                size.id == null ? null : (
-                  <div
-                    key={size.id}
-                    className={cn(
-                      "flex min-h-9 items-center gap-3 px-1 text-sm",
-                      selectedSizeId === size.id && "font-semibold text-primary"
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSizeId === size.id}
-                      aria-label={size.value || "—"}
-                      className="size-4 shrink-0 cursor-pointer accent-primary"
-                      onChange={() => onSizeChange(size.id!)}
-                    />
-                    <span>{size.value || "—"}</span>
-                  </div>
-                )
-              )}
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {optionsLoading ? text.loadingOptions : text.noOptions}
-          </p>
-        )}
-      </fieldset>
-    </aside>
+      <footer className="shrink-0 border-t border-border/60 bg-background/95 p-4 backdrop-blur sm:px-6">
+        <motion.div whileTap={{ scale: 0.985 }}>
+          <Button
+            type="button"
+            className="h-12 w-full rounded-2xl text-base font-semibold"
+            onClick={onClose}
+          >
+            {text.applyFilters}
+          </Button>
+        </motion.div>
+      </footer>
+    </div>
   )
 }
 

@@ -55,7 +55,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
         }}
       />
       <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-14 sm:px-6 sm:pt-4 sm:pb-18 md:px-10 lg:pt-6">
-        <section className="flex min-h-[calc(100svh-8rem)] flex-col items-center justify-center py-10 text-center sm:min-h-[calc(100svh-9rem)] sm:py-16 lg:min-h-[calc(100svh-7rem)] lg:py-20">
+        <section className="flex flex-col items-center justify-center py-12 text-center sm:min-h-[calc(100svh-9rem)] sm:py-16 lg:min-h-[calc(100svh-7rem)] lg:py-20">
           <DiaTextReveal
             text={t("home.eyebrow")}
             duration={1.5}
@@ -63,9 +63,9 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
           />
           <TextAnimate
             animation="blurInUp"
-            by="character"
+            by="word"
             duration={1.5}
-            className="max-w-5xl text-[clamp(2.5rem,12.5vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl"
+            className="max-w-5xl text-[clamp(2.25rem,10vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-7xl lg:text-8xl"
           >
             {t("home.title")}
           </TextAnimate>
@@ -78,11 +78,14 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             {t("home.description")}
           </TextAnimate>
 
-          <div className="mt-8 grid w-full max-w-sm grid-cols-3 gap-2 sm:mt-10 sm:flex sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-3">
-            <Link href={`/${lang}/book-demo`} className="min-w-0 sm:w-auto">
+          <div className="mt-8 grid w-full max-w-sm grid-cols-2 gap-3 sm:mt-10 sm:flex sm:max-w-none sm:flex-wrap sm:justify-center">
+            <Link
+              href={`/${lang}/book-demo`}
+              className="col-span-2 min-w-0 sm:w-auto"
+            >
               <ShimmerButton
                 background={`#008872`}
-                className="xs:px-2 xs:text-[11px] h-10 w-full min-w-0 bg-input/30! px-1 text-[10px] sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg xl:text-xl dark:border-primary"
+                className="h-11 w-full min-w-0 bg-input/30! px-4 text-xs sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg xl:text-xl dark:border-primary"
               >
                 {t("home.bookingDemoAction")}
               </ShimmerButton>
@@ -90,7 +93,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
             <Button
               asChild
               size="lg"
-              className="xs:px-2 xs:text-[10px]! h-10 w-full min-w-0 px-1 text-[9px]! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
+              className="h-11 w-full min-w-0 px-3 text-xs! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
             >
               <Link href={`/${lang}/login`}>{t("home.primaryAction")}</Link>
             </Button>
@@ -98,7 +101,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
               asChild
               variant="outline"
               size="lg"
-              className="xs:px-2 xs:text-[10px]! h-10 w-full min-w-0 px-1 text-[9px]! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
+              className="h-11 w-full min-w-0 px-3 text-xs! tracking-tight sm:h-12 sm:w-auto sm:min-w-44 sm:px-6 sm:text-base! sm:tracking-normal lg:h-14 lg:min-w-48 lg:px-7 lg:text-lg! xl:text-xl!"
             >
               <Link href={`/${lang}/register`}>
                 {t("home.secondaryAction")}
