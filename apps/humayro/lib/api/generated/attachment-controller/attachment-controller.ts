@@ -30,7 +30,8 @@ import type {
   UploadBody,
   UploadImageBody,
   UploadImagesBody,
-  UploadVideoBody
+  UploadVideoBody,
+  UploadVideoParams
 } from '../../model';
 
 import { customInstance } from '../../mutator';
@@ -119,6 +120,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUploadMutationOptions(options), queryClient);
     }
     export const uploadVideo = (
+    params: UploadVideoParams,
     uploadVideoBody?: BodyType<UploadVideoBody>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -131,7 +133,8 @@ if(uploadVideoBody?.file !== undefined) {
       return customInstance<AttachmentDTO>(
       {url: `/api/attachments/upload-video`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
-       data: formData, signal
+       data: formData,
+        params, signal
     },
       options);
     }
@@ -140,8 +143,8 @@ if(uploadVideoBody?.file !== undefined) {
 
 
 export const getUploadVideoMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{params: UploadVideoParams;data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{params: UploadVideoParams;data?: BodyType<UploadVideoBody>}, TContext> => {
 
 const mutationKey = ['uploadVideo'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -153,10 +156,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadVideo>>, {data?: BodyType<UploadVideoBody>}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadVideo>>, {params: UploadVideoParams;data?: BodyType<UploadVideoBody>}> = (props) => {
+          const {params,data} = props ?? {};
 
-          return  uploadVideo(data,requestOptions)
+          return  uploadVideo(params,data,requestOptions)
         }
 
 
@@ -171,11 +174,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UploadVideoMutationError = ErrorType<unknown>
 
     export const useUploadVideo = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,{params: UploadVideoParams;data?: BodyType<UploadVideoBody>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof uploadVideo>>,
         TError,
-        {data?: BodyType<UploadVideoBody>},
+        {params: UploadVideoParams;data?: BodyType<UploadVideoBody>},
         TContext
       > => {
       return useMutation(getUploadVideoMutationOptions(options), queryClient);
@@ -304,7 +307,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUploadImageMutationOptions(options), queryClient);
     }
-    export const getById7 = (
+    export const getById8 = (
     id: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -319,66 +322,66 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetById7QueryKey = (id: number,) => {
+export const getGetById8QueryKey = (id: number,) => {
     return [
     `/api/attachments/${id}`
     ] as const;
     }
 
 
-export const getGetById7QueryOptions = <TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetById8QueryOptions = <TData = Awaited<ReturnType<typeof getById8>>, TError = ErrorType<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetById7QueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetById8QueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById7>>> = ({ signal }) => getById7(id, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById8>>> = ({ signal }) => getById8(id, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetById7QueryResult = NonNullable<Awaited<ReturnType<typeof getById7>>>
-export type GetById7QueryError = ErrorType<unknown>
+export type GetById8QueryResult = NonNullable<Awaited<ReturnType<typeof getById8>>>
+export type GetById8QueryError = ErrorType<unknown>
 
 
-export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>> & Pick<
+export function useGetById8<TData = Awaited<ReturnType<typeof getById8>>, TError = ErrorType<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getById7>>,
+          Awaited<ReturnType<typeof getById8>>,
           TError,
-          Awaited<ReturnType<typeof getById7>>
+          Awaited<ReturnType<typeof getById8>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>> & Pick<
+export function useGetById8<TData = Awaited<ReturnType<typeof getById8>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getById7>>,
+          Awaited<ReturnType<typeof getById8>>,
           TError,
-          Awaited<ReturnType<typeof getById7>>
+          Awaited<ReturnType<typeof getById8>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetById8<TData = Awaited<ReturnType<typeof getById8>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetById7<TData = Awaited<ReturnType<typeof getById7>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetById8<TData = Awaited<ReturnType<typeof getById8>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getById8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetById7QueryOptions(id,options)
+  const queryOptions = getGetById8QueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

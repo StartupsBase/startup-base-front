@@ -17,14 +17,14 @@ import { toast } from "sonner"
 import { Input } from "@/components/input"
 import type { DistrictCreateDTO, RegionCreateDTO, RegionDTO } from "@/lib/api"
 import {
-  getGetAll9QueryKey,
+  getGetAll10QueryKey,
   useCreateBulk1 as useCreateDistricts,
-  useGetAll9 as useDistricts,
+  useGetAll10 as useDistricts,
 } from "@/lib/api/generated/district/district"
 import {
-  getGetAll8QueryKey,
+  getGetAll9QueryKey,
   useCreateBulk as useCreateRegions,
-  useGetAll8 as useRegions,
+  useGetAll9 as useRegions,
 } from "@/lib/api/generated/region/region"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -115,7 +115,7 @@ export function RegionsDirectoryPage({ language }: { language: string }) {
 
     try {
       const created = await createRegions.mutateAsync({ data: payload })
-      await queryClient.invalidateQueries({ queryKey: getGetAll8QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll9QueryKey() })
       toast.success(t("addresses.saved", { count: created.length }))
       setDrafts([createRegionDraft(nextKey.current++)])
       setDialogOpen(false)
@@ -297,7 +297,7 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
 
     try {
       const created = await createDistricts.mutateAsync({ data: payload })
-      await queryClient.invalidateQueries({ queryKey: getGetAll9QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll10QueryKey() })
       toast.success(t("addresses.saved", { count: created.length }))
       setDrafts([createDistrictDraft(nextKey.current++)])
       setDialogOpen(false)

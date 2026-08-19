@@ -7,8 +7,7 @@
  */
 
 export type GetAll8Params = {
-id?: number;
-name?: string;
+organizationId?: number;
 page?: number;
 size?: number;
 };

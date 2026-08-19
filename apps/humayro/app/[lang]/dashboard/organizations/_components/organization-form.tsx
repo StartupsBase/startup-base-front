@@ -10,9 +10,9 @@ import { z } from "zod"
 
 import type { OrganizationDTO } from "@/lib/api"
 import {
-  getGetAll6QueryKey,
+  getGetAll7QueryKey,
   getGetById6QueryKey,
-  useCreate6,
+  useCreate7,
   useUpdate7,
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import { useUploadImage } from "@/lib/api/generated/attachment-controller/attachment-controller"
@@ -116,7 +116,7 @@ export function OrganizationForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const create = useCreate6()
+  const create = useCreate7()
   const update = useUpdate7()
   const uploadLogo = useUploadImage()
   const [logo, setLogo] = useState<File | null>(null)
@@ -163,7 +163,7 @@ export function OrganizationForm({
         await create.mutateAsync({ data: payload })
       }
 
-      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
       if (organization?.id !== undefined) {
         await queryClient.invalidateQueries({
           queryKey: getGetById6QueryKey(organization.id),

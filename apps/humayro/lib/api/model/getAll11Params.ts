@@ -5,10 +5,11 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { GetAll11Status } from './getAll11Status';
 
 export type GetAll11Params = {
-status?: GetAll11Status;
+search?: string;
+organizationId?: number;
+branchId?: number;
 page?: number;
 size?: number;
 };

@@ -29,7 +29,7 @@ import type {
   CategoryDTO,
   CategoryMoveDTO,
   CategoryUpdateDTO,
-  GetAll4Params
+  GetAll5Params
 } from '../../model';
 
 import { customInstance } from '../../mutator';
@@ -256,8 +256,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDelete4MutationOptions(options), queryClient);
     }
-    export const getAll4 = (
-    params?: GetAll4Params,
+    export const getAll5 = (
+    params?: GetAll5Params,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
 
@@ -272,66 +272,66 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetAll4QueryKey = (params?: GetAll4Params,) => {
+export const getGetAll5QueryKey = (params?: GetAll5Params,) => {
     return [
     `/api/categories`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetAll4QueryOptions = <TData = Awaited<ReturnType<typeof getAll4>>, TError = ErrorType<unknown>>(params?: GetAll4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAll5QueryOptions = <TData = Awaited<ReturnType<typeof getAll5>>, TError = ErrorType<unknown>>(params?: GetAll5Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAll4QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetAll5QueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll4>>> = ({ signal }) => getAll4(params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll5>>> = ({ signal }) => getAll5(params, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetAll4QueryResult = NonNullable<Awaited<ReturnType<typeof getAll4>>>
-export type GetAll4QueryError = ErrorType<unknown>
+export type GetAll5QueryResult = NonNullable<Awaited<ReturnType<typeof getAll5>>>
+export type GetAll5QueryError = ErrorType<unknown>
 
 
-export function useGetAll4<TData = Awaited<ReturnType<typeof getAll4>>, TError = ErrorType<unknown>>(
- params: undefined |  GetAll4Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData>> & Pick<
+export function useGetAll5<TData = Awaited<ReturnType<typeof getAll5>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetAll5Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAll4>>,
+          Awaited<ReturnType<typeof getAll5>>,
           TError,
-          Awaited<ReturnType<typeof getAll4>>
+          Awaited<ReturnType<typeof getAll5>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAll4<TData = Awaited<ReturnType<typeof getAll4>>, TError = ErrorType<unknown>>(
- params?: GetAll4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData>> & Pick<
+export function useGetAll5<TData = Awaited<ReturnType<typeof getAll5>>, TError = ErrorType<unknown>>(
+ params?: GetAll5Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAll4>>,
+          Awaited<ReturnType<typeof getAll5>>,
           TError,
-          Awaited<ReturnType<typeof getAll4>>
+          Awaited<ReturnType<typeof getAll5>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAll4<TData = Awaited<ReturnType<typeof getAll4>>, TError = ErrorType<unknown>>(
- params?: GetAll4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAll5<TData = Awaited<ReturnType<typeof getAll5>>, TError = ErrorType<unknown>>(
+ params?: GetAll5Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetAll4<TData = Awaited<ReturnType<typeof getAll4>>, TError = ErrorType<unknown>>(
- params?: GetAll4Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAll5<TData = Awaited<ReturnType<typeof getAll5>>, TError = ErrorType<unknown>>(
+ params?: GetAll5Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll5>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetAll4QueryOptions(params,options)
+  const queryOptions = getGetAll5QueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -343,7 +343,7 @@ export function useGetAll4<TData = Awaited<ReturnType<typeof getAll4>>, TError =
 
 
 
-export const create4 = (
+export const create5 = (
     categoryCreateDTO: BodyType<CategoryCreateDTO>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -360,11 +360,11 @@ export const create4 = (
 
 
 
-export const getCreate4MutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext> => {
+export const getCreate5MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext> => {
 
-const mutationKey = ['create4'];
+const mutationKey = ['create5'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -374,10 +374,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create4>>, {data: BodyType<CategoryCreateDTO>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create5>>, {data: BodyType<CategoryCreateDTO>}> = (props) => {
           const {data} = props ?? {};
 
-          return  create4(data,requestOptions)
+          return  create5(data,requestOptions)
         }
 
 
@@ -387,19 +387,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create4MutationResult = NonNullable<Awaited<ReturnType<typeof create4>>>
-    export type Create4MutationBody = BodyType<CategoryCreateDTO>
-    export type Create4MutationError = ErrorType<unknown>
+    export type Create5MutationResult = NonNullable<Awaited<ReturnType<typeof create5>>>
+    export type Create5MutationBody = BodyType<CategoryCreateDTO>
+    export type Create5MutationError = ErrorType<unknown>
 
-    export const useCreate4 = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useCreate5 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: BodyType<CategoryCreateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof create4>>,
+        Awaited<ReturnType<typeof create5>>,
         TError,
         {data: BodyType<CategoryCreateDTO>},
         TContext
       > => {
-      return useMutation(getCreate4MutationOptions(options), queryClient);
+      return useMutation(getCreate5MutationOptions(options), queryClient);
     }
     export const createBulk3 = (
     categoryCreateDTO: BodyType<CategoryCreateDTO[]>,

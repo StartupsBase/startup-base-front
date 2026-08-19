@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import {
   getGetByProductQueryKey,
   useAddOrUpdate,
-  useDelete9,
+  useDelete10,
 } from "@/lib/api/generated/review/review"
 import type { ReviewDTO } from "@/lib/api/model/reviewDTO"
 import type { DisplayReviewEntry } from "@/lib/review-entries"
@@ -22,7 +22,7 @@ export function useReviewDeletion({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const deleteMutation = useDelete9()
+  const deleteMutation = useDelete10()
   const updateMutation = useAddOrUpdate()
 
   async function deleteReview(entry: DisplayReviewEntry) {

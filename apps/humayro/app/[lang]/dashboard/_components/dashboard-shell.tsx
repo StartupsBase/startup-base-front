@@ -69,6 +69,10 @@ export function DashboardShell({
   const clearUser = useAuthStore((state) => state.clear)
   const meQuery = useMe1({ query: { initialData: initialUser, retry: false } })
   const dashboardAccess = getDashboardAccess(meQuery.data.roles)
+  const canViewAnalytics =
+    meQuery.data.roles?.some(
+      (role) => role === "ROLE_ADMIN" || role === "ROLE_SUPER_ADMIN"
+    ) ?? false
   const canManagePayments =
     meQuery.data.roles?.some(
       (role) => role === "ROLE_EMPLOYER" || role === "ROLE_SUPER_ADMIN"
@@ -81,10 +85,12 @@ export function DashboardShell({
 
   const navigationItems = getDashboardNavigationItems({
     access: dashboardAccess,
+    canViewAnalytics,
     canManagePayments,
     labels: {
       administration: t("administration.title"),
       addresses: t("addresses.title"),
+      analytics: t("analytics.title"),
       dashboard: t("dashboard.home"),
       districts: t("addresses.districts.title"),
       orders: t("storefront.myOrders"),

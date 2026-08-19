@@ -9,8 +9,8 @@ import { toast } from "sonner"
 
 import type { CategoryDTO } from "@/lib/api"
 import {
-  getGetAll4QueryKey,
-  useCreateBulk1,
+  getGetAll5QueryKey,
+  useCreateBulk3,
 } from "@/lib/api/generated/category/category"
 import { Button } from "@workspace/ui/components/button"
 import { DialogFooter } from "@workspace/ui/components/dialog"
@@ -62,7 +62,7 @@ export function BulkCategoryForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const createBulk = useCreateBulk1()
+  const createBulk = useCreateBulk3()
   const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [
     createDraft(0, "initial"),
   ])
@@ -122,7 +122,7 @@ export function BulkCategoryForm({
           sortOrder: draft.sortOrder,
         })),
       })
-      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.success(t("category.bulkCreated", { count: drafts.length }))
       onComplete()
     } catch {

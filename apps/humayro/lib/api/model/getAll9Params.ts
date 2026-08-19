@@ -8,7 +8,6 @@
 
 export type GetAll9Params = {
 id?: number;
-regionId?: number;
 name?: string;
 page?: number;
 size?: number;

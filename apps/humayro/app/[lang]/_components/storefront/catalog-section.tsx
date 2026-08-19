@@ -1,7 +1,7 @@
 "use client"
 
-import { useGetAll4 } from "@/lib/api/generated/category/category"
-import { useGetAll3 } from "@/lib/api/generated/color/color"
+import { useGetAll5 } from "@/lib/api/generated/category/category"
+import { useGetAll4 as useGetAllColors } from "@/lib/api/generated/color/color"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import {
   getGetById2QueryOptions,
@@ -90,11 +90,11 @@ export function CatalogSection({
   const [page, setPage] = useState(0)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const categoriesQuery = useGetAll4(
+  const categoriesQuery = useGetAll5(
     { active: true },
     { query: { staleTime: 5 * 60_000 } }
   )
-  const colorsQuery = useGetAll3({
+  const colorsQuery = useGetAllColors({
     query: { staleTime: 5 * 60_000, retry: false },
   })
   const sizesQuery = useGetAll1(undefined, {

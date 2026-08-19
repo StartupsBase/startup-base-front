@@ -16,6 +16,8 @@ export interface CheckoutDTO {
      */
   recipientPhone: string;
   deliveryAddress?: string;
+  regionId: number;
+  districtId: number;
   deliveryCity?: string;
   deliveryDistrict?: string;
   street?: string;

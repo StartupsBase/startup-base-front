@@ -7,7 +7,5 @@
  */
 
 export type GetAll7Params = {
-organizationId?: number;
-page?: number;
-size?: number;
+active?: boolean;
 };

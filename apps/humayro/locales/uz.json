@@ -348,6 +348,53 @@
         "regionRequired": "Har bir tuman uchun viloyatni tanlang."
       }
     },
+    "analytics": {
+      "title": "Analitika",
+      "eyebrow": "Savdo samaradorligi",
+      "description": "Yetkazilgan buyurtmalar bo'yicha savdoni tahlil qiling va filiallar samaradorligini solishtiring.",
+      "updating": "Ma'lumotlar yangilanmoqda...",
+      "deliveredOnly": "Hisob-kitoblarda faqat «Yetkazilgan» holatidagi buyurtmalar inobatga olinadi.",
+      "invalidPeriod": "Boshlanish sanasi tugash sanasidan keyin bo'lishi mumkin emas.",
+      "loadFailed": "Analitikani yuklab bo'lmadi. Kirish huquqini tekshirib, qayta urinib ko'ring.",
+      "retry": "Qayta urinish",
+      "period": "Davr: {{period}}",
+      "filters": {
+        "title": "Hisobot parametrlari",
+        "description": "Standart holatda oxirgi 30 kalendar kunlik joriy davr tanlanadi.",
+        "from": "Boshlanish sanasi",
+        "to": "Tugash sanasi",
+        "organization": "Tashkilot",
+        "allOrganizations": "Barcha tashkilotlar",
+        "apply": "Qo'llash",
+        "reset": "Tozalash"
+      },
+      "metrics": {
+        "revenue": "Tushum",
+        "orders": "Yetkazilgan buyurtmalar",
+        "averageCheck": "O'rtacha chek",
+        "previous": "Oldingi davr"
+      },
+      "chart": {
+        "title": "Savdo dinamikasi",
+        "description": "Sotuvsiz kunlarni ham hisobga olgan holda kunlik tushum va yetkazilgan buyurtmalar soni.",
+        "revenue": "Tushum",
+        "orders": "Buyurtmalar",
+        "empty": "Tanlangan davr uchun savdo ma'lumotlari yo'q."
+      },
+      "branches": {
+        "title": "Filiallar samaradorligi",
+        "description": "Filiallar server tomonidan 0 dan 100 gacha bo'lgan yakuniy baho bo'yicha saralangan.",
+        "empty": "Tanlangan davr uchun filiallar ma'lumotlari yo'q.",
+        "branch": "Filial",
+        "score": "Baho",
+        "rating": "Reyting",
+        "breakdown": "Baho tarkibi",
+        "revenuePoints": "Tushum",
+        "averageCheckPoints": "O'rtacha chek",
+        "ordersPoints": "Buyurtmalar",
+        "ratingPoints": "Reyting"
+      }
+    },
     "dashboard": {
       "admin": "Humayro administratori",
       "home": "Boshqaruv",
@@ -957,6 +1004,10 @@
         "addresses": {
           "title": "Manzil ma'lumotnomalari",
           "description": "Humayro yetkazib berish viloyatlari va tumanlarini boshqarish."
+        },
+        "analytics": {
+          "title": "Savdo analitikasi",
+          "description": "Humayro savdosi va filiallar samaradorligi ko'rsatkichlari."
         },
         "payments": {
           "title": "To'lovlarni boshqarish",

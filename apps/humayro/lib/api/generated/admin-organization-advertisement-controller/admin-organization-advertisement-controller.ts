@@ -25,7 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GetAll7Params,
+  GetAll8Params,
   OrganizationAdvertisementRequest,
   OrganizationAdvertisementResponse,
   OrganizationAdvertisementUpdateRequest,
@@ -170,8 +170,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDelete7MutationOptions(options), queryClient);
     }
-    export const getAll7 = (
-    params?: GetAll7Params,
+    export const getAll8 = (
+    params?: GetAll8Params,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
 
@@ -186,66 +186,66 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetAll7QueryKey = (params?: GetAll7Params,) => {
+export const getGetAll8QueryKey = (params?: GetAll8Params,) => {
     return [
     `/api/admin/organization-advertisements`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetAll7QueryOptions = <TData = Awaited<ReturnType<typeof getAll7>>, TError = ErrorType<unknown>>(params?: GetAll7Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetAll8QueryOptions = <TData = Awaited<ReturnType<typeof getAll8>>, TError = ErrorType<unknown>>(params?: GetAll8Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAll7QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetAll8QueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll7>>> = ({ signal }) => getAll7(params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll8>>> = ({ signal }) => getAll8(params, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetAll7QueryResult = NonNullable<Awaited<ReturnType<typeof getAll7>>>
-export type GetAll7QueryError = ErrorType<unknown>
+export type GetAll8QueryResult = NonNullable<Awaited<ReturnType<typeof getAll8>>>
+export type GetAll8QueryError = ErrorType<unknown>
 
 
-export function useGetAll7<TData = Awaited<ReturnType<typeof getAll7>>, TError = ErrorType<unknown>>(
- params: undefined |  GetAll7Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData>> & Pick<
+export function useGetAll8<TData = Awaited<ReturnType<typeof getAll8>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetAll8Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAll7>>,
+          Awaited<ReturnType<typeof getAll8>>,
           TError,
-          Awaited<ReturnType<typeof getAll7>>
+          Awaited<ReturnType<typeof getAll8>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAll7<TData = Awaited<ReturnType<typeof getAll7>>, TError = ErrorType<unknown>>(
- params?: GetAll7Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData>> & Pick<
+export function useGetAll8<TData = Awaited<ReturnType<typeof getAll8>>, TError = ErrorType<unknown>>(
+ params?: GetAll8Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAll7>>,
+          Awaited<ReturnType<typeof getAll8>>,
           TError,
-          Awaited<ReturnType<typeof getAll7>>
+          Awaited<ReturnType<typeof getAll8>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAll7<TData = Awaited<ReturnType<typeof getAll7>>, TError = ErrorType<unknown>>(
- params?: GetAll7Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAll8<TData = Awaited<ReturnType<typeof getAll8>>, TError = ErrorType<unknown>>(
+ params?: GetAll8Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetAll7<TData = Awaited<ReturnType<typeof getAll7>>, TError = ErrorType<unknown>>(
- params?: GetAll7Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll7>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetAll8<TData = Awaited<ReturnType<typeof getAll8>>, TError = ErrorType<unknown>>(
+ params?: GetAll8Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll8>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetAll7QueryOptions(params,options)
+  const queryOptions = getGetAll8QueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -257,7 +257,7 @@ export function useGetAll7<TData = Awaited<ReturnType<typeof getAll7>>, TError =
 
 
 
-export const create7 = (
+export const create8 = (
     organizationAdvertisementRequest: BodyType<OrganizationAdvertisementRequest>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -274,11 +274,11 @@ export const create7 = (
 
 
 
-export const getCreate7MutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create7>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create7>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext> => {
+export const getCreate8MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create8>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof create8>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext> => {
 
-const mutationKey = ['create7'];
+const mutationKey = ['create8'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -288,10 +288,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create7>>, {data: BodyType<OrganizationAdvertisementRequest>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create8>>, {data: BodyType<OrganizationAdvertisementRequest>}> = (props) => {
           const {data} = props ?? {};
 
-          return  create7(data,requestOptions)
+          return  create8(data,requestOptions)
         }
 
 
@@ -301,17 +301,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create7MutationResult = NonNullable<Awaited<ReturnType<typeof create7>>>
-    export type Create7MutationBody = BodyType<OrganizationAdvertisementRequest>
-    export type Create7MutationError = ErrorType<unknown>
+    export type Create8MutationResult = NonNullable<Awaited<ReturnType<typeof create8>>>
+    export type Create8MutationBody = BodyType<OrganizationAdvertisementRequest>
+    export type Create8MutationError = ErrorType<unknown>
 
-    export const useCreate7 = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create7>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useCreate8 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create8>>, TError,{data: BodyType<OrganizationAdvertisementRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof create7>>,
+        Awaited<ReturnType<typeof create8>>,
         TError,
         {data: BodyType<OrganizationAdvertisementRequest>},
         TContext
       > => {
-      return useMutation(getCreate7MutationOptions(options), queryClient);
+      return useMutation(getCreate8MutationOptions(options), queryClient);
     }

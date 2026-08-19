@@ -6,11 +6,20 @@
  * OpenAPI spec version: 1.0
  */
 import type { GetAll12Status } from './getAll12Status';
-import type { GetAll12Type } from './getAll12Type';
 
 export type GetAll12Params = {
-type?: GetAll12Type;
 status?: GetAll12Status;
+productId?: number;
+categoryId?: number;
+regionId?: number;
+districtId?: number;
+/**
+ * @minimum 0
+ */
 page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
 size?: number;
 };

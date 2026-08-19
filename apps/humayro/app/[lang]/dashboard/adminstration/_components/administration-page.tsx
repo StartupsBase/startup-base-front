@@ -13,12 +13,12 @@ import {
   type OrganizationDTO,
   type SizeDTO,
 } from "@/lib/api"
-import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
+import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
-  getGetAll3QueryKey,
-  useCreate3,
+  getGetAll4QueryKey,
+  useCreate4,
   useDelete3,
-  useGetAll3,
+  useGetAll4,
   useUpdate4,
 } from "@/lib/api/generated/color/color"
 import {
@@ -122,7 +122,7 @@ export function AdministrationPage({ language }: { language: string }) {
 function ColorsPanel() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const colorsQuery = useGetAll3({ query: { retry: false } })
+  const colorsQuery = useGetAll4({ query: { retry: false } })
   const remove = useDelete3()
   const [createOpen, setCreateOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<ColorDTO | null>(null)
@@ -131,7 +131,7 @@ function ColorsPanel() {
     async (id: number) => {
       try {
         await remove.mutateAsync({ id })
-        await queryClient.invalidateQueries({ queryKey: getGetAll3QueryKey() })
+        await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
         toast.success(t("notifications.deleteSuccess"))
       } catch {
         toast.error(t("notifications.deleteFailed"))
@@ -255,7 +255,7 @@ function ColorForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const create = useCreate3()
+  const create = useCreate4()
   const update = useUpdate4()
   const [name, setName] = React.useState(color?.name ?? "")
   const [hexCode, setHexCode] = React.useState(color?.hexCode ?? "#000000")
@@ -282,7 +282,7 @@ function ColorForm({
       if (color?.id !== undefined)
         await update.mutateAsync({ id: color.id, data })
       else await create.mutateAsync({ data })
-      await queryClient.invalidateQueries({ queryKey: getGetAll3QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
       toast.success(
         t(color ? "notifications.updateSuccess" : "notifications.createSuccess")
       )

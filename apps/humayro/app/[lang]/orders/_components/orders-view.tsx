@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import type { Language } from "@/i18n/config"
 import {
   getMyOrdersQueryKey,
-  useCancel,
+  useCancel1,
   useMyOrders,
 } from "@/lib/api/generated/order/order"
 import type { OrderDTO } from "@/lib/api/model/orderDTO"
@@ -29,7 +29,7 @@ export function OrdersView({ language }: { language: Language }) {
   const ordersQuery = useMyOrders({
     query: { enabled: hasToken, retry: false },
   })
-  const cancelMutation = useCancel({
+  const cancelMutation = useCancel1({
     mutation: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() })

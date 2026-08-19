@@ -11,9 +11,9 @@ import { toast } from "sonner"
 
 import { useMe1, type OrganizationDTO } from "@/lib/api"
 import {
-  getGetAll6QueryKey,
+  getGetAll7QueryKey,
   useDelete6,
-  useGetAll6,
+  useGetAll7,
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
@@ -49,7 +49,7 @@ export function OrganizationsPage({ language }: { language: string }) {
   const meQuery = useMe1({ query: { retry: false } })
   const canManageOrganizations =
     meQuery.data?.roles?.includes("ROLE_SUPER_ADMIN") ?? false
-  const organizationsQuery = useGetAll6(undefined, {
+  const organizationsQuery = useGetAll7(undefined, {
     query: { enabled: canManageOrganizations, retry: false },
   })
   const [createOpen, setCreateOpen] = useState(false)
@@ -269,7 +269,7 @@ function OrganizationActions({
     if (organization.id === undefined) return
     try {
       await remove.mutateAsync({ id: organization.id })
-      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
       toast.success(t("notifications.deleteSuccess"))
     } catch {
       toast.error(t("notifications.deleteFailed"))

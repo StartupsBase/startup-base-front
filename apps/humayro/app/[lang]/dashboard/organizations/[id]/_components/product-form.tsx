@@ -28,9 +28,9 @@ import {
   useUploadImages,
   useUploadVideo,
 } from "@/lib/api/generated/attachment-controller/attachment-controller"
-import { useGetAll4 } from "@/lib/api/generated/category/category"
-import { useGetAll5 as useGetBranches } from "@/lib/api/generated/branch/branch"
-import { useGetAll3 as useGetColors } from "@/lib/api/generated/color/color"
+import { useGetAll5 } from "@/lib/api/generated/category/category"
+import { useGetAll6 as useGetBranches } from "@/lib/api/generated/branch/branch"
+import { useGetAll4 as useGetColors } from "@/lib/api/generated/color/color"
 import {
   getGetAll2QueryKey,
   useCreate2,
@@ -278,7 +278,7 @@ export function ProductForm({
   const detailsQuery = useGetById2(productId ?? 0, {
     query: { enabled: editing, retry: false },
   })
-  const categoriesQuery = useGetAll4()
+  const categoriesQuery = useGetAll5()
   const branchesQuery = useGetBranches({ organizationId, size: 100 })
   const colorsQuery = useGetColors()
   const sizesQuery = useGetSizes()

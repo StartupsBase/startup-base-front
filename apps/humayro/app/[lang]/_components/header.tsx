@@ -16,7 +16,7 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 import { LogoBrand } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Language } from "@/i18n/config"
-import { useGetAll4 } from "@/lib/api/generated/category/category"
+import { useGetAll5 } from "@/lib/api/generated/category/category"
 import type { CategoryDTO } from "@/lib/api/model/categoryDTO"
 import { useCatalogStore } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
@@ -47,7 +47,7 @@ export default function Header({ language }: { language: Language }) {
   const isHeaderHidden =
     pathname.startsWith(`/${language}/dashboard`) ||
     pathname.startsWith(`/${language}/login`)
-  const categoriesQuery = useGetAll4(
+  const categoriesQuery = useGetAll5(
     { active: true },
     {
       query: {

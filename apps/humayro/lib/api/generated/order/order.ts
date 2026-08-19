@@ -26,8 +26,10 @@ import type {
 
 import type {
   CheckoutDTO,
+  MyOrdersParams,
   OrderDTO,
-  OrderLocationUpdateDTO
+  OrderLocationUpdateDTO,
+  PageResponseOrderDTO
 } from '../../model';
 
 import { customInstance } from '../../mutator';
@@ -170,7 +172,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateLocationMutationOptions(options), queryClient);
     }
-    export const cancel = (
+    export const cancel1 = (
     id: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -185,11 +187,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getCancelMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof cancel>>, TError,{id: number}, TContext> => {
+export const getCancel1MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancel1>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancel1>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['cancel'];
+const mutationKey = ['cancel1'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -199,10 +201,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancel>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancel1>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  cancel(id,requestOptions)
+          return  cancel1(id,requestOptions)
         }
 
 
@@ -212,28 +214,29 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CancelMutationResult = NonNullable<Awaited<ReturnType<typeof cancel>>>
+    export type Cancel1MutationResult = NonNullable<Awaited<ReturnType<typeof cancel1>>>
 
-    export type CancelMutationError = ErrorType<unknown>
+    export type Cancel1MutationError = ErrorType<unknown>
 
-    export const useCancel = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useCancel1 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancel1>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof cancel>>,
+        Awaited<ReturnType<typeof cancel1>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getCancelMutationOptions(options), queryClient);
+      return useMutation(getCancel1MutationOptions(options), queryClient);
     }
     export const myOrders = (
-
+    params?: MyOrdersParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
 
 
-      return customInstance<OrderDTO[]>(
-      {url: `/api/orders`, method: 'GET', signal
+      return customInstance<PageResponseOrderDTO>(
+      {url: `/api/orders`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -241,23 +244,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getMyOrdersQueryKey = () => {
+export const getMyOrdersQueryKey = (params?: MyOrdersParams,) => {
     return [
-    `/api/orders`
+    `/api/orders`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getMyOrdersQueryOptions = <TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getMyOrdersQueryOptions = <TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>(params?: MyOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMyOrdersQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getMyOrdersQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof myOrders>>> = ({ signal }) => myOrders(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof myOrders>>> = ({ signal }) => myOrders(params, requestOptions, signal);
 
 
 
@@ -271,7 +274,7 @@ export type MyOrdersQueryError = ErrorType<unknown>
 
 
 export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>> & Pick<
+ params: undefined |  MyOrdersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof myOrders>>,
           TError,
@@ -281,7 +284,7 @@ export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>> & Pick<
+ params?: MyOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof myOrders>>,
           TError,
@@ -291,16 +294,16 @@ export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: MyOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useMyOrders<TData = Awaited<ReturnType<typeof myOrders>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ params?: MyOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof myOrders>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getMyOrdersQueryOptions(options)
+  const queryOptions = getMyOrdersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

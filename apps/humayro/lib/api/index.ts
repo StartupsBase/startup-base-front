@@ -30,3 +30,5 @@ export * from './generated/district/district';
 export * from './generated/organization-advertisement-controller/organization-advertisement-controller';
 export * from './generated/region/region';
 export * from './generated/test-click-payment-controller/test-click-payment-controller';
+export * from './generated/admin-analytics/admin-analytics';
+export * from './generated/product-transfer/product-transfer';

@@ -10,8 +10,9 @@ export type GetAll12Status = typeof GetAll12Status[keyof typeof GetAll12Status];
 
 
 export const GetAll12Status = {
-  STARTED: 'STARTED',
-  SKIPPED: 'SKIPPED',
-  SUCCESS: 'SUCCESS',
-  FAILED: 'FAILED',
+  NEW: 'NEW',
+  CONFIRMED: 'CONFIRMED',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
 } as const;

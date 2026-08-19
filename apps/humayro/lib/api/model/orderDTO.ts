@@ -23,6 +23,12 @@ export interface OrderDTO {
   recipientLastName?: string;
   recipientName?: string;
   recipientPhone?: string;
+  regionId?: number;
+  regionName?: string;
+  regionNameUz?: string;
+  districtId?: number;
+  districtName?: string;
+  districtNameUz?: string;
   deliveryCity?: string;
   deliveryDistrict?: string;
   street?: string;

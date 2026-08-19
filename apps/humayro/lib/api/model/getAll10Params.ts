@@ -7,9 +7,9 @@
  */
 
 export type GetAll10Params = {
-search?: string;
-organizationId?: number;
-branchId?: number;
+id?: number;
+regionId?: number;
+name?: string;
 page?: number;
 size?: number;
 };

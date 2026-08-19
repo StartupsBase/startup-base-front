@@ -13,4 +13,5 @@ export interface AttachmentDTO {
   fileSize?: number;
   s3Url?: string;
   s3Key?: string;
+  organizationId?: number;
 }

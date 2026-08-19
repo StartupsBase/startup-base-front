@@ -23,6 +23,7 @@ export const seoPages = [
   "dashboard",
   "administration",
   "addresses",
+  "analytics",
   "organizations",
   "organization",
   "newProduct",

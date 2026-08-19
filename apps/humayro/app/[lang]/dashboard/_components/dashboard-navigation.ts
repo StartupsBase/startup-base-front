@@ -1,4 +1,5 @@
 import {
+  Analytics01Icon,
   Building03Icon,
   CreditCardIcon,
   Home01Icon,
@@ -14,6 +15,7 @@ import type { DashboardAccess } from "@/lib/auth"
 export type DashboardPermission =
   | "administration:manage"
   | "addresses:manage"
+  | "analytics:read"
   | "dashboard:read"
   | "organization:manage-own"
   | "organizations:read-all"
@@ -34,6 +36,7 @@ export type DashboardNavigationItem = {
 type NavigationLabels = {
   administration: string
   addresses: string
+  analytics: string
   dashboard: string
   districts: string
   orders: string
@@ -45,6 +48,7 @@ type NavigationLabels = {
 
 export function getDashboardNavigationItems({
   access,
+  canViewAnalytics,
   canManagePayments,
   labels,
   language,
@@ -53,6 +57,7 @@ export function getDashboardNavigationItems({
   pathname,
 }: {
   access: DashboardAccess
+  canViewAnalytics: boolean
   canManagePayments: boolean
   labels: NavigationLabels
   language: string
@@ -62,6 +67,7 @@ export function getDashboardNavigationItems({
 }): DashboardNavigationItem[] {
   const dashboardHref = `/${language}/dashboard`
   const administrationHref = `${dashboardHref}/adminstration`
+  const analyticsHref = `${dashboardHref}/analytics`
   const addressesHref = `${dashboardHref}/addresses`
   const regionsHref = `${addressesHref}/regions`
   const districtsHref = `${addressesHref}/districts`
@@ -82,6 +88,18 @@ export function getDashboardNavigationItems({
         label: labels.dashboard,
         permission: "dashboard:read",
       },
+      ...(canViewAnalytics
+        ? [
+            {
+              active: pathname.startsWith(analyticsHref),
+              href: analyticsHref,
+              icon: Analytics01Icon,
+              id: "analytics",
+              label: labels.analytics,
+              permission: "analytics:read" as const,
+            },
+          ]
+        : []),
       {
         active: pathname.startsWith(administrationHref),
         href: administrationHref,
@@ -127,15 +145,28 @@ export function getDashboardNavigationItems({
     )
   }
 
-  if (access === "organization" && organizationId) {
-    items.push({
-      active: pathname.startsWith(organizationsHref),
-      href: `${organizationsHref}/${organizationId}`,
-      icon: Building03Icon,
-      id: "organization",
-      label: organizationName || labels.organizations,
-      permission: "organization:manage-own",
-    })
+  if (access === "organization") {
+    if (canViewAnalytics) {
+      items.push({
+        active: pathname.startsWith(analyticsHref),
+        href: analyticsHref,
+        icon: Analytics01Icon,
+        id: "analytics",
+        label: labels.analytics,
+        permission: "analytics:read",
+      })
+    }
+
+    if (organizationId) {
+      items.push({
+        active: pathname.startsWith(organizationsHref),
+        href: `${organizationsHref}/${organizationId}`,
+        icon: Building03Icon,
+        id: "organization",
+        label: organizationName || labels.organizations,
+        permission: "organization:manage-own",
+      })
+    }
   }
 
   if (canManagePayments) {
