@@ -14,6 +14,7 @@ import {
 
 type DashboardPage =
   | "administration"
+  | "addresses"
   | "dashboard"
   | "organization"
   | "organizations"

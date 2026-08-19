@@ -8,6 +8,19 @@
       "updateFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
       "deleteFailed": "O'chirib bo'lmadi. Qayta urinib ko'ring."
     },
+    "notificationCenter": {
+      "title": "Bildirishnomalar",
+      "unread": "O'qilmagan: {{count}}",
+      "unreadOne": "O'qilmagan bildirishnoma",
+      "allRead": "Barcha bildirishnomalar o'qilgan",
+      "markAllRead": "Barchasini o'qish",
+      "emptyTitle": "Hozircha bildirishnomalar yo'q",
+      "emptyDescription": "Ular buyurtma amalda rasmiylashtirilgandan keyin paydo bo'ladi.",
+      "loadFailed": "Bildirishnomalarni yuklab bo'lmadi.",
+      "retry": "Qayta urinish",
+      "orderFallback": "Buyurtma yangilanishi",
+      "systemFallback": "Yangi bildirishnoma"
+    },
     "home": {
       "eyebrow": "Keyingi sevimli libosingiz",
       "title": "Sizga mos keladigan kiyimlar.",
@@ -284,6 +297,55 @@
           "LETTER": "Harfli",
           "NUMBER": "Raqamli"
         }
+      }
+    },
+    "addresses": {
+      "title": "Manzil ma'lumotnomalari",
+      "navigation": "Manzil ma'lumotnomasi bo'limlari",
+      "loading": "Manzil ma'lumotlari yuklanmoqda...",
+      "loadFailed": "Manzil ma'lumotlarini yuklab bo'lmadi.",
+      "saveFailed": "Ma'lumotlarni saqlab bo'lmadi. Maydonlarni tekshirib, qayta urinib ko'ring.",
+      "saving": "Saqlanmoqda...",
+      "saved": "{{count}} ta yozuv saqlandi",
+      "saveAll": "Yozuvlarni saqlash ({{count}})",
+      "addAnother": "Yana yozuv qo'shish",
+      "remove": "Yozuvni shakldan o'chirish",
+      "item": "{{number}}-yozuv",
+      "searchAction": "Qidirish",
+      "total": "Jami yozuvlar: {{count}}",
+      "regions": {
+        "title": "Viloyatlar",
+        "description": "Viloyatlarni ko'rish va yangi manzil viloyatlarini paketli qo'shish.",
+        "search": "Viloyatlarni qidirish...",
+        "create": "Viloyatlar qo'shish",
+        "createDescription": "Bir yoki bir nechta yozuvni to'ldiring. Barcha viloyatlar bitta so'rovda yuboriladi.",
+        "empty": "Viloyatlar topilmadi.",
+        "loadFailed": "Viloyatlar ro'yxatini yuklab bo'lmadi."
+      },
+      "districts": {
+        "title": "Tumanlar",
+        "description": "Tumanlarni ko'rish va ularni viloyatga bog'lab paketli qo'shish.",
+        "search": "Tumanlarni qidirish...",
+        "create": "Tumanlar qo'shish",
+        "createDescription": "Viloyatni tanlang va bir yoki bir nechta tuman yozuvini to'ldiring.",
+        "empty": "Tumanlar topilmadi."
+      },
+      "fields": {
+        "id": "ID",
+        "nameRu": "Nomi (RU)",
+        "nameUz": "Nomi (UZ)",
+        "region": "Viloyat",
+        "selectRegion": "Viloyatni tanlang",
+        "fakturaRegionId": "Faktura: viloyat IDsi",
+        "fakturaRegionCode": "Faktura: viloyat kodi",
+        "fakturaRegionName": "Faktura: viloyat nomi",
+        "fakturaDistrictCode": "Faktura: tuman kodi",
+        "fakturaDistrictName": "Faktura: tuman nomi",
+        "soato": "SOATO kodi"
+      },
+      "validation": {
+        "nameRequired": "Har bir yozuv uchun nom kiriting.",
+        "regionRequired": "Har bir tuman uchun viloyatni tanlang."
       }
     },
     "dashboard": {
@@ -888,6 +950,10 @@
         "administration": {
           "title": "Ma'muriyat",
           "description": "Humayro ma'lumotnomalari va sozlamalarini boshqarish."
+        },
+        "addresses": {
+          "title": "Manzil ma'lumotnomalari",
+          "description": "Humayro yetkazib berish viloyatlari va tumanlarini boshqarish."
         },
         "payments": {
           "title": "To'lovlarni boshqarish",

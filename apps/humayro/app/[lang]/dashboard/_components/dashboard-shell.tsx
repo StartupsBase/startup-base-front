@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ArrowDown01Icon,
   Home01Icon,
   Logout02Icon,
   PlayStoreIcon,
@@ -14,6 +15,7 @@ import { useTranslation } from "react-i18next"
 
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { Logo, LogoBrand } from "@/components/logo"
+import { NotificationsMenu } from "@/components/notifications-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Language } from "@/i18n/config"
 import { useMe1, type UserDTO } from "@/lib/api"
@@ -21,6 +23,11 @@ import { getDashboardAccess } from "@/lib/auth"
 import { clearAuthToken } from "@/lib/auth-client"
 import { HUMAYRO_PLAY_MARKET_URL } from "@/lib/constants"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@workspace/ui/components/collapsible"
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +39,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
@@ -74,11 +84,14 @@ export function DashboardShell({
     canManagePayments,
     labels: {
       administration: t("administration.title"),
+      addresses: t("addresses.title"),
       dashboard: t("dashboard.home"),
+      districts: t("addresses.districts.title"),
       orders: t("storefront.myOrders"),
       payments: t("payments.title"),
       organizations: t("dashboard.organizations"),
       profile: t("profile.title"),
+      regions: t("addresses.regions.title"),
     },
     language,
     organizationId: meQuery.data.organizationId,
@@ -137,22 +150,7 @@ export function DashboardShell({
               <SidebarGroupLabel>{t("dashboard.navigation")}</SidebarGroupLabel>
               <SidebarMenu className="gap-2">
                 {navigationItems.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      size="lg"
-                      isActive={item.active}
-                      tooltip={sidebarTooltip(item.label)}
-                      className="h-12 rounded-2xl px-2.5 font-semibold group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-md"
-                    >
-                      <Link href={item.href}>
-                        <DashboardNavIcon icon={item.icon} />
-                        <span className="text-[15px] font-bold text-sidebar-foreground group-data-[active=true]/menu-button:text-sidebar-primary-foreground group-data-[collapsible=icon]:hidden">
-                          {item.label}
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <DashboardNavigationEntry key={item.id} item={item} />
                 ))}
               </SidebarMenu>
             </SidebarGroup>
@@ -201,6 +199,10 @@ export function DashboardShell({
             <LogoBrand className="md:hidden" />
             <SidebarTrigger className="hidden size-10 rounded-xl border bg-background shadow-sm md:inline-flex" />
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <NotificationsMenu
+                language={language}
+                ordersHref={`/${language}/dashboard/orders`}
+              />
               <LanguageSwitcher language={language} className="size-10" />
               <ThemeToggle className="size-10" />
               <UserDropdown language={language} />
@@ -311,6 +313,76 @@ function DashboardNavIcon({ icon }: { icon: typeof Home01Icon }) {
     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sidebar-accent text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border/60 transition-colors group-data-[active=true]/menu-button:bg-sidebar-primary-foreground/15 group-data-[active=true]/menu-button:text-sidebar-primary-foreground group-data-[active=true]/menu-button:ring-sidebar-primary-foreground/20">
       <HugeiconsIcon icon={icon} strokeWidth={2.2} className="size-5!" />
     </span>
+  )
+}
+
+function DashboardNavigationEntry({
+  item,
+}: {
+  item: ReturnType<typeof getDashboardNavigationItems>[number]
+}) {
+  if (!item.children?.length) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          size="lg"
+          isActive={item.active}
+          tooltip={sidebarTooltip(item.label)}
+          className="h-12 rounded-2xl px-2.5 font-semibold group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-md"
+        >
+          <Link href={item.href}>
+            <DashboardNavIcon icon={item.icon} />
+            <span className="text-[15px] font-bold text-sidebar-foreground group-data-[active=true]/menu-button:text-sidebar-primary-foreground group-data-[collapsible=icon]:hidden">
+              {item.label}
+            </span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  }
+
+  return (
+    <Collapsible
+      asChild
+      defaultOpen={item.active}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton
+            size="lg"
+            isActive={item.active}
+            tooltip={sidebarTooltip(item.label)}
+            className="h-12 rounded-2xl px-2.5 font-semibold group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-md"
+          >
+            <DashboardNavIcon icon={item.icon} />
+            <span className="text-[15px] font-bold text-sidebar-foreground group-data-[active=true]/menu-button:text-sidebar-primary-foreground group-data-[collapsible=icon]:hidden">
+              {item.label}
+            </span>
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              className="ml-auto size-4! transition-transform group-data-[collapsible=icon]:hidden group-data-[state=open]/collapsible:rotate-180"
+            />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub className="mt-1 gap-1 border-sidebar-primary/25">
+            {item.children.map((child) => (
+              <SidebarMenuSubItem key={child.id}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={child.active}
+                  className="h-9 rounded-xl px-3 font-semibold data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                >
+                  <Link href={child.href}>{child.label}</Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
   )
 }
 

@@ -24,6 +24,10 @@ import {
   getMyOrdersQueryKey,
   useCheckout,
 } from "@/lib/api/generated/order/order"
+import {
+  getMyNotificationsQueryKey,
+  getUnreadCountQueryKey,
+} from "@/lib/api/generated/notification/notification"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
 import type { CartItemDTO } from "@/lib/api/model/cartItemDTO"
 import type { CheckoutDTO } from "@/lib/api/model/checkoutDTO"
@@ -88,6 +92,12 @@ export function CartView({ language }: { language: Language }) {
         await Promise.all([
           refreshCart(),
           queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() }),
+          queryClient.invalidateQueries({
+            queryKey: getMyNotificationsQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: getUnreadCountQueryKey(),
+          }),
         ])
       },
       onError: () => toast.error(text.checkoutError),

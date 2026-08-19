@@ -2,6 +2,7 @@ import {
   Building03Icon,
   CreditCardIcon,
   Home01Icon,
+  MapsIcon,
   Settings02Icon,
   ShoppingCart02Icon,
   UserCircleIcon,
@@ -12,6 +13,7 @@ import type { DashboardAccess } from "@/lib/auth"
 
 export type DashboardPermission =
   | "administration:manage"
+  | "addresses:manage"
   | "dashboard:read"
   | "organization:manage-own"
   | "organizations:read-all"
@@ -21,6 +23,7 @@ export type DashboardPermission =
 
 export type DashboardNavigationItem = {
   active: boolean
+  children?: DashboardNavigationItem[]
   href: string
   icon: IconSvgElement
   id: string
@@ -30,11 +33,14 @@ export type DashboardNavigationItem = {
 
 type NavigationLabels = {
   administration: string
+  addresses: string
   dashboard: string
+  districts: string
   orders: string
   payments: string
   organizations: string
   profile: string
+  regions: string
 }
 
 export function getDashboardNavigationItems({
@@ -56,6 +62,9 @@ export function getDashboardNavigationItems({
 }): DashboardNavigationItem[] {
   const dashboardHref = `/${language}/dashboard`
   const administrationHref = `${dashboardHref}/adminstration`
+  const addressesHref = `${dashboardHref}/addresses`
+  const regionsHref = `${addressesHref}/regions`
+  const districtsHref = `${addressesHref}/districts`
   const organizationsHref = `${dashboardHref}/organizations`
   const ordersHref = `${dashboardHref}/orders`
   const paymentsHref = `${dashboardHref}/payments`
@@ -80,6 +89,32 @@ export function getDashboardNavigationItems({
         id: "administration",
         label: labels.administration,
         permission: "administration:manage",
+      },
+      {
+        active: pathname.startsWith(addressesHref),
+        children: [
+          {
+            active: pathname.startsWith(regionsHref),
+            href: regionsHref,
+            icon: MapsIcon,
+            id: "regions",
+            label: labels.regions,
+            permission: "addresses:manage",
+          },
+          {
+            active: pathname.startsWith(districtsHref),
+            href: districtsHref,
+            icon: MapsIcon,
+            id: "districts",
+            label: labels.districts,
+            permission: "addresses:manage",
+          },
+        ],
+        href: regionsHref,
+        icon: MapsIcon,
+        id: "addresses",
+        label: labels.addresses,
+        permission: "addresses:manage",
       },
       {
         active: pathname.startsWith(organizationsHref),

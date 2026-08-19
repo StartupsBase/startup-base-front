@@ -295,56 +295,11 @@ export function CatalogSection({
           </div>
         </div>
 
-        <div className="mt-9 flex items-center gap-3 border-b pb-4">
-          <div className="flex min-w-0 flex-1 scrollbar-none gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-            <button
-              type="button"
-              className={cn(
-                "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                categoryId == null
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background hover:border-primary/50"
-              )}
-              onClick={() => selectCategory(null)}
-            >
-              {text.allCategories}
-            </button>
-            {parentCategories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={cn(
-                    "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                    activeParentId === category.id
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background hover:border-primary/50"
-                  )}
-                  onClick={() => selectCategory(category.id ?? null)}
-                >
-                  {category.imageUrl ? (
-                    <img
-                      src={category.imageUrl}
-                      alt=""
-                      className="mr-2 inline-block size-7 rounded-full object-cover"
-                    />
-                  ) : null}
-                  {name || "—"}
-                </button>
-              )
-            })}
-          </div>
-
+        <div className="mt-9 hidden justify-end border-b pb-4 lg:flex">
           <Button
             type="button"
             variant={desktopFiltersOpen ? "default" : "outline"}
-            className="hidden h-11 shrink-0 rounded-full px-5 lg:inline-flex"
+            className="h-11 shrink-0 rounded-full px-5"
             aria-expanded={desktopFiltersOpen}
             onClick={() => setDesktopFiltersOpen((current) => !current)}
           >
@@ -358,11 +313,10 @@ export function CatalogSection({
             side="right"
             className="w-screen! max-w-none! overflow-y-auto px-4 pt-14 pb-8 sm:max-w-none! lg:hidden"
           >
-            <SheetTitle className="sr-only">
-              {text.mobileFilters}
-            </SheetTitle>
+            <SheetTitle className="sr-only">{text.mobileFilters}</SheetTitle>
             <CatalogFilters
               language={language}
+              parentCategories={parentCategories}
               categories={childCategories}
               colors={colors}
               sizes={sizes}
@@ -392,6 +346,7 @@ export function CatalogSection({
             <div className="hidden lg:sticky lg:top-24 lg:block lg:min-w-52.5 lg:self-start xl:min-w-62.5">
               <CatalogFilters
                 language={language}
+                parentCategories={parentCategories}
                 categories={childCategories}
                 colors={colors}
                 sizes={sizes}
@@ -469,7 +424,7 @@ export function CatalogSection({
                   "mt-10 gap-4 pb-2",
                   isProductsPage
                     ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-                    : "flex snap-x snap-mandatory scrollbar-none overflow-x-auto overscroll-x-contain [&::-webkit-scrollbar]:hidden"
+                    : "scrollbar-none flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [&::-webkit-scrollbar]:hidden"
                 )}
               >
                 {products.map((product, index) => (
@@ -543,6 +498,7 @@ export function CatalogSection({
 
 type CatalogFiltersProps = {
   language: Language
+  parentCategories?: CategoryDTO[]
   categories: CategoryDTO[]
   colors: ColorDTO[]
   sizes: SizeDTO[]
@@ -554,7 +510,7 @@ type CatalogFiltersProps = {
   optionsLoading: boolean
   onDraftPriceChange: (range: [number, number]) => void
   onApplyPriceRange: (range: number[]) => void
-  onCategoryChange: (id: number) => void
+  onCategoryChange: (id: number | null) => void
   onColorChange: (id: number) => void
   onSizeChange: (id: number) => void
   onReset: () => void
@@ -563,6 +519,7 @@ type CatalogFiltersProps = {
 
 function CatalogFilters({
   language,
+  parentCategories = [],
   categories,
   colors,
   sizes,
@@ -581,6 +538,11 @@ function CatalogFilters({
   className,
 }: CatalogFiltersProps) {
   const text = useStorefrontCopy()
+  const selectedCategory = [...parentCategories, ...categories].find(
+    (category) => category.id === selectedCategoryId
+  )
+  const selectedParentId =
+    selectedCategory?.parentId ?? selectedCategory?.id ?? null
   const isFiltered =
     categories.some((category) => category.id === selectedCategoryId) ||
     appliedPriceRange[0] !== PRICE_MIN ||
@@ -617,6 +579,60 @@ function CatalogFilters({
           </button>
         ) : null}
       </div>
+
+      {parentCategories.length ? (
+        <fieldset className="mt-6 border-t pt-5">
+          <legend className="text-sm font-semibold">
+            {text.mobileFilters}
+          </legend>
+          <div className="mt-3 flex flex-col gap-2">
+            <button
+              type="button"
+              aria-pressed={selectedCategoryId == null}
+              className={cn(
+                "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
+                selectedCategoryId == null
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              onClick={() => onCategoryChange(null)}
+            >
+              {text.allCategories}
+            </button>
+            {parentCategories.map((category) => {
+              if (category.id == null) return null
+              const name =
+                language === "ru"
+                  ? category.nameRu || category.name || category.nameEng
+                  : category.name || category.nameRu || category.nameEng
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  aria-pressed={selectedParentId === category.id}
+                  className={cn(
+                    "flex min-h-16 w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
+                    selectedParentId === category.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => onCategoryChange(category.id!)}
+                >
+                  {category.imageUrl ? (
+                    <img
+                      src={category.imageUrl}
+                      alt=""
+                      className="size-9 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : null}
+                  <span className="min-w-0 break-words">{name || "—"}</span>
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+      ) : null}
 
       {categories.length ? (
         <fieldset className="mt-6 border-t pt-5">
