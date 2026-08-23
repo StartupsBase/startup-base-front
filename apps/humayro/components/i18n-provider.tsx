@@ -14,6 +14,7 @@ function I18nProvider({
   children: React.ReactNode
   language: Language
 }) {
+  const languageResources = resources[language]
   const i18n = React.useMemo(() => {
     const instance = createInstance()
 
@@ -31,7 +32,7 @@ function I18nProvider({
     })
 
     return instance
-  }, [language])
+  }, [language, languageResources])
 
   return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
 }

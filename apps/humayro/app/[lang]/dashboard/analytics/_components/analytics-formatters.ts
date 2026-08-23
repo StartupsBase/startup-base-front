@@ -1,5 +1,68 @@
 import type { DateRange } from "@workspace/ui/components/date-picker"
 
+const MONTH_NAMES = {
+  ru: {
+    long: [
+      "января",
+      "февраля",
+      "марта",
+      "апреля",
+      "мая",
+      "июня",
+      "июля",
+      "августа",
+      "сентября",
+      "октября",
+      "ноября",
+      "декабря",
+    ],
+    short: [
+      "янв.",
+      "февр.",
+      "мар.",
+      "апр.",
+      "мая",
+      "июн.",
+      "июл.",
+      "авг.",
+      "сент.",
+      "окт.",
+      "нояб.",
+      "дек.",
+    ],
+  },
+  uz: {
+    long: [
+      "yanvar",
+      "fevral",
+      "mart",
+      "aprel",
+      "may",
+      "iyun",
+      "iyul",
+      "avgust",
+      "sentabr",
+      "oktabr",
+      "noyabr",
+      "dekabr",
+    ],
+    short: [
+      "yan",
+      "fev",
+      "mar",
+      "apr",
+      "may",
+      "iyun",
+      "iyul",
+      "avg",
+      "sen",
+      "okt",
+      "noy",
+      "dek",
+    ],
+  },
+} as const
+
 export function formatCurrency(value: number, language: string) {
   const currency = language === "uz" ? "so‘m" : "сум"
   return `${formatNumber(value, language)} ${currency}`
@@ -34,21 +97,14 @@ export function formatChartDate(value: string, language: string) {
   const date = parseInputDate(value)
   if (!date) return value
 
-  return new Intl.DateTimeFormat(getLocale(language), {
-    day: "2-digit",
-    month: "short",
-  }).format(date)
+  return formatDateWithMonthName(date, language, "short", false)
 }
 
 export function formatLongDate(value: string, language: string) {
   const date = parseInputDate(value)
   if (!date) return value
 
-  return new Intl.DateTimeFormat(getLocale(language), {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date)
+  return formatDateWithMonthName(date, language, "long", true)
 }
 
 export function formatDateRange(from: string, to: string, language: string) {
@@ -85,11 +141,25 @@ export function clampScore(value?: number) {
 }
 
 function formatShortDate(date: Date, language: string) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date)
+  return formatDateWithMonthName(date, language, "long", true)
+}
+
+function formatDateWithMonthName(
+  date: Date,
+  language: string,
+  width: "long" | "short",
+  includeYear: boolean
+) {
+  const normalizedLanguage = language === "uz" ? "uz" : "ru"
+  const month = MONTH_NAMES[normalizedLanguage][width][date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+
+  if (normalizedLanguage === "uz") {
+    return `${day}-${month}${includeYear ? ` ${year}` : ""}`
+  }
+
+  return `${day} ${month}${includeYear ? ` ${year} г.` : ""}`
 }
 
 function getLocale(language: string) {

@@ -19,6 +19,8 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card"
 import {
+  datePickerRuLocale,
+  datePickerUzLocale,
   DateRangePicker,
   type DateRange,
 } from "@workspace/ui/components/date-picker"
@@ -123,7 +125,11 @@ export function AnalyticsFiltersCard({
               value={dateRange}
               onValueChange={updateRange}
               formatValue={(range) => formatPickerRange(range, language)}
+              locale={
+                language === "uz" ? datePickerUzLocale : datePickerRuLocale
+              }
               placeholder={t("analytics.filters.selectPeriod")}
+              todayLabel={t("analytics.filters.today")}
               clearable={false}
               required
               className="h-11 w-full justify-start rounded-xl bg-background px-3.5"
