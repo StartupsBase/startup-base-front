@@ -29,6 +29,7 @@ import {
   getUnreadCountQueryKey,
 } from "@/lib/api/generated/notification/notification"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import type { CartItemDTO } from "@/lib/api/model/cartItemDTO"
 import type { CheckoutDTO } from "@/lib/api/model/checkoutDTO"
 import type { OrderDTO } from "@/lib/api/model/orderDTO"
@@ -60,7 +61,7 @@ export function CartView({ language }: { language: Language }) {
     query: { enabled: hasToken, retry: false },
   })
   const productsQuery = useGetAll2(
-    { active: true, page: 0, size: 20 },
+    { active: true, page: toApiPage(FIRST_PAGE), size: 20 },
     { query: { staleTime: 60_000 } }
   )
 

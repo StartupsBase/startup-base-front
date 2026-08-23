@@ -73,6 +73,8 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/minimal-tiptap": "./src/components/ui/minimal-tiptap/index.ts",
     "./components/minimal-tiptap/*": "./src/components/ui/minimal-tiptap/*",
+    "./components/date-picker": "./src/components/date-picker/index.ts",
+    "./components/date-picker/*": "./src/components/date-picker/*.tsx",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts"
   }

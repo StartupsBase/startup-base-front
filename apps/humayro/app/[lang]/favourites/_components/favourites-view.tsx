@@ -5,6 +5,7 @@ import Link from "next/link"
 import type { Language } from "@/i18n/config"
 import { useGetFavorites } from "@/lib/api/generated/favorite/favorite"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
@@ -21,7 +22,7 @@ export function FavouritesView({ language }: { language: Language }) {
     query: { enabled: hasToken, retry: false },
   })
   const guestProductsQuery = useGetAll2(
-    { active: true, page: 0, size: 100 },
+    { active: true, page: toApiPage(FIRST_PAGE), size: 100 },
     { query: { enabled: !hasToken, staleTime: 60_000 } }
   )
 

@@ -33,6 +33,7 @@ import {
 } from "@workspace/ui/components/dialog"
 import { Slider } from "@workspace/ui/components/slider"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import {
   Select,
   SelectContent,
@@ -87,7 +88,7 @@ export function CatalogSection({
   ])
   const [colorId, setColorId] = useState<number | null>(null)
   const [sizeId, setSizeId] = useState<number | null>(null)
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(FIRST_PAGE)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const categoriesQuery = useGetAll5(
@@ -110,7 +111,7 @@ export function CatalogSection({
       sizeId: sizeId ?? undefined,
       search: searchQuery || undefined,
       sort: sortMap[sort],
-      page: isProductsPage ? page : 0,
+      page: toApiPage(isProductsPage ? page : FIRST_PAGE),
       size: isProductsPage ? PRODUCTS_PAGE_SIZE : 12,
     },
     { query: { retry: 1 } }
@@ -218,7 +219,7 @@ export function CatalogSection({
     nextRange.sort((first, second) => first - second)
     setDraftPriceRange(nextRange)
     setPriceRange(nextRange)
-    setPage(0)
+    setPage(FIRST_PAGE)
   }
 
   function resetFilters() {
@@ -228,22 +229,22 @@ export function CatalogSection({
     setColorId(null)
     setSizeId(null)
     setCategoryId(null)
-    setPage(0)
+    setPage(FIRST_PAGE)
   }
 
   function selectCategory(id: number | null) {
     setCategoryId(id)
-    setPage(0)
+    setPage(FIRST_PAGE)
   }
 
   function toggleColor(id: number) {
     setColorId((current) => (current === id ? null : id))
-    setPage(0)
+    setPage(FIRST_PAGE)
   }
 
   function toggleSize(id: number) {
     setSizeId((current) => (current === id ? null : id))
-    setPage(0)
+    setPage(FIRST_PAGE)
   }
 
   return (
@@ -278,7 +279,7 @@ export function CatalogSection({
               value={sort}
               onValueChange={(value) => {
                 setSort(value as CatalogSort)
-                setPage(0)
+                setPage(FIRST_PAGE)
               }}
             >
               <SelectTrigger className="h-11 min-w-0 flex-1 rounded-2xl bg-background sm:min-w-48 lg:flex-none">
@@ -438,16 +439,18 @@ export function CatalogSection({
             {isProductsPage && totalPages > 1 ? (
               <nav
                 aria-label={text.paginationPage
-                  .replace("{{current}}", String(page + 1))
+                  .replace("{{current}}", String(page))
                   .replace("{{total}}", String(totalPages))}
                 className="mt-10 flex flex-wrap items-center justify-center gap-3"
               >
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={page === 0 || productsQuery.isFetching}
+                  disabled={page === FIRST_PAGE || productsQuery.isFetching}
                   onClick={() => {
-                    setPage((current) => Math.max(0, current - 1))
+                    setPage((current) =>
+                      Math.max(FIRST_PAGE, current - 1)
+                    )
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >
@@ -455,15 +458,15 @@ export function CatalogSection({
                 </Button>
                 <span className="min-w-32 text-center text-sm font-semibold text-muted-foreground">
                   {text.paginationPage
-                    .replace("{{current}}", String(page + 1))
+                    .replace("{{current}}", String(page))
                     .replace("{{total}}", String(totalPages))}
                 </span>
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={page + 1 >= totalPages || productsQuery.isFetching}
+                  disabled={page >= totalPages || productsQuery.isFetching}
                   onClick={() => {
-                    setPage((current) => Math.min(totalPages - 1, current + 1))
+                    setPage((current) => Math.min(totalPages, current + 1))
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >

@@ -21,7 +21,7 @@ import {
   useGetAll,
 } from "@/lib/api/generated/user-controller/user-controller"
 import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
-import { useGetAll6 as useBranches } from "@/lib/api/generated/branch/branch"
+import { useInfiniteBranches } from "@/hooks/use-infinite-directory-query"
 import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
@@ -100,7 +100,7 @@ export function Dashboard({ language }: { language: string }) {
   const organizationsQuery = useOrganizations(undefined, {
     query: { enabled: meQuery.isSuccess, retry: false },
   })
-  const branchesQuery = useBranches(
+  const branchesQuery = useInfiniteBranches(
     { organizationId: selectedOrganizationId, size: 100 },
     { query: { enabled: meQuery.isSuccess, retry: false } }
   )
