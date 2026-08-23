@@ -33,6 +33,7 @@ import {
   type PaymentTransaction,
   type PaymentTransactionStatus,
 } from "@/lib/payment-api"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { Button } from "@workspace/ui/components/button"
 import {
   Card,
@@ -92,7 +93,7 @@ export function PaymentsPage({
   const [statusFilter, setStatusFilter] = useState<
     PaymentTransactionStatus | undefined
   >()
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(FIRST_PAGE)
   const [refundTarget, setRefundTarget] = useState<PaymentTransaction | null>(
     null
   )
@@ -117,7 +118,7 @@ export function PaymentsPage({
 
   const transactionFilters = useMemo(
     () => ({
-      page,
+      page: toApiPage(page),
       provider: providerFilter,
       search: search.trim() || undefined,
       size: 20,
@@ -292,7 +293,7 @@ export function PaymentsPage({
               value={organizationId?.toString()}
               onValueChange={(value) => {
                 setSelectedOrganizationId(Number(value))
-                setPage(0)
+                setPage(FIRST_PAGE)
               }}
             >
               <SelectTrigger id="payment-organization" className="h-11 w-full">
@@ -452,7 +453,7 @@ export function PaymentsPage({
                   placeholder={t("payments.search")}
                   onChange={(event) => {
                     setSearch(event.target.value)
-                    setPage(0)
+                    setPage(FIRST_PAGE)
                   }}
                 />
                 <Select
@@ -461,7 +462,7 @@ export function PaymentsPage({
                     setProviderFilter(
                       value === "ALL" ? undefined : (value as PaymentProvider)
                     )
-                    setPage(0)
+                    setPage(FIRST_PAGE)
                   }}
                 >
                   <SelectTrigger className="h-11 w-full xl:w-36">
@@ -483,7 +484,7 @@ export function PaymentsPage({
                         ? undefined
                         : (value as PaymentTransactionStatus)
                     )
-                    setPage(0)
+                    setPage(FIRST_PAGE)
                   }}
                 >
                   <SelectTrigger className="h-11 w-full xl:w-40">
@@ -546,18 +547,26 @@ export function PaymentsPage({
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={page === 0 || transactionsQuery.isFetching}
+                    disabled={page === FIRST_PAGE || transactionsQuery.isFetching}
                     onClick={() =>
-                      setPage((current) => Math.max(current - 1, 0))
+                      setPage((current) =>
+                        Math.max(current - 1, FIRST_PAGE)
+                      )
                     }
                   >
                     {t("dashboard.previous")}
                   </Button>
+                  <span className="self-center px-2 text-sm text-muted-foreground">
+                    {t("dashboard.page", {
+                      page,
+                      total: transactionsQuery.data?.totalPages ?? 1,
+                    })}
+                  </span>
                   <Button
                     size="sm"
                     variant="outline"
                     disabled={
-                      page + 1 >= (transactionsQuery.data?.totalPages ?? 0) ||
+                      page >= (transactionsQuery.data?.totalPages ?? 0) ||
                       transactionsQuery.isFetching
                     }
                     onClick={() => setPage((current) => current + 1)}

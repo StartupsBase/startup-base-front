@@ -10,6 +10,7 @@ import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import { useGetAll2 } from "@/lib/api/generated/product/product"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 
@@ -42,7 +43,7 @@ export function AdvancedSearch({ language }: { language: Language }) {
       active: true,
       search: debouncedQuery || undefined,
       sort: "name,asc",
-      page: 0,
+      page: toApiPage(FIRST_PAGE),
       size: 8,
     },
     { query: { enabled: isOpen, staleTime: 30_000 } }

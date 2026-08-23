@@ -48,9 +48,9 @@ import {
   getGetAll6QueryKey as getBranchesQueryKey,
   useCreate6 as useCreateBranch,
   useDelete5 as useDeleteBranch,
-  useGetAll6 as useGetBranches,
   useUpdate6 as useUpdateBranch,
 } from "@/lib/api/generated/branch/branch"
+import { useInfiniteBranches } from "@/hooks/use-infinite-directory-query"
 import {
   getGetAll2QueryKey as getProductsQueryKey,
   useDelete2 as useDeleteProduct,
@@ -315,7 +315,7 @@ export function OrganizationCategoriesPage({
       query: { enabled: canManageCategories, retry: false },
     }
   )
-  const branchesQuery = useGetBranches(
+  const branchesQuery = useInfiniteBranches(
     { organizationId },
     {
       query: { enabled: canManageCategories, retry: false },

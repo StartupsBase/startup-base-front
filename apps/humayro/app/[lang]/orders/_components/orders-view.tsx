@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/generated/order/order"
 import type { OrderDTO } from "@/lib/api/model/orderDTO"
 import { formatStorefrontPrice, getLoginHref } from "@/lib/storefront"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
@@ -26,9 +27,9 @@ export function OrdersView({ language }: { language: Language }) {
   const text = useStorefrontCopy()
   const hasToken = useHasAuthToken()
   const queryClient = useQueryClient()
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(FIRST_PAGE)
   const ordersQuery = useMyOrders(
-    { page, size: ORDERS_PAGE_SIZE },
+    { page: toApiPage(page), size: ORDERS_PAGE_SIZE },
     { query: { enabled: hasToken, retry: false } }
   )
   const cancelMutation = useCancel1({
@@ -120,13 +121,15 @@ export function OrdersView({ language }: { language: Language }) {
           <div className="mt-8 flex items-center justify-center gap-3">
             <Button
               variant="outline"
-              disabled={page === 0 || ordersQuery.isFetching}
-              onClick={() => setPage((current) => Math.max(0, current - 1))}
+              disabled={page === FIRST_PAGE || ordersQuery.isFetching}
+              onClick={() =>
+                setPage((current) => Math.max(FIRST_PAGE, current - 1))
+              }
             >
               {text.previousStep}
             </Button>
             <span className="text-sm text-muted-foreground">
-              {page + 1} / {ordersQuery.data?.totalPages ?? 1}
+              {page} / {ordersQuery.data?.totalPages ?? 1}
             </span>
             <Button
               variant="outline"

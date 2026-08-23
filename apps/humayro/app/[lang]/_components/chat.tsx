@@ -32,6 +32,7 @@ import {
 import type { ChatMessageDTO } from "@/lib/api/model/chatMessageDTO"
 import type { ChatRoomDTO } from "@/lib/api/model/chatRoomDTO"
 import { useHasAuthToken } from "@/lib/use-auth-token"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -160,7 +161,7 @@ export function Chat({
   const imagePreviewUrlRef = useRef<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
-  const roomsParams = { page: 0, size: 100 }
+  const roomsParams = { page: toApiPage(FIRST_PAGE), size: 100 }
   const roomsQuery = useGetRooms(roomsParams, {
     query: {
       enabled: isOpen && hasToken,
@@ -187,7 +188,7 @@ export function Chat({
   const activeRoom =
     rooms.find((room) => room.id === activeRoomId) ??
     (productRoom?.id === activeRoomId ? productRoom : undefined)
-  const messagesParams = { page: 0, size: 100 }
+  const messagesParams = { page: toApiPage(FIRST_PAGE), size: 100 }
   const messagesQuery = useGetMessages(activeRoomId ?? 0, messagesParams, {
     query: {
       enabled:

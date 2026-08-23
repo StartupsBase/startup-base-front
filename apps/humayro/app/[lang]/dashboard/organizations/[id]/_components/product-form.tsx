@@ -29,7 +29,7 @@ import {
   useUploadVideo,
 } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { useGetAll5 } from "@/lib/api/generated/category/category"
-import { useGetAll6 as useGetBranches } from "@/lib/api/generated/branch/branch"
+import { useInfiniteBranches } from "@/hooks/use-infinite-directory-query"
 import { useGetAll4 as useGetColors } from "@/lib/api/generated/color/color"
 import {
   getGetAll2QueryKey,
@@ -279,7 +279,7 @@ export function ProductForm({
     query: { enabled: editing, retry: false },
   })
   const categoriesQuery = useGetAll5()
-  const branchesQuery = useGetBranches({ organizationId, size: 100 })
+  const branchesQuery = useInfiniteBranches({ organizationId, size: 100 })
   const colorsQuery = useGetColors()
   const sizesQuery = useGetSizes()
   const create = useCreate2()

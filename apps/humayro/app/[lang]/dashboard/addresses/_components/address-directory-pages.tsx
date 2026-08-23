@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Input } from "@/components/input"
+import { useInfiniteRegions } from "@/hooks/use-infinite-directory-query"
+import { useLocalizedName } from "@/hooks/use-localized-name"
 import type { DistrictCreateDTO, RegionCreateDTO, RegionDTO } from "@/lib/api"
 import {
   getGetAll10QueryKey,
@@ -26,6 +28,7 @@ import {
   useCreateBulk as useCreateRegions,
   useGetAll9 as useRegions,
 } from "@/lib/api/generated/region/region"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { Button } from "@workspace/ui/components/button"
 import {
   Dialog,
@@ -48,6 +51,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 
 const PAGE_SIZE = 20
+const REGION_OPTIONS_SIZE = 100
 
 type RegionDraft = {
   fakturaRegionCode: string
@@ -70,8 +74,12 @@ type DistrictDraft = {
 
 export function RegionsDirectoryPage({ language }: { language: string }) {
   const { t } = useTranslation()
+  const { getLocalizedName } = useLocalizedName({
+    defaultNameLanguage: "ru",
+    language,
+  })
   const queryClient = useQueryClient()
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(FIRST_PAGE)
   const [searchDraft, setSearchDraft] = useState("")
   const [search, setSearch] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -80,7 +88,7 @@ export function RegionsDirectoryPage({ language }: { language: string }) {
   const regionsQuery = useRegions(
     {
       name: search || undefined,
-      page,
+      page: toApiPage(page),
       size: PAGE_SIZE,
     },
     {
@@ -94,7 +102,7 @@ export function RegionsDirectoryPage({ language }: { language: string }) {
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setPage(0)
+    setPage(FIRST_PAGE)
     setSearch(searchDraft.trim())
   }
 
@@ -208,21 +216,29 @@ export function RegionsDirectoryPage({ language }: { language: string }) {
           <DirectoryTable
             headers={[
               t("addresses.fields.id"),
-              t("addresses.fields.nameRu"),
-              t("addresses.fields.nameUz"),
+              t("addresses.fields.name"),
+              t("addresses.districts.title"),
             ]}
             rows={(regionsQuery.data?.content ?? []).map((region) => ({
               cells: [
                 region.id ?? "—",
-                region.name || "—",
-                region.nameUz || "—",
+                getLocalizedName(region),
+                region.id === undefined ? null : (
+                  <Button asChild size="sm" variant="outline">
+                    <Link
+                      href={`/${language}/dashboard/addresses/districts?regionId=${region.id}`}
+                    >
+                      {t("addresses.regions.viewDistricts")}
+                    </Link>
+                  </Button>
+                ),
               ],
               key: region.id ?? `${region.name}-${region.nameUz}`,
             }))}
             emptyMessage={t("addresses.regions.empty")}
           />
           <DirectoryPagination
-            page={regionsQuery.data?.page ?? page}
+            page={page}
             totalElements={regionsQuery.data?.totalElements ?? 0}
             totalPages={regionsQuery.data?.totalPages ?? 0}
             onPageChange={setPage}
@@ -233,21 +249,32 @@ export function RegionsDirectoryPage({ language }: { language: string }) {
   )
 }
 
-export function DistrictsDirectoryPage({ language }: { language: string }) {
+export function DistrictsDirectoryPage({
+  initialRegionId,
+  language,
+}: {
+  initialRegionId?: number
+  language: string
+}) {
   const { t } = useTranslation()
+  const { getLocalizedName } = useLocalizedName({
+    defaultNameLanguage: "ru",
+    language,
+  })
   const queryClient = useQueryClient()
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(FIRST_PAGE)
   const [searchDraft, setSearchDraft] = useState("")
   const [search, setSearch] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const nextKey = useRef(2)
   const [drafts, setDrafts] = useState<DistrictDraft[]>([
-    createDistrictDraft(1),
+    createDistrictDraft(1, initialRegionId),
   ])
   const districtsQuery = useDistricts(
     {
       name: search || undefined,
-      page,
+      page: toApiPage(page),
+      regionId: initialRegionId,
       size: PAGE_SIZE,
     },
     {
@@ -257,16 +284,24 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
       },
     }
   )
-  const regionsQuery = useRegions(
-    { page: 0, size: 500 },
+  const regionsQuery = useInfiniteRegions(
+    { size: REGION_OPTIONS_SIZE },
     { query: { retry: false } }
   )
   const createDistricts = useCreateDistricts()
   const regions = regionsQuery.data?.content ?? []
+  const selectedRegion = regions.find((region) => region.id === initialRegionId)
+
+  function getRegionName(regionId?: number, fallback = "—") {
+    return getLocalizedName(
+      regions.find((region) => region.id === regionId),
+      fallback
+    )
+  }
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setPage(0)
+    setPage(FIRST_PAGE)
     setSearch(searchDraft.trim())
   }
 
@@ -299,7 +334,7 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
       const created = await createDistricts.mutateAsync({ data: payload })
       await queryClient.invalidateQueries({ queryKey: getGetAll10QueryKey() })
       toast.success(t("addresses.saved", { count: created.length }))
-      setDrafts([createDistrictDraft(nextKey.current++)])
+      setDrafts([createDistrictDraft(nextKey.current++, initialRegionId)])
       setDialogOpen(false)
     } catch {
       toast.error(t("addresses.saveFailed"))
@@ -339,6 +374,9 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
                     key={draft.key}
                     draft={draft}
                     index={index}
+                    getRegionName={(region) =>
+                      getLocalizedName(region, `#${region.id}`)
+                    }
                     regions={regions}
                     regionsLoading={regionsQuery.isLoading}
                     removable={drafts.length > 1}
@@ -363,7 +401,7 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
                 onClick={() =>
                   setDrafts((current) => [
                     ...current,
-                    createDistrictDraft(nextKey.current++),
+                    createDistrictDraft(nextKey.current++, initialRegionId),
                   ])
                 }
               >
@@ -385,6 +423,20 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
         </Dialog>
       }
     >
+      {initialRegionId ? (
+        <div className="flex flex-col gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            {t("addresses.districts.filteredByRegion", {
+              region: getLocalizedName(selectedRegion, `#${initialRegionId}`),
+            })}
+          </p>
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/${language}/dashboard/addresses/districts`}>
+              {t("addresses.districts.showAll")}
+            </Link>
+          </Button>
+        </div>
+      ) : null}
       <DirectorySearch
         value={searchDraft}
         onChange={setSearchDraft}
@@ -400,25 +452,21 @@ export function DistrictsDirectoryPage({ language }: { language: string }) {
           <DirectoryTable
             headers={[
               t("addresses.fields.id"),
-              t("addresses.fields.nameRu"),
-              t("addresses.fields.nameUz"),
+              t("addresses.fields.name"),
               t("addresses.fields.region"),
             ]}
             rows={(districtsQuery.data?.content ?? []).map((district) => ({
               cells: [
                 district.id ?? "—",
-                district.name || "—",
-                district.nameUz || "—",
-                district.regionName ||
-                  findRegionName(regions, district.regionId) ||
-                  "—",
+                getLocalizedName(district),
+                getRegionName(district.regionId, district.regionName),
               ],
               key: district.id ?? `${district.regionId}-${district.name}`,
             }))}
             emptyMessage={t("addresses.districts.empty")}
           />
           <DirectoryPagination
-            page={districtsQuery.data?.page ?? page}
+            page={page}
             totalElements={districtsQuery.data?.totalElements ?? 0}
             totalPages={districtsQuery.data?.totalPages ?? 0}
             onPageChange={setPage}
@@ -591,18 +639,16 @@ function DirectoryPagination({
         <Button
           variant="outline"
           size="sm"
-          disabled={page <= 0}
-          onClick={() => onPageChange(page - 1)}
+          disabled={page <= FIRST_PAGE}
+          onClick={() => onPageChange(Math.max(FIRST_PAGE, page - 1))}
         >
           {t("dashboard.previous")}
         </Button>
-        <span>
-          {t("dashboard.page", { page: page + 1, total: safeTotalPages })}
-        </span>
+        <span>{t("dashboard.page", { page, total: safeTotalPages })}</span>
         <Button
           variant="outline"
           size="sm"
-          disabled={page + 1 >= safeTotalPages}
+          disabled={page >= safeTotalPages}
           onClick={() => onPageChange(page + 1)}
         >
           {t("dashboard.next")}
@@ -668,6 +714,7 @@ function RegionDraftFields({
 
 function DistrictDraftFields({
   draft,
+  getRegionName,
   index,
   onChange,
   onRemove,
@@ -676,6 +723,7 @@ function DistrictDraftFields({
   removable,
 }: {
   draft: DistrictDraft
+  getRegionName: (region: RegionDTO) => string
   index: number
   onChange: (draft: DistrictDraft) => void
   onRemove: () => void
@@ -707,7 +755,7 @@ function DistrictDraftFields({
             {regions.map((region) =>
               region.id === undefined ? null : (
                 <SelectItem key={region.id} value={String(region.id)}>
-                  {region.name || region.nameUz || `#${region.id}`}
+                  {getRegionName(region)}
                 </SelectItem>
               )
             )}
@@ -843,14 +891,14 @@ function createRegionDraft(key: number): RegionDraft {
   }
 }
 
-function createDistrictDraft(key: number): DistrictDraft {
+function createDistrictDraft(key: number, regionId?: number): DistrictDraft {
   return {
     fakturaDistrictCode: "",
     fakturaDistrictName: "",
     key,
     name: "",
     nameUz: "",
-    regionId: "",
+    regionId: regionId ? String(regionId) : "",
     soato: "",
   }
 }
@@ -863,9 +911,4 @@ function optionalNumber(value: string) {
   if (!value.trim()) return undefined
   const number = Number(value)
   return Number.isFinite(number) ? number : undefined
-}
-
-function findRegionName(regions: RegionDTO[], regionId?: number) {
-  const region = regions.find((item) => item.id === regionId)
-  return region?.name || region?.nameUz
 }

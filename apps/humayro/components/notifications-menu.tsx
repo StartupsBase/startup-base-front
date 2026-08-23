@@ -23,6 +23,7 @@ import {
 } from "@/lib/api/generated/notification/notification"
 import type { NotificationDTO } from "@/lib/api/model/notificationDTO"
 import { useHasAuthToken } from "@/lib/use-auth-token"
+import { FIRST_PAGE, toApiPage } from "@/lib/pagination"
 import { Button } from "@workspace/ui/components/button"
 import {
   Popover,
@@ -32,7 +33,10 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { cn } from "@workspace/ui/lib/utils"
 
-const notificationsParams = { page: 0, size: 20 } as const
+const notificationsParams = {
+  page: toApiPage(FIRST_PAGE),
+  size: 20,
+} as const
 
 export function NotificationsMenu({
   language,

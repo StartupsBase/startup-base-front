@@ -21,8 +21,10 @@ import { z } from "zod"
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
 import { useMe1 } from "@/lib/api"
-import { useGetAll10 as useDistricts } from "@/lib/api/generated/district/district"
-import { useGetAll9 as useRegions } from "@/lib/api/generated/region/region"
+import {
+  useInfiniteDistricts,
+  useInfiniteRegions,
+} from "@/hooks/use-infinite-directory-query"
 import type { CartItemDTO } from "@/lib/api/model/cartItemDTO"
 import type { CheckoutDTO } from "@/lib/api/model/checkoutDTO"
 import type { DistrictDTO } from "@/lib/api/model/districtDTO"
@@ -141,12 +143,12 @@ export function CheckoutStepper({
     defaultValue: defaultValues,
   })
   const selectedRegionId = values.regionId ?? 0
-  const regionsQuery = useRegions(
-    { page: 0, size: 100 },
+  const regionsQuery = useInfiniteRegions(
+    { size: 100 },
     { query: { retry: false } }
   )
-  const districtsQuery = useDistricts(
-    { regionId: selectedRegionId || undefined, page: 0, size: 100 },
+  const districtsQuery = useInfiniteDistricts(
+    { regionId: selectedRegionId || undefined, size: 100 },
     { query: { enabled: selectedRegionId > 0, retry: false } }
   )
   const regions = regionsQuery.data?.content ?? []
