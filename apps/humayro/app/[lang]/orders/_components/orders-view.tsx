@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import type { Language } from "@/i18n/config"
@@ -11,10 +12,7 @@ import {
   useMyOrders,
 } from "@/lib/api/generated/order/order"
 import type { OrderDTO } from "@/lib/api/model/orderDTO"
-import {
-  formatStorefrontPrice,
-  getLoginHref,
-} from "@/lib/storefront"
+import { formatStorefrontPrice, getLoginHref } from "@/lib/storefront"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import { Button } from "@workspace/ui/components/button"
@@ -22,13 +20,17 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { EmptyState } from "../../_components/storefront/empty-state"
 
+const ORDERS_PAGE_SIZE = 10
+
 export function OrdersView({ language }: { language: Language }) {
   const text = useStorefrontCopy()
   const hasToken = useHasAuthToken()
   const queryClient = useQueryClient()
-  const ordersQuery = useMyOrders({
-    query: { enabled: hasToken, retry: false },
-  })
+  const [page, setPage] = useState(0)
+  const ordersQuery = useMyOrders(
+    { page, size: ORDERS_PAGE_SIZE },
+    { query: { enabled: hasToken, retry: false } }
+  )
   const cancelMutation = useCancel1({
     mutation: {
       onSuccess: async () => {
@@ -66,7 +68,7 @@ export function OrdersView({ language }: { language: Language }) {
     )
   }
 
-  const orders = ordersQuery.data ?? []
+  const orders = ordersQuery.data?.content ?? []
 
   if (orders.length === 0) {
     return (
@@ -104,7 +106,8 @@ export function OrdersView({ language }: { language: Language }) {
               order={order}
               language={language}
               isCancelling={
-                cancelMutation.isPending && cancelMutation.variables?.id === order.id
+                cancelMutation.isPending &&
+                cancelMutation.variables?.id === order.id
               }
               onCancel={() =>
                 order.id != null && cancelMutation.mutate({ id: order.id })
@@ -112,6 +115,30 @@ export function OrdersView({ language }: { language: Language }) {
             />
           ))}
         </div>
+
+        {(ordersQuery.data?.totalPages ?? 0) > 1 ? (
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              disabled={page === 0 || ordersQuery.isFetching}
+              onClick={() => setPage((current) => Math.max(0, current - 1))}
+            >
+              {text.previousStep}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {page + 1} / {ordersQuery.data?.totalPages ?? 1}
+            </span>
+            <Button
+              variant="outline"
+              disabled={
+                ordersQuery.data?.last !== false || ordersQuery.isFetching
+              }
+              onClick={() => setPage((current) => current + 1)}
+            >
+              {text.nextStep}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </main>
   )
@@ -161,10 +188,13 @@ function OrderCard({
         <span
           className={cn(
             "rounded-full px-3 py-1.5 text-xs font-bold",
-            status === "DELIVERED" && "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+            status === "DELIVERED" &&
+              "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
             status === "CANCELLED" && "bg-destructive/10 text-destructive",
-            status === "SHIPPED" && "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-            (status === "NEW" || status === "CONFIRMED") && "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+            status === "SHIPPED" &&
+              "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+            (status === "NEW" || status === "CONFIRMED") &&
+              "bg-amber-500/10 text-amber-700 dark:text-amber-300"
           )}
         >
           {statusLabel}
@@ -173,7 +203,10 @@ function OrderCard({
 
       <div className="space-y-3 p-5 sm:p-6">
         {order.items?.map((item, index) => (
-          <div key={item.id ?? index} className="flex justify-between gap-4 text-sm">
+          <div
+            key={item.id ?? index}
+            className="flex justify-between gap-4 text-sm"
+          >
             <div className="min-w-0">
               <p className="truncate font-medium">{item.productName || "—"}</p>
               <p className="text-xs text-muted-foreground">
@@ -216,7 +249,10 @@ function OrdersSkeleton() {
       <div className="h-12 w-64 animate-pulse rounded-xl bg-muted" />
       <div className="mt-10 space-y-5">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="h-64 animate-pulse rounded-[1.75rem] bg-muted" />
+          <div
+            key={index}
+            className="h-64 animate-pulse rounded-[1.75rem] bg-muted"
+          />
         ))}
       </div>
     </main>

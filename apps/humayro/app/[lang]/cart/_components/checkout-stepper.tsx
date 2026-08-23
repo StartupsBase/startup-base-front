@@ -21,8 +21,12 @@ import { z } from "zod"
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
 import { useMe1 } from "@/lib/api"
+import { useGetAll10 as useDistricts } from "@/lib/api/generated/district/district"
+import { useGetAll9 as useRegions } from "@/lib/api/generated/region/region"
 import type { CartItemDTO } from "@/lib/api/model/cartItemDTO"
 import type { CheckoutDTO } from "@/lib/api/model/checkoutDTO"
+import type { DistrictDTO } from "@/lib/api/model/districtDTO"
+import type { RegionDTO } from "@/lib/api/model/regionDTO"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { formatStorefrontPrice } from "@/lib/storefront"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
@@ -36,6 +40,13 @@ import {
 } from "@workspace/ui/components/card"
 import { Label } from "@workspace/ui/components/label"
 import { PhoneInput } from "@workspace/ui/components/phone-input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { Separator } from "@workspace/ui/components/separator"
 import {
   Tabs,
@@ -56,6 +67,8 @@ function createCheckoutSchema(text: ReturnType<typeof useStorefrontCopy>) {
     recipientFirstName: required,
     recipientLastName: required,
     recipientPhone: z.string().regex(/^\+998\d{9}$/, text.invalidPhoneNumber),
+    regionId: z.number().int().positive(text.requiredField),
+    districtId: z.number().int().positive(text.requiredField),
     deliveryCity: required,
     deliveryDistrict: required,
     street: required,
@@ -77,6 +90,8 @@ const defaultValues: CheckoutValues = {
   recipientFirstName: "",
   recipientLastName: "",
   recipientPhone: "+998",
+  regionId: 0,
+  districtId: 0,
   deliveryCity: "",
   deliveryDistrict: "",
   street: "",
@@ -91,7 +106,7 @@ const defaultValues: CheckoutValues = {
 
 const stepFields: Record<CheckoutStep, FieldPath<CheckoutValues>[]> = {
   contact: ["recipientFirstName", "recipientLastName", "recipientPhone"],
-  delivery: ["deliveryCity", "deliveryDistrict", "street", "houseNumber"],
+  delivery: ["regionId", "districtId", "street", "houseNumber"],
   review: [],
 }
 
@@ -125,6 +140,17 @@ export function CheckoutStepper({
     control: form.control,
     defaultValue: defaultValues,
   })
+  const selectedRegionId = values.regionId ?? 0
+  const regionsQuery = useRegions(
+    { page: 0, size: 100 },
+    { query: { retry: false } }
+  )
+  const districtsQuery = useDistricts(
+    { regionId: selectedRegionId || undefined, page: 0, size: 100 },
+    { query: { enabled: selectedRegionId > 0, retry: false } }
+  )
+  const regions = regionsQuery.data?.content ?? []
+  const districts = districtsQuery.data?.content ?? []
   const latitude = values.latitude
   const longitude = values.longitude
   const mappedAddress = values.deliveryAddress
@@ -318,29 +344,126 @@ export function CheckoutStepper({
                     <FormField
                       id="checkout-city"
                       label={text.deliveryCity}
-                      error={form.formState.errors.deliveryCity?.message}
+                      error={form.formState.errors.regionId?.message}
                     >
-                      <Input
-                        id="checkout-city"
-                        autoComplete="address-level2"
-                        aria-invalid={Boolean(
-                          form.formState.errors.deliveryCity
+                      <Controller
+                        control={form.control}
+                        name="regionId"
+                        render={({ field }) => (
+                          <Select
+                            value={field.value > 0 ? String(field.value) : ""}
+                            disabled={regionsQuery.isPending}
+                            onValueChange={(value) => {
+                              const regionId = Number(value)
+                              field.onChange(regionId)
+                              form.setValue(
+                                "deliveryCity",
+                                getRegionName(
+                                  regions.find(
+                                    (region) => region.id === regionId
+                                  ),
+                                  language
+                                ),
+                                { shouldDirty: true, shouldValidate: true }
+                              )
+                              form.setValue("districtId", 0, {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
+                              form.setValue("deliveryDistrict", "", {
+                                shouldDirty: true,
+                              })
+                            }}
+                          >
+                            <SelectTrigger
+                              id="checkout-city"
+                              className="w-full rounded-2xl"
+                              aria-invalid={Boolean(
+                                form.formState.errors.regionId
+                              )}
+                            >
+                              <SelectValue
+                                placeholder={
+                                  regionsQuery.isPending
+                                    ? text.loadingOptions
+                                    : text.deliveryCity
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {regions.map((region) =>
+                                region.id == null ? null : (
+                                  <SelectItem
+                                    key={region.id}
+                                    value={String(region.id)}
+                                  >
+                                    {getRegionName(region, language)}
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
                         )}
-                        {...form.register("deliveryCity")}
                       />
                     </FormField>
                     <FormField
                       id="checkout-district"
                       label={text.deliveryDistrict}
-                      error={form.formState.errors.deliveryDistrict?.message}
+                      error={form.formState.errors.districtId?.message}
                     >
-                      <Input
-                        id="checkout-district"
-                        autoComplete="address-level3"
-                        aria-invalid={Boolean(
-                          form.formState.errors.deliveryDistrict
+                      <Controller
+                        control={form.control}
+                        name="districtId"
+                        render={({ field }) => (
+                          <Select
+                            value={field.value > 0 ? String(field.value) : ""}
+                            disabled={
+                              selectedRegionId === 0 || districtsQuery.isPending
+                            }
+                            onValueChange={(value) => {
+                              const districtId = Number(value)
+                              field.onChange(districtId)
+                              form.setValue(
+                                "deliveryDistrict",
+                                getDistrictName(
+                                  districts.find(
+                                    (district) => district.id === districtId
+                                  ),
+                                  language
+                                ),
+                                { shouldDirty: true, shouldValidate: true }
+                              )
+                            }}
+                          >
+                            <SelectTrigger
+                              id="checkout-district"
+                              className="w-full rounded-2xl"
+                              aria-invalid={Boolean(
+                                form.formState.errors.districtId
+                              )}
+                            >
+                              <SelectValue
+                                placeholder={
+                                  districtsQuery.isPending
+                                    ? text.loadingOptions
+                                    : text.deliveryDistrict
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {districts.map((district) =>
+                                district.id == null ? null : (
+                                  <SelectItem
+                                    key={district.id}
+                                    value={String(district.id)}
+                                  >
+                                    {getDistrictName(district, language)}
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
                         )}
-                        {...form.register("deliveryDistrict")}
                       />
                     </FormField>
                     <FormField
@@ -692,6 +815,23 @@ function formatDeliveryAddress(values: Partial<CheckoutValues>) {
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(", ")
+}
+
+function getRegionName(region: RegionDTO | undefined, language: Language) {
+  if (!region) return ""
+  return language === "uz"
+    ? region.nameUz || region.name || ""
+    : region.name || region.nameUz || ""
+}
+
+function getDistrictName(
+  district: DistrictDTO | undefined,
+  language: Language
+) {
+  if (!district) return ""
+  return language === "uz"
+    ? district.nameUz || district.name || ""
+    : district.name || district.nameUz || ""
 }
 
 function optionalValue(value?: string) {

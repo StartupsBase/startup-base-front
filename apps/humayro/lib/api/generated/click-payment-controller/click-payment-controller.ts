@@ -30,7 +30,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export const callback = (
+export const clickCallback = (
     multiValueMapStringString?: BodyType<MultiValueMapStringString>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -54,11 +54,11 @@ if(multiValueMapStringString?.empty !== undefined) {
 
 
 
-export const getCallbackMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof callback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof callback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext> => {
+export const getClickCallbackMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clickCallback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof clickCallback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext> => {
 
-const mutationKey = ['callback'];
+const mutationKey = ['clickCallback'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -68,10 +68,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof callback>>, {data?: BodyType<MultiValueMapStringString>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof clickCallback>>, {data?: BodyType<MultiValueMapStringString>}> = (props) => {
           const {data} = props ?? {};
 
-          return  callback(data,requestOptions)
+          return  clickCallback(data,requestOptions)
         }
 
 
@@ -81,19 +81,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CallbackMutationResult = NonNullable<Awaited<ReturnType<typeof callback>>>
-    export type CallbackMutationBody = BodyType<MultiValueMapStringString> | undefined
-    export type CallbackMutationError = ErrorType<unknown>
+    export type ClickCallbackMutationResult = NonNullable<Awaited<ReturnType<typeof clickCallback>>>
+    export type ClickCallbackMutationBody = BodyType<MultiValueMapStringString> | undefined
+    export type ClickCallbackMutationError = ErrorType<unknown>
 
-    export const useCallback = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof callback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useClickCallback = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clickCallback>>, TError,{data?: BodyType<MultiValueMapStringString>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof callback>>,
+        Awaited<ReturnType<typeof clickCallback>>,
         TError,
         {data?: BodyType<MultiValueMapStringString>},
         TContext
       > => {
-      return useMutation(getCallbackMutationOptions(options), queryClient);
+      return useMutation(getClickCallbackMutationOptions(options), queryClient);
     }
     export const initiate = (
     orderId: number,

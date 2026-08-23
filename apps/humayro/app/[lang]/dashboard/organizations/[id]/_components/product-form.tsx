@@ -454,7 +454,10 @@ export function ProductForm({
     }
 
     try {
-      const attachment = await uploadVideo.mutateAsync({ data: { file } })
+      const attachment = await uploadVideo.mutateAsync({
+        params: { organizationId },
+        data: { file },
+      })
       if (attachment.id === undefined) throw new Error("Missing attachment ID")
       setVideoAttachmentId(attachment.id)
       setVideoName(attachment.fileName ?? file.name)
