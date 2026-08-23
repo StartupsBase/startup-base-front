@@ -7,6 +7,8 @@
  */
 
 export interface OrderLocationUpdateDTO {
+  regionId?: number;
+  districtId?: number;
   /**
      * @minimum -90
      * @maximum 90

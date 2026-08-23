@@ -254,7 +254,7 @@ export function useGetByProduct<TData = Awaited<ReturnType<typeof getByProduct>>
 
 
 
-export const delete9 = (
+export const delete10 = (
     id: number,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -269,11 +269,11 @@ export const delete9 = (
 
 
 
-export const getDelete9MutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete9>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete9>>, TError,{id: number}, TContext> => {
+export const getDelete10MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete10>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof delete10>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete9'];
+const mutationKey = ['delete10'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -283,10 +283,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete9>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete10>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete9(id,requestOptions)
+          return  delete10(id,requestOptions)
         }
 
 
@@ -296,17 +296,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete9MutationResult = NonNullable<Awaited<ReturnType<typeof delete9>>>
+    export type Delete10MutationResult = NonNullable<Awaited<ReturnType<typeof delete10>>>
 
-    export type Delete9MutationError = ErrorType<unknown>
+    export type Delete10MutationError = ErrorType<unknown>
 
-    export const useDelete9 = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete9>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDelete10 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete10>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof delete9>>,
+        Awaited<ReturnType<typeof delete10>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getDelete9MutationOptions(options), queryClient);
+      return useMutation(getDelete10MutationOptions(options), queryClient);
     }

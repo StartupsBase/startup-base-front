@@ -10,6 +10,7 @@ import { I18nProvider } from "@/components/i18n-provider"
 import { CookieConsent } from "@/components/cookie-consent"
 import HumayroLoader from "./_components/loader"
 import { QueryProvider } from "@/components/query-provider"
+import { PublicPageTransition } from "@/components/public-page-transition"
 import { SonnerProvider } from "@/components/sonner-provider"
 import { TelegramProvider } from "@/components/telegram-provider"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -137,7 +138,7 @@ export default async function RootLayout({
                 <HumayroLoader>
                   <NextTopLoader color="#008872" showSpinner={false} />
                   <Header language={lang} />
-                  {children}
+                  <PublicPageTransition>{children}</PublicPageTransition>
                   <Footer language={lang} />
                   <CookieConsent
                     heading={cookieCopy.heading}

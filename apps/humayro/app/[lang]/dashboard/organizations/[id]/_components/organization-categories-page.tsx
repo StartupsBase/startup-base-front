@@ -27,28 +27,28 @@ import {
   type UserDTO,
   useMe1,
 } from "@/lib/api"
-import { useGetAll7 } from "@/lib/api/generated/admin-user/admin-user"
+import { useGetAll11 } from "@/lib/api/generated/admin-user/admin-user"
 import {
-  getGetAll6QueryKey,
+  getGetAll7QueryKey,
   useGetById6,
 } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
-  getGetAll4QueryKey,
-  useCreate4,
+  getGetAll5QueryKey,
+  useCreate5,
   useDelete4,
-  useGetAll4,
+  useGetAll5,
   useMove,
   useUpdate5,
 } from "@/lib/api/generated/category/category"
 import {
-  useDelete8,
+  useDelete9,
   useUpload,
 } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import {
-  getGetAll5QueryKey as getBranchesQueryKey,
-  useCreate5 as useCreateBranch,
+  getGetAll6QueryKey as getBranchesQueryKey,
+  useCreate6 as useCreateBranch,
   useDelete5 as useDeleteBranch,
-  useGetAll5 as useGetBranches,
+  useGetAll6 as useGetBranches,
   useUpdate6 as useUpdateBranch,
 } from "@/lib/api/generated/branch/branch"
 import {
@@ -306,10 +306,10 @@ export function OrganizationCategoriesPage({
     meQuery.data?.roles?.some(
       (role) => role === "ROLE_SUPER_ADMIN" || role === "ROLE_ADMIN"
     ) ?? false
-  const categoriesQuery = useGetAll4(undefined, {
+  const categoriesQuery = useGetAll5(undefined, {
     query: { enabled: canManageCategories, retry: false },
   })
-  const usersQuery = useGetAll7(
+  const usersQuery = useGetAll11(
     { organizationId },
     {
       query: { enabled: canManageCategories, retry: false },
@@ -394,11 +394,11 @@ export function OrganizationCategoriesPage({
           sortOrder: movement.toIndex,
         },
       })
-      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.success(t("category.orderSaved"))
     } catch {
       setOrderedCategories(previousCategories)
-      void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.error(t("category.orderFailed"))
     }
   }
@@ -439,11 +439,11 @@ export function OrganizationCategoriesPage({
           sortOrder: destinationOrder,
         },
       })
-      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.success(t("category.moveSaved"))
     } catch {
       setOrderedCategories(previousCategories)
-      void queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      void queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.error(t("category.orderFailed"))
     }
   }
@@ -1964,7 +1964,7 @@ function CategoryForm({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const create = useCreate4()
+  const create = useCreate5()
   const update = useUpdate5()
   const upload = useUpload()
   const form = useForm<CategoryFormValues>({
@@ -2058,7 +2058,7 @@ function CategoryForm({
           String(imageId)
         )
       }
-      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
       toast.success(
         t(
           editing
@@ -2302,7 +2302,7 @@ function CategoryActions({
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const removeCategory = useDelete4()
-  const removeAttachment = useDelete8()
+  const removeAttachment = useDelete9()
   const [editOpen, setEditOpen] = useState(false)
   const [childOpen, setChildOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -2324,8 +2324,8 @@ function CategoryActions({
       }
       await removeCategory.mutateAsync({ id: category.id })
       window.localStorage.removeItem(imageStorageKey(category.id))
-      await queryClient.invalidateQueries({ queryKey: getGetAll4QueryKey() })
-      await queryClient.invalidateQueries({ queryKey: getGetAll6QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll5QueryKey() })
+      await queryClient.invalidateQueries({ queryKey: getGetAll7QueryKey() })
       toast.success(t("notifications.deleteSuccess"))
     } catch {
       setDeleteError(t("category.deleteFailed"))

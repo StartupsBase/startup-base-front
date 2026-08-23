@@ -4,6 +4,13 @@ export default defineConfig({
   humayro: {
     input: {
       target: "./lib/api/openapi.json",
+      override: {
+        transformer: (schema) => {
+          const callback = schema.paths?.["/api/payments/click/callback"]?.post
+          if (callback) callback.operationId = "clickCallback"
+          return schema
+        },
+      },
     },
     output: {
       client: "react-query",

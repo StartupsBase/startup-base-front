@@ -14,6 +14,8 @@ import {
 
 type DashboardPage =
   | "administration"
+  | "addresses"
+  | "analytics"
   | "dashboard"
   | "organization"
   | "organizations"
@@ -59,9 +61,13 @@ export async function requireDashboardPageAccess({
   const canManagePayments = user.roles?.some(
     (role) => role === "ROLE_EMPLOYER" || role === "ROLE_SUPER_ADMIN"
   )
+  const canViewAnalytics = user.roles?.some(
+    (role) => role === "ROLE_ADMIN" || role === "ROLE_SUPER_ADMIN"
+  )
   const canAccess =
     page === "profile" ||
     page === "orders" ||
+    (page === "analytics" && canViewAnalytics) ||
     (page === "payments" && canManagePayments) ||
     access === "all" ||
     (access === "organization" &&

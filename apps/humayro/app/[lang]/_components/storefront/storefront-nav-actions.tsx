@@ -4,6 +4,7 @@ import { HeartIcon, ShoppingCart02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
 
+import { NotificationsMenu } from "@/components/notifications-menu"
 import type { Language } from "@/i18n/config"
 import { useGetCart } from "@/lib/api/generated/cart/cart"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
@@ -30,6 +31,14 @@ export function StorefrontNavActions({
   })
   return (
     <div className="xs:gap-1 flex shrink-0 items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
+      <NotificationsMenu
+        language={language}
+        className={
+          compact
+            ? "size-11"
+            : "xs:size-9 size-8 sm:size-10 lg:size-9 xl:size-10 2xl:size-11"
+        }
+      />
       <NavAction
         href={`/${language}/favourites`}
         label={text.favoritesNav}

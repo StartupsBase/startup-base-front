@@ -5,12 +5,10 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { GetAll9Status } from './getAll9Status';
-import type { GetAll9Type } from './getAll9Type';
 
 export type GetAll9Params = {
-type?: GetAll9Type;
-status?: GetAll9Status;
+id?: number;
+name?: string;
 page?: number;
 size?: number;
 };

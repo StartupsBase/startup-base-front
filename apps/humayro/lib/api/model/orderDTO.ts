@@ -5,6 +5,8 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
+import type { OrderDTOPaymentMethod } from './orderDTOPaymentMethod';
+import type { OrderDTOPaymentStatus } from './orderDTOPaymentStatus';
 import type { OrderDTOStatus } from './orderDTOStatus';
 import type { OrderItemDTO } from './orderItemDTO';
 
@@ -13,11 +15,20 @@ export interface OrderDTO {
   orderNumber?: string;
   status?: OrderDTOStatus;
   statusLabel?: string;
+  paymentMethod?: OrderDTOPaymentMethod;
+  paymentStatus?: OrderDTOPaymentStatus;
+  paymentDeadlineAt?: string;
   totalAmount?: number;
   recipientFirstName?: string;
   recipientLastName?: string;
   recipientName?: string;
   recipientPhone?: string;
+  regionId?: number;
+  regionName?: string;
+  regionNameUz?: string;
+  districtId?: number;
+  districtName?: string;
+  districtNameUz?: string;
   deliveryCity?: string;
   deliveryDistrict?: string;
   street?: string;

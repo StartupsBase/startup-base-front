@@ -8,8 +8,4 @@
 
 export type GetAll5Params = {
 active?: boolean;
-organizationId?: number;
-search?: string;
-page?: number;
-size?: number;
 };

@@ -19,7 +19,7 @@ import { toast } from "sonner"
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
 import type { UserDTO } from "@/lib/api"
-import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
+import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
   getPaymentSettings,
   getPaymentTransactions,

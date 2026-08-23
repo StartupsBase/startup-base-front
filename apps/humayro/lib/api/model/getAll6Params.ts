@@ -8,4 +8,8 @@
 
 export type GetAll6Params = {
 active?: boolean;
+organizationId?: number;
+search?: string;
+page?: number;
+size?: number;
 };

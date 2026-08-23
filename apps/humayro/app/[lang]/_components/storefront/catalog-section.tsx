@@ -1,7 +1,7 @@
 "use client"
 
-import { useGetAll4 } from "@/lib/api/generated/category/category"
-import { useGetAll3 } from "@/lib/api/generated/color/color"
+import { useGetAll5 } from "@/lib/api/generated/category/category"
+import { useGetAll4 as useGetAllColors } from "@/lib/api/generated/color/color"
 import { useGetFavoriteIds } from "@/lib/api/generated/favorite/favorite"
 import {
   getGetById2QueryOptions,
@@ -14,11 +14,23 @@ import type { SizeDTO } from "@/lib/api/model/sizeDTO"
 import type { Language } from "@/i18n/config"
 import { useHasAuthToken } from "@/lib/use-auth-token"
 import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Delete02Icon,
+  Search01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
   useCatalogStore,
   type CatalogSort,
 } from "@/lib/stores/use-catalog-store"
 import { Button } from "@workspace/ui/components/button"
-import { Sheet, SheetContent, SheetTitle } from "@workspace/ui/components/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@workspace/ui/components/dialog"
 import { Slider } from "@workspace/ui/components/slider"
 import { useStorefrontCopy } from "@/lib/use-storefront-copy"
 import {
@@ -30,6 +42,7 @@ import {
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
 import { useQueries } from "@tanstack/react-query"
+import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
 import { ProductCard } from "./product-card"
@@ -45,62 +58,6 @@ const PRICE_MIN = 0
 const PRICE_MAX = 10_000_000
 const PRODUCTS_PAGE_SIZE = 24
 
-const productsPageCopy = {
-  ru: {
-    eyebrow: "Каталог",
-    title: "Все товары",
-    found: "Найдено товаров: {{count}}",
-    foundFor: "По запросу «{{query}}» найдено товаров: {{count}}",
-    mobileFilters: "Фильтры и категории",
-    previous: "Назад",
-    next: "Вперёд",
-    page: "Страница {{current}} из {{total}}",
-  },
-  uz: {
-    eyebrow: "Katalog",
-    title: "Barcha mahsulotlar",
-    found: "{{count}} ta mahsulot topildi",
-    foundFor: "“{{query}}” bo‘yicha {{count}} ta mahsulot topildi",
-    mobileFilters: "Filterlar va turkumlar",
-    previous: "Oldingi",
-    next: "Keyingi",
-    page: "{{current}} / {{total}}-sahifa",
-  },
-} satisfies Record<Language, Record<string, string>>
-
-const catalogFilterCopy = {
-  ru: {
-    filters: "Фильтры",
-    clearFilters: "Сбросить",
-    priceRange: "Диапазон цен",
-    priceFrom: "От",
-    priceTo: "До",
-    subcategories: "Подкатегории",
-    colors: "Цвет",
-    sizes: "Размер",
-    showMore: "Ещё",
-    showLess: "Показать меньше",
-    unnamedColor: "Цвет без названия",
-    loadingOptions: "Загружаем варианты...",
-    noOptions: "Нет доступных вариантов",
-  },
-  uz: {
-    filters: "Filtrlar",
-    clearFilters: "Tozalash",
-    priceRange: "Narx oralig‘i",
-    priceFrom: "Dan",
-    priceTo: "Gacha",
-    subcategories: "Ichki turkumlar",
-    colors: "Rang",
-    sizes: "O‘lcham",
-    showMore: "Yana",
-    showLess: "Kamroq ko‘rsatish",
-    unnamedColor: "Nomsiz rang",
-    loadingOptions: "Variantlar yuklanmoqda...",
-    noOptions: "Mavjud variantlar yo‘q",
-  },
-} satisfies Record<Language, Record<string, string>>
-
 type CatalogSectionProps = {
   language: Language
   mode?: "homepage" | "products"
@@ -113,7 +70,6 @@ export function CatalogSection({
   searchQuery = "",
 }: CatalogSectionProps) {
   const text = useStorefrontCopy()
-  const pageText = productsPageCopy[language]
   const isProductsPage = mode === "products"
   const hasToken = useHasAuthToken()
   const categoryId = useCatalogStore((state) => state.categoryId)
@@ -132,14 +88,13 @@ export function CatalogSection({
   const [colorId, setColorId] = useState<number | null>(null)
   const [sizeId, setSizeId] = useState<number | null>(null)
   const [page, setPage] = useState(0)
-  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false)
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const categoriesQuery = useGetAll4(
+  const categoriesQuery = useGetAll5(
     { active: true },
     { query: { staleTime: 5 * 60_000 } }
   )
-  const colorsQuery = useGetAll3({
+  const colorsQuery = useGetAllColors({
     query: { staleTime: 5 * 60_000, retry: false },
   })
   const sizesQuery = useGetAll1(undefined, {
@@ -246,7 +201,9 @@ export function CatalogSection({
     "price-low": text.priceLow,
     "price-high": text.priceHigh,
   }
-  const resultSummary = (searchQuery ? pageText.foundFor : pageText.found)
+  const resultSummary = (
+    searchQuery ? text.productsFoundFor : text.productsFound
+  )
     .replace("{{query}}", searchQuery)
     .replace(
       "{{count}}",
@@ -270,9 +227,7 @@ export function CatalogSection({
     setPriceRange(initialRange)
     setColorId(null)
     setSizeId(null)
-    if (selectedCategory?.parentId != null) {
-      setCategoryId(selectedCategory.parentId)
-    }
+    setCategoryId(null)
     setPage(0)
   }
 
@@ -308,10 +263,10 @@ export function CatalogSection({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-bold tracking-[0.2em] text-primary capitalize">
-              {isProductsPage ? pageText.eyebrow : text.catalogEyebrow}
+              {isProductsPage ? text.productsEyebrow : text.catalogEyebrow}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">
-              {isProductsPage ? pageText.title : text.catalogTitle}
+              {isProductsPage ? text.productsTitle : text.catalogTitle}
             </h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
               {isProductsPage ? resultSummary : text.catalogDescription}
@@ -342,82 +297,36 @@ export function CatalogSection({
               type="button"
               variant="outline"
               className="flex h-11 shrink-0 rounded-2xl lg:hidden"
-              aria-expanded={mobileFiltersOpen}
-              onClick={() => setMobileFiltersOpen(true)}
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen(true)}
             >
-              {catalogFilterCopy[language].filters}
+              {text.filters}
             </Button>
           </div>
         </div>
 
-        <div className="mt-9 flex items-center gap-3 border-b pb-4">
-          <div className="flex min-w-0 flex-1 scrollbar-none gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-            <button
-              type="button"
-              className={cn(
-                "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                categoryId == null
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background hover:border-primary/50"
-              )}
-              onClick={() => selectCategory(null)}
-            >
-              {text.allCategories}
-            </button>
-            {parentCategories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={cn(
-                    "shrink-0 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
-                    activeParentId === category.id
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background hover:border-primary/50"
-                  )}
-                  onClick={() => selectCategory(category.id ?? null)}
-                >
-                  {category.imageUrl ? (
-                    <img
-                      src={category.imageUrl}
-                      alt=""
-                      className="mr-2 inline-block size-7 rounded-full object-cover"
-                    />
-                  ) : null}
-                  {name || "—"}
-                </button>
-              )
-            })}
-          </div>
-
+        <div className="mt-9 hidden justify-end border-b pb-4 lg:flex">
           <Button
             type="button"
-            variant={desktopFiltersOpen ? "default" : "outline"}
-            className="hidden h-11 shrink-0 rounded-full px-5 lg:inline-flex"
-            aria-expanded={desktopFiltersOpen}
-            onClick={() => setDesktopFiltersOpen((current) => !current)}
+            variant={filtersOpen ? "default" : "outline"}
+            className="h-11 shrink-0 rounded-full px-5"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen(true)}
           >
-            {catalogFilterCopy[language].filters}
+            {text.filters}
           </Button>
         </div>
       </div>
       <div className="mx-auto max-w-[96rem]">
-        <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-          <SheetContent
-            side="right"
-            className="w-screen! max-w-none! overflow-y-auto px-4 pt-14 pb-8 sm:max-w-none! lg:hidden"
+        <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <DialogContent
+            showCloseButton={false}
+            className="h-[min(92dvh,800px)] max-w-[calc(100%-1rem)] gap-0 overflow-hidden rounded-[2rem] border border-border/60 bg-background p-0 shadow-2xl sm:max-w-xl"
           >
-            <SheetTitle className="sr-only">
-              {pageText.mobileFilters}
-            </SheetTitle>
+            <DialogTitle className="sr-only">{text.mobileFilters}</DialogTitle>
             <CatalogFilters
               language={language}
+              parentCategories={parentCategories}
               categories={childCategories}
               colors={colors}
               sizes={sizes}
@@ -437,39 +346,12 @@ export function CatalogSection({
               onColorChange={toggleColor}
               onSizeChange={toggleSize}
               onReset={resetFilters}
-              className="mt-0 border-0 bg-transparent p-0 shadow-none"
+              onClose={() => setFiltersOpen(false)}
             />
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
 
-        <div className="flex justify-center gap-10">
-          {desktopFiltersOpen ? (
-            <div className="hidden lg:sticky lg:top-24 lg:block lg:min-w-52.5 lg:self-start xl:min-w-62.5">
-              <CatalogFilters
-                language={language}
-                categories={childCategories}
-                colors={colors}
-                sizes={sizes}
-                draftPriceRange={draftPriceRange}
-                appliedPriceRange={priceRange}
-                selectedCategoryId={categoryId}
-                selectedColorId={colorId}
-                selectedSizeId={sizeId}
-                optionsLoading={
-                  colorsQuery.isPending ||
-                  sizesQuery.isPending ||
-                  filterProductQueries.some((query) => query.isPending)
-                }
-                onDraftPriceChange={setDraftPriceRange}
-                onApplyPriceRange={applyPriceRange}
-                onCategoryChange={selectCategory}
-                onColorChange={toggleColor}
-                onSizeChange={toggleSize}
-                onReset={resetFilters}
-              />
-            </div>
-          ) : null}
-
+        <div className="flex justify-center">
           <div
             className={cn(
               "w-full min-w-0 flex-1",
@@ -524,7 +406,7 @@ export function CatalogSection({
                   "mt-10 gap-4 pb-2",
                   isProductsPage
                     ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-                    : "flex snap-x snap-mandatory scrollbar-none overflow-x-auto overscroll-x-contain [&::-webkit-scrollbar]:hidden"
+                    : "scrollbar-none flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [&::-webkit-scrollbar]:hidden"
                 )}
               >
                 {products.map((product, index) => (
@@ -555,7 +437,7 @@ export function CatalogSection({
             )}
             {isProductsPage && totalPages > 1 ? (
               <nav
-                aria-label={pageText.page
+                aria-label={text.paginationPage
                   .replace("{{current}}", String(page + 1))
                   .replace("{{total}}", String(totalPages))}
                 className="mt-10 flex flex-wrap items-center justify-center gap-3"
@@ -569,10 +451,10 @@ export function CatalogSection({
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >
-                  {pageText.previous}
+                  {text.previousPage}
                 </Button>
                 <span className="min-w-32 text-center text-sm font-semibold text-muted-foreground">
-                  {pageText.page
+                  {text.paginationPage
                     .replace("{{current}}", String(page + 1))
                     .replace("{{total}}", String(totalPages))}
                 </span>
@@ -585,7 +467,7 @@ export function CatalogSection({
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                 >
-                  {pageText.next}
+                  {text.nextPage}
                 </Button>
               </nav>
             ) : null}
@@ -598,6 +480,7 @@ export function CatalogSection({
 
 type CatalogFiltersProps = {
   language: Language
+  parentCategories?: CategoryDTO[]
   categories: CategoryDTO[]
   colors: ColorDTO[]
   sizes: SizeDTO[]
@@ -609,15 +492,32 @@ type CatalogFiltersProps = {
   optionsLoading: boolean
   onDraftPriceChange: (range: [number, number]) => void
   onApplyPriceRange: (range: number[]) => void
-  onCategoryChange: (id: number) => void
+  onCategoryChange: (id: number | null) => void
   onColorChange: (id: number) => void
   onSizeChange: (id: number) => void
   onReset: () => void
-  className?: string
+  onClose: () => void
+}
+
+type FilterView = "overview" | "categories" | "colors" | "sizes"
+
+const filterViewVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 72 : -72,
+    opacity: 0,
+    filter: "blur(8px)",
+  }),
+  center: { x: 0, opacity: 1, filter: "blur(0px)" },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -72 : 72,
+    opacity: 0,
+    filter: "blur(8px)",
+  }),
 }
 
 function CatalogFilters({
   language,
+  parentCategories = [],
   categories,
   colors,
   sizes,
@@ -633,15 +533,44 @@ function CatalogFilters({
   onColorChange,
   onSizeChange,
   onReset,
-  className,
+  onClose,
 }: CatalogFiltersProps) {
-  const text = catalogFilterCopy[language]
+  const text = useStorefrontCopy()
+  const [view, setView] = useState<FilterView>("overview")
+  const [direction, setDirection] = useState(1)
+  const [categorySearch, setCategorySearch] = useState("")
+  const selectedCategory = [...parentCategories, ...categories].find(
+    (category) => category.id === selectedCategoryId
+  )
+  const selectedColor = colors.find((color) => color.id === selectedColorId)
+  const selectedSize = sizes.find((size) => size.id === selectedSizeId)
+  const normalizedCategorySearch = categorySearch.trim().toLocaleLowerCase()
+  const getCategoryName = (category: CategoryDTO) =>
+    language === "ru"
+      ? category.nameRu || category.name || category.nameEng || "—"
+      : category.name || category.nameRu || category.nameEng || "—"
+  const filteredParentCategories = parentCategories.filter((category) =>
+    getCategoryName(category)
+      .toLocaleLowerCase()
+      .includes(normalizedCategorySearch)
+  )
+  const filteredCategories = categories.filter((category) =>
+    getCategoryName(category)
+      .toLocaleLowerCase()
+      .includes(normalizedCategorySearch)
+  )
   const isFiltered =
-    categories.some((category) => category.id === selectedCategoryId) ||
+    selectedCategoryId != null ||
     appliedPriceRange[0] !== PRICE_MIN ||
     appliedPriceRange[1] !== PRICE_MAX ||
     selectedColorId != null ||
     selectedSizeId != null
+
+  function navigate(nextView: FilterView) {
+    setDirection(nextView === "overview" ? -1 : 1)
+    setView(nextView)
+    if (nextView !== "categories") setCategorySearch("")
+  }
 
   function updatePrice(index: 0 | 1, value: number) {
     const clamped = Math.max(PRICE_MIN, Math.min(value || 0, PRICE_MAX))
@@ -654,202 +583,476 @@ function CatalogFilters({
   }
 
   return (
-    <aside
-      className={cn(
-        "mt-10 rounded-2xl border bg-card/60 p-4 shadow-sm",
-        className
-      )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-commerce text-lg font-bold">{text.filters}</h3>
-        {isFiltered ? (
-          <button
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="flex shrink-0 items-center gap-3 border-b border-border/60 px-5 py-4 sm:px-6 sm:py-5">
+        {view !== "overview" ? (
+          <motion.button
             type="button"
-            className="text-xs font-semibold text-primary hover:underline"
+            aria-label={text.previousPage}
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-foreground transition-colors outline-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary/40"
+            whileHover={{ x: -3 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => navigate("overview")}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-5" />
+          </motion.button>
+        ) : null}
+        <h3 className="font-commerce min-w-0 flex-1 text-xl font-bold sm:text-2xl">
+          {view === "overview"
+            ? text.filters
+            : view === "categories"
+              ? text.categories
+              : view === "colors"
+                ? text.colors
+                : text.sizes}
+        </h3>
+        {isFiltered ? (
+          <motion.button
+            type="button"
+            className="flex shrink-0 items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
+            whileTap={{ scale: 0.96 }}
             onClick={onReset}
           >
+            <HugeiconsIcon icon={Delete02Icon} className="size-4" />
             {text.clearFilters}
-          </button>
+          </motion.button>
         ) : null}
+      </header>
+
+      <div className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 sm:px-6">
+        <AnimatePresence mode="wait" custom={direction} initial={false}>
+          {view === "categories" ? (
+            <motion.div
+              key="categories"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <label className="relative block">
+                <span className="sr-only">{text.searchCategories}</span>
+                <HugeiconsIcon
+                  icon={Search01Icon}
+                  className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                  type="search"
+                  value={categorySearch}
+                  placeholder={text.searchCategories}
+                  className="h-14 w-full rounded-2xl bg-muted/70 pr-4 pl-12 text-base font-medium transition outline-none focus:ring-2 focus:ring-primary/30"
+                  onChange={(event) => setCategorySearch(event.target.value)}
+                />
+              </label>
+
+              {parentCategories.length ? (
+                <fieldset className="mt-5">
+                  <legend className="sr-only">{text.categories}</legend>
+                  <div className="flex flex-col gap-2">
+                    {!normalizedCategorySearch ? (
+                      <motion.button
+                        type="button"
+                        aria-pressed={selectedCategoryId == null}
+                        className={cn(
+                          "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                          selectedCategoryId == null
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                            : "bg-muted/60 text-foreground hover:bg-muted"
+                        )}
+                        whileTap={{ scale: 0.985 }}
+                        onClick={() => onCategoryChange(null)}
+                      >
+                        <span
+                          className={cn(
+                            "grid size-7 shrink-0 place-items-center rounded-lg border",
+                            selectedCategoryId == null
+                              ? "border-primary-foreground/40 bg-primary-foreground/15"
+                              : "border-border bg-background/40"
+                          )}
+                        >
+                          {selectedCategoryId == null ? (
+                            <HugeiconsIcon
+                              icon={Tick02Icon}
+                              className="size-4"
+                            />
+                          ) : null}
+                        </span>
+                        {text.allCategories}
+                      </motion.button>
+                    ) : null}
+                    {filteredParentCategories.map((category, index) => {
+                      if (category.id == null) return null
+                      const name = getCategoryName(category)
+                      const selected = selectedCategoryId === category.id
+
+                      return (
+                        <motion.button
+                          key={category.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onCategoryChange(category.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          <span className="min-w-0 break-words">{name}</span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              ) : null}
+
+              {filteredCategories.length ? (
+                <fieldset className="mt-6 border-t pt-5">
+                  <legend className="text-sm font-semibold">
+                    {text.subcategories}
+                  </legend>
+                  <div className="mt-3 flex flex-col gap-2">
+                    {filteredCategories.map((category, index) => {
+                      if (category.id == null) return null
+                      const name = getCategoryName(category)
+                      const selected = selectedCategoryId === category.id
+
+                      return (
+                        <motion.button
+                          key={category.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onCategoryChange(category.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          {name}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              ) : null}
+            </motion.div>
+          ) : null}
+
+          {view === "overview" ? (
+            <motion.div
+              key="overview"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              className="space-y-3"
+            >
+              {[
+                {
+                  view: "categories" as const,
+                  label: text.categories,
+                  value: selectedCategory
+                    ? getCategoryName(selectedCategory)
+                    : text.allCategories,
+                },
+                {
+                  view: "colors" as const,
+                  label: text.colors,
+                  value: selectedColor
+                    ? getCatalogColorName(selectedColor, language, text)
+                    : null,
+                },
+                {
+                  view: "sizes" as const,
+                  label: text.sizes,
+                  value: selectedSize?.value || null,
+                },
+              ].map((item, index) => (
+                <motion.button
+                  key={item.view}
+                  type="button"
+                  className="flex min-h-16 w-full items-center gap-4 rounded-3xl bg-muted/55 px-5 text-left transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/40"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.06 }}
+                  whileHover={{ x: 3 }}
+                  whileTap={{ scale: 0.985 }}
+                  onClick={() => navigate(item.view)}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold sm:text-lg">
+                      {item.label}
+                    </span>
+                    {item.value ? (
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:text-sm">
+                        {item.value}
+                      </span>
+                    ) : null}
+                  </span>
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    className="size-5 shrink-0 text-muted-foreground"
+                  />
+                </motion.button>
+              ))}
+
+              <motion.fieldset
+                className="rounded-3xl bg-muted/40 p-5"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+              >
+                <legend className="text-sm font-semibold">
+                  {text.priceRange}
+                </legend>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="min-w-0">
+                    <span className="sr-only">{text.priceFrom}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={draftPriceRange[0].toLocaleString("ru-RU")}
+                      aria-label={text.priceFrom}
+                      className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                      onChange={(event) => {
+                        const rawValue = event.target.value.replace(/\D/g, "")
+                        const value = rawValue ? Number(rawValue) : 0
+
+                        updatePrice(
+                          0,
+                          Math.max(
+                            PRICE_MIN,
+                            Math.min(value, draftPriceRange[1])
+                          )
+                        )
+                      }}
+                      onBlur={() => onApplyPriceRange(draftPriceRange)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          onApplyPriceRange(draftPriceRange)
+                          event.currentTarget.blur()
+                        }
+                      }}
+                    />
+                  </label>
+                  <label className="min-w-0">
+                    <span className="sr-only">{text.priceTo}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={draftPriceRange[1].toLocaleString("ru-RU")}
+                      aria-label={text.priceTo}
+                      className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                      onChange={(event) => {
+                        const rawValue = event.target.value.replace(/\D/g, "")
+                        const value = Number(rawValue)
+
+                        updatePrice(1, Math.min(value, PRICE_MAX))
+                      }}
+                      onBlur={() => onApplyPriceRange(draftPriceRange)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          onApplyPriceRange(draftPriceRange)
+                          event.currentTarget.blur()
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <Slider
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={10_000}
+                  value={draftPriceRange}
+                  aria-label={text.priceRange}
+                  className="mt-4 py-2 [&_[data-slot=slider-track]]:h-1.5"
+                  onValueChange={(value) =>
+                    onDraftPriceChange(value as [number, number])
+                  }
+                  onValueCommit={onApplyPriceRange}
+                />
+              </motion.fieldset>
+            </motion.div>
+          ) : null}
+
+          {view === "colors" ? (
+            <motion.div
+              key="colors"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <fieldset>
+                <legend className="sr-only">{text.colors}</legend>
+                {colors.length ? (
+                  <>
+                    <div className="mt-3 space-y-1">
+                      {colors.map((color) => {
+                        if (color.id == null) return null
+                        const name = getCatalogColorName(color, language, text)
+
+                        return (
+                          <motion.button
+                            key={color.id}
+                            type="button"
+                            aria-pressed={selectedColorId === color.id}
+                            className={cn(
+                              "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                              selectedColorId === color.id
+                                ? "bg-primary/12 font-semibold text-primary ring-1 ring-primary/25"
+                                : "hover:bg-muted"
+                            )}
+                            whileTap={{ scale: 0.985 }}
+                            onClick={() => onColorChange(color.id!)}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="size-5 shrink-0 rounded-full border border-black/10 shadow-sm"
+                              style={{
+                                backgroundColor: getColorHex(color.hexCode),
+                              }}
+                            />
+                            <span className="truncate">
+                              {name || text.unnamedColor}
+                            </span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {optionsLoading ? text.loadingOptions : text.noOptions}
+                  </p>
+                )}
+              </fieldset>
+            </motion.div>
+          ) : null}
+
+          {view === "sizes" ? (
+            <motion.div
+              key="sizes"
+              custom={direction}
+              variants={filterViewVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+            >
+              <fieldset>
+                <legend className="sr-only">{text.sizes}</legend>
+                {sizes.length ? (
+                  <div className="mt-3 space-y-1">
+                    {sizes.map((size, index) => {
+                      if (size.id == null) return null
+                      const selected = selectedSizeId === size.id
+
+                      return (
+                        <motion.button
+                          key={size.id}
+                          type="button"
+                          aria-pressed={selected}
+                          className={cn(
+                            "flex min-h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:text-base",
+                            selected
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/15"
+                              : "bg-muted/60 text-foreground hover:bg-muted"
+                          )}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.035 }}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => onSizeChange(size.id!)}
+                        >
+                          <span
+                            className={cn(
+                              "grid size-7 shrink-0 place-items-center rounded-lg border",
+                              selected
+                                ? "border-primary-foreground/40 bg-primary-foreground/15"
+                                : "border-border bg-background/40"
+                            )}
+                          >
+                            {selected ? (
+                              <HugeiconsIcon
+                                icon={Tick02Icon}
+                                className="size-4"
+                              />
+                            ) : null}
+                          </span>
+                          <span>{size.value || "—"}</span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {optionsLoading ? text.loadingOptions : text.noOptions}
+                  </p>
+                )}
+              </fieldset>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
-      {categories.length ? (
-        <fieldset className="mt-6 border-t pt-5">
-          <legend className="text-sm font-semibold">
-            {text.subcategories}
-          </legend>
-          <div className="mt-3 flex flex-col gap-2">
-            {categories.map((category) => {
-              if (category.id == null) return null
-              const name =
-                language === "ru"
-                  ? category.nameRu || category.name || category.nameEng
-                  : category.name || category.nameRu || category.nameEng
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  aria-pressed={selectedCategoryId === category.id}
-                  className={cn(
-                    "w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition",
-                    selectedCategoryId === category.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  onClick={() => onCategoryChange(category.id!)}
-                >
-                  {name || "—"}
-                </button>
-              )
-            })}
-          </div>
-        </fieldset>
-      ) : null}
-
-      <fieldset className="mt-5">
-        <legend className="text-sm font-semibold">{text.priceRange}</legend>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <label className="min-w-0">
-            <span className="sr-only">{text.priceFrom}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={draftPriceRange[0].toLocaleString("ru-RU")}
-              aria-label={text.priceFrom}
-              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              onChange={(event) => {
-                const rawValue = event.target.value.replace(/\D/g, "")
-                const value = rawValue ? Number(rawValue) : 0
-
-                updatePrice(
-                  0,
-                  Math.max(PRICE_MIN, Math.min(value, draftPriceRange[1]))
-                )
-              }}
-              onBlur={() => onApplyPriceRange(draftPriceRange)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onApplyPriceRange(draftPriceRange)
-                  event.currentTarget.blur()
-                }
-              }}
-            />
-          </label>
-          <label className="min-w-0">
-            <span className="sr-only">{text.priceTo}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={draftPriceRange[1].toLocaleString("ru-RU")}
-              aria-label={text.priceTo}
-              className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-              onChange={(event) => {
-                const rawValue = event.target.value.replace(/\D/g, "")
-                const value = Number(rawValue)
-
-                updatePrice(1, Math.min(value, PRICE_MAX))
-              }}
-              onBlur={() => onApplyPriceRange(draftPriceRange)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onApplyPriceRange(draftPriceRange)
-                  event.currentTarget.blur()
-                }
-              }}
-            />
-          </label>
-        </div>
-        <Slider
-          min={PRICE_MIN}
-          max={PRICE_MAX}
-          step={10_000}
-          value={draftPriceRange}
-          aria-label={text.priceRange}
-          className="mt-4 py-2 [&_[data-slot=slider-track]]:h-1.5"
-          onValueChange={(value) =>
-            onDraftPriceChange(value as [number, number])
-          }
-          onValueCommit={onApplyPriceRange}
-        />
-      </fieldset>
-
-      <fieldset className="mt-6 border-t pt-5">
-        <legend className="text-sm font-semibold">{text.colors}</legend>
-        {colors.length ? (
-          <>
-            <div className="mt-3 space-y-1">
-              {colors.map((color) => {
-                if (color.id == null) return null
-                const name = getCatalogColorName(color, language)
-
-                return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    aria-pressed={selectedColorId === color.id}
-                    className={cn(
-                      "flex min-h-9 w-full items-center gap-3 rounded-xl px-2 text-left text-sm transition",
-                      selectedColorId === color.id
-                        ? "bg-primary/12 font-semibold text-primary ring-1 ring-primary/25"
-                        : "hover:bg-muted"
-                    )}
-                    onClick={() => onColorChange(color.id!)}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="size-5 shrink-0 rounded-full border border-black/10 shadow-sm"
-                      style={{ backgroundColor: getColorHex(color.hexCode) }}
-                    />
-                    <span className="truncate">
-                      {name || text.unnamedColor}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {optionsLoading ? text.loadingOptions : text.noOptions}
-          </p>
-        )}
-      </fieldset>
-
-      <fieldset className="mt-6 border-t pt-5">
-        <legend className="text-sm font-semibold">{text.sizes}</legend>
-        {sizes.length ? (
-          <>
-            <div className="mt-3 space-y-1">
-              {sizes.map((size) =>
-                size.id == null ? null : (
-                  <div
-                    key={size.id}
-                    className={cn(
-                      "flex min-h-9 items-center gap-3 px-1 text-sm",
-                      selectedSizeId === size.id && "font-semibold text-primary"
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSizeId === size.id}
-                      aria-label={size.value || "—"}
-                      className="size-4 shrink-0 cursor-pointer accent-primary"
-                      onChange={() => onSizeChange(size.id!)}
-                    />
-                    <span>{size.value || "—"}</span>
-                  </div>
-                )
-              )}
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {optionsLoading ? text.loadingOptions : text.noOptions}
-          </p>
-        )}
-      </fieldset>
-    </aside>
+      <footer className="shrink-0 border-t border-border/60 bg-background/95 p-4 backdrop-blur sm:px-6">
+        <motion.div whileTap={{ scale: 0.985 }}>
+          <Button
+            type="button"
+            className="h-12 w-full rounded-2xl text-base font-semibold"
+            onClick={onClose}
+          >
+            {text.applyFilters}
+          </Button>
+        </motion.div>
+      </footer>
+    </div>
   )
 }
 
@@ -859,7 +1062,26 @@ function getColorHex(hexCode?: string) {
   return /^#[\da-f]{3,8}$/i.test(normalized) ? normalized : "var(--muted)"
 }
 
-function getCatalogColorName(color: ColorDTO, language: Language) {
+type CatalogColorCopy = Pick<
+  ReturnType<typeof useStorefrontCopy>,
+  | "colorRed"
+  | "colorGreen"
+  | "colorBlue"
+  | "colorBlack"
+  | "colorWhite"
+  | "colorYellow"
+  | "colorBrown"
+  | "colorGray"
+  | "colorPink"
+  | "colorPurple"
+  | "colorKhaki"
+>
+
+function getCatalogColorName(
+  color: ColorDTO,
+  language: Language,
+  text: CatalogColorCopy
+) {
   if (language === "ru" && color.nameRu) return color.nameRu
   if (language === "uz" && color.nameUz) return color.nameUz
 
@@ -870,44 +1092,46 @@ function getCatalogColorName(color: ColorDTO, language: Language) {
     .replaceAll("‘", "'")
     .replaceAll("’", "'")
 
-  const knownColors: Record<string, Record<Language, string>> = {
-    qizil: { uz: "Qizil", ru: "Красный" },
-    red: { uz: "Qizil", ru: "Красный" },
-    красный: { uz: "Qizil", ru: "Красный" },
-    yashil: { uz: "Yashil", ru: "Зелёный" },
-    green: { uz: "Yashil", ru: "Зелёный" },
-    зелёный: { uz: "Yashil", ru: "Зелёный" },
-    kok: { uz: "Ko‘k", ru: "Синий" },
-    "ko'k": { uz: "Ko‘k", ru: "Синий" },
-    blue: { uz: "Ko‘k", ru: "Синий" },
-    синий: { uz: "Ko‘k", ru: "Синий" },
-    qora: { uz: "Qora", ru: "Чёрный" },
-    black: { uz: "Qora", ru: "Чёрный" },
-    чёрный: { uz: "Qora", ru: "Чёрный" },
-    oq: { uz: "Oq", ru: "Белый" },
-    white: { uz: "Oq", ru: "Белый" },
-    белый: { uz: "Oq", ru: "Белый" },
-    sariq: { uz: "Sariq", ru: "Жёлтый" },
-    yellow: { uz: "Sariq", ru: "Жёлтый" },
-    жёлтый: { uz: "Sariq", ru: "Жёлтый" },
-    jigarrang: { uz: "Jigarrang", ru: "Коричневый" },
-    brown: { uz: "Jigarrang", ru: "Коричневый" },
-    коричневый: { uz: "Jigarrang", ru: "Коричневый" },
-    kulrang: { uz: "Kulrang", ru: "Серый" },
-    gray: { uz: "Kulrang", ru: "Серый" },
-    grey: { uz: "Kulrang", ru: "Серый" },
-    серый: { uz: "Kulrang", ru: "Серый" },
-    pushti: { uz: "Pushti", ru: "Розовый" },
-    pink: { uz: "Pushti", ru: "Розовый" },
-    розовый: { uz: "Pushti", ru: "Розовый" },
-    binafsha: { uz: "Binafsha", ru: "Фиолетовый" },
-    binafsharang: { uz: "Binafsharang", ru: "Фиолетовый" },
-    purple: { uz: "Binafsha", ru: "Фиолетовый" },
-    фиолетовый: { uz: "Binafsha", ru: "Фиолетовый" },
-    xaki: { uz: "Xaki", ru: "Хаки" },
-    khaki: { uz: "Xaki", ru: "Хаки" },
-    хаки: { uz: "Xaki", ru: "Хаки" },
+  const knownColorKeys: Record<string, keyof CatalogColorCopy> = {
+    qizil: "colorRed",
+    red: "colorRed",
+    красный: "colorRed",
+    yashil: "colorGreen",
+    green: "colorGreen",
+    зелёный: "colorGreen",
+    kok: "colorBlue",
+    "ko'k": "colorBlue",
+    blue: "colorBlue",
+    синий: "colorBlue",
+    qora: "colorBlack",
+    black: "colorBlack",
+    чёрный: "colorBlack",
+    oq: "colorWhite",
+    white: "colorWhite",
+    белый: "colorWhite",
+    sariq: "colorYellow",
+    yellow: "colorYellow",
+    жёлтый: "colorYellow",
+    jigarrang: "colorBrown",
+    brown: "colorBrown",
+    коричневый: "colorBrown",
+    kulrang: "colorGray",
+    gray: "colorGray",
+    grey: "colorGray",
+    серый: "colorGray",
+    pushti: "colorPink",
+    pink: "colorPink",
+    розовый: "colorPink",
+    binafsha: "colorPurple",
+    binafsharang: "colorPurple",
+    purple: "colorPurple",
+    фиолетовый: "colorPurple",
+    xaki: "colorKhaki",
+    khaki: "colorKhaki",
+    хаки: "colorKhaki",
   }
 
-  return knownColors[normalizedName]?.[language] || fallbackName
+  const colorKey = knownColorKeys[normalizedName]
+
+  return colorKey ? text[colorKey] : fallbackName
 }

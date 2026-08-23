@@ -56,3 +56,7 @@ apps/humayro/lib/api/openapi.json
 
 .cursor\rules\nx-rules.mdc
 .github\instructions\nx.instructions.md
+
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json

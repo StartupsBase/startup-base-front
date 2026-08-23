@@ -4,12 +4,13 @@ import { ShoppingCart02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import type { Language } from "@/i18n/config"
 import {
   getMyOrdersQueryKey,
-  useCancel,
+  useCancel1,
   useMyOrders,
 } from "@/lib/api/generated/order/order"
 import type { OrderDTO } from "@/lib/api/model/orderDTO"
@@ -27,11 +28,17 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { DashboardBreadcrumb } from "../../_components/dashboard-breadcrumb"
 
+const ORDERS_PAGE_SIZE = 12
+
 export function OrdersView({ language }: { language: Language }) {
   const text = useStorefrontCopy()
   const queryClient = useQueryClient()
-  const ordersQuery = useMyOrders({ query: { retry: false } })
-  const cancelMutation = useCancel({
+  const [page, setPage] = useState(0)
+  const ordersQuery = useMyOrders(
+    { page, size: ORDERS_PAGE_SIZE },
+    { query: { retry: false } }
+  )
+  const cancelMutation = useCancel1({
     mutation: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() })
@@ -56,7 +63,7 @@ export function OrdersView({ language }: { language: Language }) {
     )
   }
 
-  const orders = ordersQuery.data ?? []
+  const orders = ordersQuery.data?.content ?? []
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -96,25 +103,50 @@ export function OrdersView({ language }: { language: Language }) {
           </CardContent>
         </Card>
       ) : (
-        <section
-          aria-label={text.myOrders}
-          className="mt-8 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3"
-        >
-          {orders.map((order, index) => (
-            <OrderCard
-              key={order.id ?? index}
-              order={order}
-              language={language}
-              isCancelling={
-                cancelMutation.isPending &&
-                cancelMutation.variables?.id === order.id
-              }
-              onCancel={() =>
-                order.id != null && cancelMutation.mutate({ id: order.id })
-              }
-            />
-          ))}
-        </section>
+        <>
+          <section
+            aria-label={text.myOrders}
+            className="mt-8 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3"
+          >
+            {orders.map((order, index) => (
+              <OrderCard
+                key={order.id ?? index}
+                order={order}
+                language={language}
+                isCancelling={
+                  cancelMutation.isPending &&
+                  cancelMutation.variables?.id === order.id
+                }
+                onCancel={() =>
+                  order.id != null && cancelMutation.mutate({ id: order.id })
+                }
+              />
+            ))}
+          </section>
+          {(ordersQuery.data?.totalPages ?? 0) > 1 ? (
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                disabled={page === 0 || ordersQuery.isFetching}
+                onClick={() => setPage((current) => Math.max(0, current - 1))}
+              >
+                {text.previousStep}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {page + 1} / {ordersQuery.data?.totalPages ?? 1}
+              </span>
+              <Button
+                variant="outline"
+                disabled={
+                  ordersQuery.data?.last !== false || ordersQuery.isFetching
+                }
+                onClick={() => setPage((current) => current + 1)}
+              >
+                {text.nextStep}
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   )
@@ -140,9 +172,7 @@ function OrderCard({
     DELIVERED: text.statusDelivered,
     CANCELLED: text.statusCancelled,
   }
-  const statusLabel = status
-    ? statusLabels[status]
-    : order.statusLabel || "—"
+  const statusLabel = status ? statusLabels[status] : order.statusLabel || "—"
   const canCancel = status === "NEW" || status === "CONFIRMED"
   const date = order.createdAt
     ? new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "uz-UZ", {
@@ -150,15 +180,16 @@ function OrderCard({
         timeStyle: "short",
       }).format(new Date(order.createdAt))
     : "—"
-  const recipient = [
-    order.recipientFirstName,
-    order.recipientLastName,
-  ]
-    .filter(Boolean)
-    .join(" ") || order.recipientName
+  const recipient =
+    [order.recipientFirstName, order.recipientLastName]
+      .filter(Boolean)
+      .join(" ") || order.recipientName
   const address = getOrderAddress(order)
   const visibleItems = order.items?.slice(0, 3) ?? []
-  const hiddenItems = Math.max((order.items?.length ?? 0) - visibleItems.length, 0)
+  const hiddenItems = Math.max(
+    (order.items?.length ?? 0) - visibleItems.length,
+    0
+  )
 
   return (
     <Card className="h-full gap-0 py-0 shadow-sm transition-shadow hover:shadow-md">
@@ -216,7 +247,9 @@ function OrderCard({
               className="flex justify-between gap-4 text-sm"
             >
               <div className="min-w-0">
-                <p className="truncate font-medium">{item.productName || "—"}</p>
+                <p className="truncate font-medium">
+                  {item.productName || "—"}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {[item.colorName, item.sizeValue].filter(Boolean).join(" · ")}
                   {` · ${item.quantity ?? 0} ${text.pieces}`}
@@ -263,11 +296,7 @@ function getOrderAddress(order: OrderDTO) {
   const streetAndHouse = [order.street, order.houseNumber]
     .filter(Boolean)
     .join(" ")
-  const apartmentDetails = [
-    order.apartmentNumber,
-    order.entrance,
-    order.floor,
-  ]
+  const apartmentDetails = [order.apartmentNumber, order.entrance, order.floor]
     .filter(Boolean)
     .join(", ")
 
@@ -288,7 +317,10 @@ function OrdersSkeleton() {
       <div className="mt-7 h-10 w-64 animate-pulse rounded-xl bg-muted" />
       <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="h-96 animate-pulse rounded-2xl bg-muted" />
+          <div
+            key={index}
+            className="h-96 animate-pulse rounded-2xl bg-muted"
+          />
         ))}
       </div>
     </div>

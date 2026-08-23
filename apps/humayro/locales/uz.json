@@ -8,6 +8,19 @@
       "updateFailed": "O'zgarishlarni saqlab bo'lmadi. Qayta urinib ko'ring.",
       "deleteFailed": "O'chirib bo'lmadi. Qayta urinib ko'ring."
     },
+    "notificationCenter": {
+      "title": "Bildirishnomalar",
+      "unread": "O'qilmagan: {{count}}",
+      "unreadOne": "O'qilmagan bildirishnoma",
+      "allRead": "Barcha bildirishnomalar o'qilgan",
+      "markAllRead": "Barchasini o'qish",
+      "emptyTitle": "Hozircha bildirishnomalar yo'q",
+      "emptyDescription": "Ular buyurtma amalda rasmiylashtirilgandan keyin paydo bo'ladi.",
+      "loadFailed": "Bildirishnomalarni yuklab bo'lmadi.",
+      "retry": "Qayta urinish",
+      "orderFallback": "Buyurtma yangilanishi",
+      "systemFallback": "Yangi bildirishnoma"
+    },
     "home": {
       "eyebrow": "Keyingi sevimli libosingiz",
       "title": "Sizga mos keladigan kiyimlar.",
@@ -33,6 +46,15 @@
       "featureThree": {
         "title": "Har kun uchun uslublar",
         "description": "Har bir vaziyat uchun liboslar."
+      },
+      "kpi": {
+        "activeCustomers": "Faol mijozlar",
+        "thisMonth": "shu oy",
+        "monthlyRevenue": "Oylik daromad",
+        "fromLastMonth": "o'tgan oydan",
+        "branchesCount": "Filiallar soni",
+        "organizationsCount": "Tashkilotlar soni",
+        "regionsCount": "Viloyatlar soni"
       }
     },
     "bookDemo": {
@@ -275,6 +297,102 @@
           "LETTER": "Harfli",
           "NUMBER": "Raqamli"
         }
+      }
+    },
+    "addresses": {
+      "title": "Manzil ma'lumotnomalari",
+      "navigation": "Manzil ma'lumotnomasi bo'limlari",
+      "loading": "Manzil ma'lumotlari yuklanmoqda...",
+      "loadFailed": "Manzil ma'lumotlarini yuklab bo'lmadi.",
+      "saveFailed": "Ma'lumotlarni saqlab bo'lmadi. Maydonlarni tekshirib, qayta urinib ko'ring.",
+      "saving": "Saqlanmoqda...",
+      "saved": "{{count}} ta yozuv saqlandi",
+      "saveAll": "Yozuvlarni saqlash ({{count}})",
+      "addAnother": "Yana yozuv qo'shish",
+      "remove": "Yozuvni shakldan o'chirish",
+      "item": "{{number}}-yozuv",
+      "searchAction": "Qidirish",
+      "total": "Jami yozuvlar: {{count}}",
+      "regions": {
+        "title": "Viloyatlar",
+        "description": "Viloyatlarni ko'rish va yangi manzil viloyatlarini paketli qo'shish.",
+        "search": "Viloyatlarni qidirish...",
+        "create": "Viloyatlar qo'shish",
+        "createDescription": "Bir yoki bir nechta yozuvni to'ldiring. Barcha viloyatlar bitta so'rovda yuboriladi.",
+        "empty": "Viloyatlar topilmadi.",
+        "loadFailed": "Viloyatlar ro'yxatini yuklab bo'lmadi."
+      },
+      "districts": {
+        "title": "Tumanlar",
+        "description": "Tumanlarni ko'rish va ularni viloyatga bog'lab paketli qo'shish.",
+        "search": "Tumanlarni qidirish...",
+        "create": "Tumanlar qo'shish",
+        "createDescription": "Viloyatni tanlang va bir yoki bir nechta tuman yozuvini to'ldiring.",
+        "empty": "Tumanlar topilmadi."
+      },
+      "fields": {
+        "id": "ID",
+        "nameRu": "Nomi (RU)",
+        "nameUz": "Nomi (UZ)",
+        "region": "Viloyat",
+        "selectRegion": "Viloyatni tanlang",
+        "fakturaRegionId": "Faktura: viloyat IDsi",
+        "fakturaRegionCode": "Faktura: viloyat kodi",
+        "fakturaRegionName": "Faktura: viloyat nomi",
+        "fakturaDistrictCode": "Faktura: tuman kodi",
+        "fakturaDistrictName": "Faktura: tuman nomi",
+        "soato": "SOATO kodi"
+      },
+      "validation": {
+        "nameRequired": "Har bir yozuv uchun nom kiriting.",
+        "regionRequired": "Har bir tuman uchun viloyatni tanlang."
+      }
+    },
+    "analytics": {
+      "title": "Analitika",
+      "eyebrow": "Savdo samaradorligi",
+      "description": "Yetkazilgan buyurtmalar bo'yicha savdoni tahlil qiling va filiallar samaradorligini solishtiring.",
+      "updating": "Ma'lumotlar yangilanmoqda...",
+      "deliveredOnly": "Hisob-kitoblarda faqat «Yetkazilgan» holatidagi buyurtmalar inobatga olinadi.",
+      "invalidPeriod": "Boshlanish sanasi tugash sanasidan keyin bo'lishi mumkin emas.",
+      "loadFailed": "Analitikani yuklab bo'lmadi. Kirish huquqini tekshirib, qayta urinib ko'ring.",
+      "retry": "Qayta urinish",
+      "period": "Davr: {{period}}",
+      "filters": {
+        "title": "Hisobot parametrlari",
+        "description": "Standart holatda oxirgi 30 kalendar kunlik joriy davr tanlanadi.",
+        "from": "Boshlanish sanasi",
+        "to": "Tugash sanasi",
+        "organization": "Tashkilot",
+        "allOrganizations": "Barcha tashkilotlar",
+        "apply": "Qo'llash",
+        "reset": "Tozalash"
+      },
+      "metrics": {
+        "revenue": "Tushum",
+        "orders": "Yetkazilgan buyurtmalar",
+        "averageCheck": "O'rtacha chek",
+        "previous": "Oldingi davr"
+      },
+      "chart": {
+        "title": "Savdo dinamikasi",
+        "description": "Sotuvsiz kunlarni ham hisobga olgan holda kunlik tushum va yetkazilgan buyurtmalar soni.",
+        "revenue": "Tushum",
+        "orders": "Buyurtmalar",
+        "empty": "Tanlangan davr uchun savdo ma'lumotlari yo'q."
+      },
+      "branches": {
+        "title": "Filiallar samaradorligi",
+        "description": "Filiallar server tomonidan 0 dan 100 gacha bo'lgan yakuniy baho bo'yicha saralangan.",
+        "empty": "Tanlangan davr uchun filiallar ma'lumotlari yo'q.",
+        "branch": "Filial",
+        "score": "Baho",
+        "rating": "Reyting",
+        "breakdown": "Baho tarkibi",
+        "revenuePoints": "Tushum",
+        "averageCheckPoints": "O'rtacha chek",
+        "ordersPoints": "Buyurtmalar",
+        "ratingPoints": "Reyting"
       }
     },
     "dashboard": {
@@ -674,7 +792,18 @@
       "catalogEyebrow": "Humayro katalogi",
       "catalogTitle": "Ommabop mahsulotlar",
       "catalogDescription": "Ishonchli do'konlardan mahsulot tanlang, yoqqanlarini saqlang va buyurtmani bir necha qadamda rasmiylashtiring.",
+      "productsEyebrow": "Katalog",
+      "productsTitle": "Barcha mahsulotlar",
+      "productsFound": "{{count}} ta mahsulot topildi",
+      "productsFoundFor": "“{{query}}” bo‘yicha {{count}} ta mahsulot topildi",
+      "mobileFilters": "Filtrlar va turkumlar",
+      "previousPage": "Oldingi",
+      "nextPage": "Keyingi",
+      "paginationPage": "{{current}} / {{total}}-sahifa",
       "allCategories": "Barcha mahsulotlar",
+      "categories": "Turkumlar",
+      "searchCategories": "Turkumlar bo'yicha qidirish",
+      "applyFilters": "Mahsulotlarni ko'rsatish",
       "newest": "Avval yangilari",
       "priceLow": "Avval arzonlari",
       "priceHigh": "Avval qimmatlari",
@@ -683,11 +812,25 @@
       "priceRange": "Narx oralig'i",
       "priceFrom": "dan",
       "priceTo": "gacha",
+      "subcategories": "Ichki turkumlar",
       "colors": "Rang",
       "sizes": "O'lcham",
       "showMore": "Yana {count}",
       "showLess": "Kamroq ko'rsatish",
       "unnamedColor": "Nomsiz rang",
+      "loadingOptions": "Variantlar yuklanmoqda...",
+      "noOptions": "Mavjud variantlar yo‘q",
+      "colorRed": "Qizil",
+      "colorGreen": "Yashil",
+      "colorBlue": "Ko‘k",
+      "colorBlack": "Qora",
+      "colorWhite": "Oq",
+      "colorYellow": "Sariq",
+      "colorBrown": "Jigarrang",
+      "colorGray": "Kulrang",
+      "colorPink": "Pushti",
+      "colorPurple": "Binafsha",
+      "colorKhaki": "Xaki",
       "addToCart": "Savatga",
       "adding": "Qo'shilmoqda...",
       "favorite": "Sevimlilarga qo'shish",
@@ -857,6 +1000,14 @@
         "administration": {
           "title": "Ma'muriyat",
           "description": "Humayro ma'lumotnomalari va sozlamalarini boshqarish."
+        },
+        "addresses": {
+          "title": "Manzil ma'lumotnomalari",
+          "description": "Humayro yetkazib berish viloyatlari va tumanlarini boshqarish."
+        },
+        "analytics": {
+          "title": "Savdo analitikasi",
+          "description": "Humayro savdosi va filiallar samaradorligi ko'rsatkichlari."
         },
         "payments": {
           "title": "To'lovlarni boshqarish",

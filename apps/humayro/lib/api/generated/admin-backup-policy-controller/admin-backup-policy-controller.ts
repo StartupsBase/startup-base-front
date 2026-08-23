@@ -138,7 +138,7 @@ export function useGet<TData = Awaited<ReturnType<typeof get>>, TError = ErrorTy
 
 
 
-export const update8 = (
+export const update9 = (
     backupPolicyUpdateDTO: BodyType<BackupPolicyUpdateDTO>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
@@ -155,11 +155,11 @@ export const update8 = (
 
 
 
-export const getUpdate8MutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update8>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof update8>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext> => {
+export const getUpdate9MutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update9>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof update9>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext> => {
 
-const mutationKey = ['update8'];
+const mutationKey = ['update9'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -169,10 +169,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update8>>, {data: BodyType<BackupPolicyUpdateDTO>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update9>>, {data: BodyType<BackupPolicyUpdateDTO>}> = (props) => {
           const {data} = props ?? {};
 
-          return  update8(data,requestOptions)
+          return  update9(data,requestOptions)
         }
 
 
@@ -182,17 +182,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Update8MutationResult = NonNullable<Awaited<ReturnType<typeof update8>>>
-    export type Update8MutationBody = BodyType<BackupPolicyUpdateDTO>
-    export type Update8MutationError = ErrorType<unknown>
+    export type Update9MutationResult = NonNullable<Awaited<ReturnType<typeof update9>>>
+    export type Update9MutationBody = BodyType<BackupPolicyUpdateDTO>
+    export type Update9MutationError = ErrorType<unknown>
 
-    export const useUpdate8 = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update8>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useUpdate9 = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update9>>, TError,{data: BodyType<BackupPolicyUpdateDTO>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof update8>>,
+        Awaited<ReturnType<typeof update9>>,
         TError,
         {data: BodyType<BackupPolicyUpdateDTO>},
         TContext
       > => {
-      return useMutation(getUpdate8MutationOptions(options), queryClient);
+      return useMutation(getUpdate9MutationOptions(options), queryClient);
     }

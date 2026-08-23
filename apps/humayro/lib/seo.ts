@@ -22,6 +22,8 @@ export const seoPages = [
   "googleCallback",
   "dashboard",
   "administration",
+  "addresses",
+  "analytics",
   "organizations",
   "organization",
   "newProduct",

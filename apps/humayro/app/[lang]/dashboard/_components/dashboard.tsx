@@ -20,8 +20,8 @@ import {
   getGetAllQueryKey,
   useGetAll,
 } from "@/lib/api/generated/user-controller/user-controller"
-import { useGetAll6 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
-import { useGetAll5 as useBranches } from "@/lib/api/generated/branch/branch"
+import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
+import { useGetAll6 as useBranches } from "@/lib/api/generated/branch/branch"
 import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"

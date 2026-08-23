@@ -23,3 +23,12 @@ export * from './generated/internal-backup-audit-controller/internal-backup-audi
 export * from './generated/internal-backup-policy-controller/internal-backup-policy-controller';
 export * from './generated/chat/chat';
 export * from './generated/notification/notification';
+export * from './generated/admin-organization-advertisement-controller/admin-organization-advertisement-controller';
+export * from './generated/admin-organization-payment-settings-controller/admin-organization-payment-settings-controller';
+export * from './generated/click-payment-controller/click-payment-controller';
+export * from './generated/district/district';
+export * from './generated/organization-advertisement-controller/organization-advertisement-controller';
+export * from './generated/region/region';
+export * from './generated/test-click-payment-controller/test-click-payment-controller';
+export * from './generated/admin-analytics/admin-analytics';
+export * from './generated/product-transfer/product-transfer';

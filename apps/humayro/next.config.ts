@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: monorepoRoot,
   deploymentId: process.env.DEPLOYMENT_VERSION,
   transpilePackages: ["@workspace/ui"],
+  experimental: {
+    viewTransition: true,
+  },
   images: {
     remotePatterns: [
       {
