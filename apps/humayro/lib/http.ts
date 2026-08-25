@@ -3,7 +3,7 @@
 import axios from "axios"
 import Cookies from "js-cookie"
 
-import { authTokenCookieName } from "@/lib/auth"
+import { authTokenCookieName, authTokenStorageName } from "@/lib/auth"
 import { getApiBaseUrl } from "@/lib/api-url"
 
 const baseURL = getApiBaseUrl()
@@ -30,6 +30,7 @@ http.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       Cookies.remove(authTokenCookieName, { path: "/" })
+      window.localStorage.removeItem(authTokenStorageName)
     }
 
     return Promise.reject(error)

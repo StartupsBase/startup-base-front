@@ -2,9 +2,14 @@
 
 import Cookies from "js-cookie"
 
-import { authTokenCookieName, authTokenMaxAgeDays } from "@/lib/auth"
+import {
+  authTokenCookieName,
+  authTokenMaxAgeDays,
+  authTokenStorageName,
+} from "@/lib/auth"
 
 export function saveAuthToken(token: string) {
+  window.localStorage.setItem(authTokenStorageName, token)
   Cookies.set(authTokenCookieName, token, {
     sameSite: "lax",
     secure: window.location.protocol === "https:",
@@ -14,6 +19,7 @@ export function saveAuthToken(token: string) {
 }
 
 export function clearAuthToken() {
+  window.localStorage.removeItem(authTokenStorageName)
   Cookies.remove(authTokenCookieName, { path: "/" })
 }
 
