@@ -109,6 +109,7 @@ export function BranchPerformance({
                 />
               </div>
               <Select
+                noOptions={t("select.noSortingOptions")}
                 value={sort}
                 onValueChange={(value) => setSort(value as BranchSort)}
               >

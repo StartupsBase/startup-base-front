@@ -105,7 +105,11 @@ export function UserCreateForm({
           control={form.control}
           name="gender"
           render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select
+              noOptions={t("select.noGenderOptions")}
+              value={field.value}
+              onValueChange={field.onChange}
+            >
               <SelectTrigger
                 ref={field.ref}
                 aria-label={t("register.gender")}
@@ -128,6 +132,10 @@ export function UserCreateForm({
           name="organizationId"
           render={({ field }) => (
             <Select
+              empty={
+                !organizations.data?.some((org) => org.id !== undefined)
+              }
+              noOptions={t("select.noOrganizations")}
               value={
                 field.value === undefined || field.value === ""
                   ? NO_ORGANIZATION

@@ -1441,6 +1441,14 @@ function CategoryHierarchyList({
                 {t("category.destinationParent")}
               </label>
               <Select
+                empty={
+                  !categories.some(
+                    (category) =>
+                      moveDialogCategory &&
+                      canUseCategoryAsParent(moveDialogCategory, category)
+                  )
+                }
+                noOptions={t("select.noCategories")}
                 value={destinationParent}
                 onValueChange={setDestinationParent}
               >
@@ -1477,6 +1485,7 @@ function CategoryHierarchyList({
                 {t("category.destinationPosition")}
               </label>
               <Select
+                noOptions={t("select.noPositions")}
                 value={destinationPosition}
                 onValueChange={(value) =>
                   setDestinationPosition(value as "first" | "last")
@@ -2134,7 +2143,11 @@ function CategoryForm({
               control={form.control}
               name="sizeType"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  noOptions={t("select.noSizeTypes")}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger
                     ref={field.ref}
                     aria-label={t("category.sizeType")}
@@ -2164,6 +2177,14 @@ function CategoryForm({
               name="parentId"
               render={({ field }) => (
                 <Select
+                  empty={
+                    !categories.some(
+                      (item) =>
+                        item.id !== undefined &&
+                        !excludedParentIds.has(item.id)
+                    )
+                  }
+                  noOptions={t("select.noCategories")}
                   value={field.value || ROOT_CATEGORY}
                   onValueChange={(nextValue) =>
                     field.onChange(nextValue === ROOT_CATEGORY ? "" : nextValue)

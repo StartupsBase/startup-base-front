@@ -738,6 +738,7 @@ function DistrictDraftFields({
       <div className="space-y-2 sm:col-span-2">
         <Label>{t("addresses.fields.region")}</Label>
         <Select
+          noOptions={t("select.noRegions")}
           value={draft.regionId}
           onValueChange={(regionId) => onChange({ ...draft, regionId })}
           disabled={regionsLoading}

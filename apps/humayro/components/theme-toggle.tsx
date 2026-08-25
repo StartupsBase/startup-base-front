@@ -22,11 +22,30 @@ function ThemeToggle({ className }: { className?: string }) {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={t(isDark ? "home.themeToLight" : "home.themeToDark")}
     >
-      <HugeiconsIcon
-        icon={isDark ? Sun01Icon : Moon01Icon}
-        strokeWidth={2}
-        className="size-4.5 sm:size-5 2xl:size-5.5"
-      />
+      <span className="relative size-4.5 sm:size-5 2xl:size-5.5">
+        <HugeiconsIcon
+          icon={Moon01Icon}
+          strokeWidth={2}
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-0 size-full transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+            isDark
+              ? "scale-50 -rotate-90 opacity-0"
+              : "scale-100 rotate-0 opacity-100"
+          )}
+        />
+        <HugeiconsIcon
+          icon={Sun01Icon}
+          strokeWidth={2}
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-0 size-full transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+            isDark
+              ? "scale-100 rotate-0 opacity-100"
+              : "scale-50 rotate-90 opacity-0"
+          )}
+        />
+      </span>
     </button>
   )
 }

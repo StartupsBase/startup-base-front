@@ -1,5 +1,20 @@
 {
   "common": {
+    "select": {
+      "noSortingOptions": "Saralash variantlari mavjud emas",
+      "noGenderOptions": "Jins variantlari mavjud emas",
+      "noOrganizations": "Tashkilotlar mavjud emas",
+      "noBranches": "Filiallar mavjud emas",
+      "noRegions": "Viloyatlar mavjud emas",
+      "noDistricts": "Tumanlar mavjud emas",
+      "noSizeTypes": "O‘lcham turlari mavjud emas",
+      "noCategories": "Kategoriyalar mavjud emas",
+      "noPositions": "Joylashuv variantlari mavjud emas",
+      "noPaymentProviders": "To‘lov tizimlari mavjud emas",
+      "noPaymentStatuses": "To‘lov holatlari mavjud emas",
+      "noColors": "Ranglar mavjud emas",
+      "noSizes": "O‘lchamlar mavjud emas"
+    },
     "notifications": {
       "createSuccess": "Muvaffaqiyatli yaratildi.",
       "updateSuccess": "O'zgarishlar muvaffaqiyatli saqlandi.",
@@ -476,7 +491,8 @@
       "profilePhoto": "Profil rasmi",
       "customer": "Mijoz",
       "accessDenied": "Hisobingiz ro'yxatdan o'tgan foydalanuvchilarni ko'rish huquqiga ega emas.",
-      "loadFailed": "Ro'yxatdan o'tgan foydalanuvchilarni yuklab bo'lmadi. Qayta urinib ko'ring."
+      "loadFailed": "Ro'yxatdan o'tgan foydalanuvchilarni yuklab bo'lmadi. Qayta urinib ko'ring.",
+      "retry": "Qayta urinish"
     },
     "payments": {
       "title": "To'lovlar",
