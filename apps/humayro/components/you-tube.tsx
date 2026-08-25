@@ -5,7 +5,8 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 import YouTube, { type YouTubeProps } from "react-youtube"
 
-const VIDEO_ID = "dQw4w9WgXcQ"
+const VIDEO_ID = "5Lnc3hSVT-c"
+// https://youtu.be/5Lnc3hSVT-c?si=jFRLDJk8smJWS9Ie
 
 const YouTubeVideo = () => {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -32,7 +33,7 @@ const YouTubeVideo = () => {
             aria-label="Videoni ko‘rish"
           >
             <img
-              src={`https://img.youtube.com/vi/${VIDEO_ID}/maxresdefault.jpg`}
+              src={`https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`}
               alt="Video rasmi"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />

@@ -25,7 +25,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       description:
         "Humayro asoschisi. Ta'lim markazlari uchun sodda va ishonchli boshqaruv tizimini yaratadi.",
       location: "Toshkent",
-      image: "/images/team/furkat-teshaev.png",
+      image: "/images/team/xasanjon.png",
       isFounder: true,
       linkedinUrl: "https://www.linkedin.com/in/xasanjon-abdunabiyev/",
     },
@@ -35,7 +35,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       description:
         "Mahsulot va biznes jarayonlariga mas'ul. Har bir o'quv markazi tezroq ishlashi uchun yechimlar yaratadi.",
       location: "Toshkent",
-      image: "/images/team/dilshodbek-khodjakov.png",
+      image: "/images/team/mavlon.jpg",
       isFounder: true,
       linkedinUrl: "https://www.linkedin.com/in/mavlon-akmalov-84153a34b/",
     },
@@ -46,7 +46,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
         "Humayro texnik yo'nalishini boshqaradi va platformaning barqaror, qulay ishlashini ta'minlaydi.",
       location: "Toshkent",
       isFounder: true,
-      image: "/images/team/umid-sultonov.png",
+      image: "/images/team/rovshanbek.png",
       linkedinUrl:
         "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },
@@ -58,7 +58,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       description:
         "Основатель Humayro. Создаёт простую и надёжную систему управления для учебных центров.",
       location: "Ташкент",
-      image: "/images/team/furkat-teshaev.png",
+      image: "/images/team/xasanjon.png",
       isFounder: true,
       linkedinUrl: "https://www.linkedin.com/in/xasanjon-abdunabiyev/",
     },
@@ -68,7 +68,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
       description:
         "Отвечает за продукт и бизнес-процессы, создавая решения для более быстрой работы учебных центров.",
       location: "Ташкент",
-      image: "/images/team/dilshodbek-khodjakov.png",
+      image: "/images/team/mavlon.jpg",
       isFounder: true,
       linkedinUrl: "https://www.linkedin.com/in/mavlon-akmalov-84153a34b/",
     },
@@ -79,7 +79,7 @@ const teamByLanguage: Record<TeamSectionProps["lang"], TeamMember[]> = {
         "Развивает техническое направление Humayro и отвечает за стабильность и удобство платформы.",
       location: "Ташкент",
       isFounder: true,
-      image: "/images/team/umid-sultonov.png",
+      image: "/images/team/rovshanbek.png",
       linkedinUrl:
         "https://www.linkedin.com/in/rovshanbek-mirvoxitov-96b831373/",
     },

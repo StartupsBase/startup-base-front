@@ -231,16 +231,25 @@ function OrderCard({
             {formatStorefrontPrice(order.totalAmount, language)}
           </strong>
         </div>
-        {canCancel && (
-          <Button
-            variant="destructive"
-            className="rounded-2xl"
-            disabled={isCancelling}
-            onClick={onCancel}
-          >
-            {text.cancelOrder}
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {order.id != null ? (
+            <Button asChild variant="outline" className="rounded-2xl">
+              <Link href={`/${language}/account/orders/${order.id}`}>
+                {language === "ru" ? "Подробнее" : "Batafsil"}
+              </Link>
+            </Button>
+          ) : null}
+          {canCancel && (
+            <Button
+              variant="destructive"
+              className="rounded-2xl"
+              disabled={isCancelling}
+              onClick={onCancel}
+            >
+              {text.cancelOrder}
+            </Button>
+          )}
+        </div>
       </div>
     </article>
   )

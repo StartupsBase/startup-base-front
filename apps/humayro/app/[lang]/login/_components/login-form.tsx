@@ -19,6 +19,7 @@ import {
   HUMAYRO_TELEGRAM_BOT_USERNAME,
 } from "@/lib/constants"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import { getSafeNextPath, localizeInternalPath } from "@/lib/safe-next-path"
 import { Input } from "@/components/input"
 import { GoogleLoginButton } from "@/components/forms/google-login-button"
 import { PasswordInput } from "@/components/forms/password-input"
@@ -156,8 +157,8 @@ function LoginForm() {
       const language = pathname.split("/")[1] ?? "ru"
       const nextPath = new URLSearchParams(window.location.search).get("next")
       const destination =
-        nextPath?.startsWith(`/${language}/`) && !nextPath.startsWith("//")
-          ? nextPath
+        nextPath
+          ? localizeInternalPath(language, getSafeNextPath(nextPath))
           : getPostLoginPath(language, session.user?.roles)
 
       router.replace(destination)
