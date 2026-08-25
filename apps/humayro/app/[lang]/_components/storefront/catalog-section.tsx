@@ -45,6 +45,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { useQueries } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ProductCard } from "./product-card"
 import { useStorefrontActions } from "./use-storefront-actions"
@@ -70,6 +71,7 @@ export function CatalogSection({
   mode = "homepage",
   searchQuery = "",
 }: CatalogSectionProps) {
+  const { t } = useTranslation()
   const text = useStorefrontCopy()
   const isProductsPage = mode === "products"
   const hasToken = useHasAuthToken()
@@ -276,6 +278,7 @@ export function CatalogSection({
 
           <div className="flex w-full items-center gap-2 lg:w-auto">
             <Select
+              noOptions={t("select.noSortingOptions")}
               value={sort}
               onValueChange={(value) => {
                 setSort(value as CatalogSort)

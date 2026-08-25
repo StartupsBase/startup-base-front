@@ -143,6 +143,7 @@ export function AllReviews({
           </h2>
           <div className="flex flex-wrap items-center justify-between gap-4 border-y py-4">
             <Select
+              noOptions={t("select.noSortingOptions")}
               value={sort}
               onValueChange={(value) => setSort(value as ReviewSort)}
             >

@@ -1,6 +1,10 @@
 "use client"
 
-import { PencilEdit02Icon, Trash } from "@hugeicons/core-free-icons"
+import {
+  PencilEdit02Icon,
+  RefreshIcon,
+  Trash,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
@@ -239,6 +243,12 @@ export function Dashboard({ language }: { language: string }) {
             className="w-full sm:w-64"
           />
           <Select
+            empty={
+              !organizationsQuery.data?.some(
+                (organization) => organization.id !== undefined
+              )
+            }
+            noOptions={t("select.noOrganizations")}
             value={organizationId || ALL_ORGANIZATIONS}
             onValueChange={(nextValue) => {
               setOrganizationId(
@@ -271,6 +281,12 @@ export function Dashboard({ language }: { language: string }) {
             </SelectContent>
           </Select>
           <Select
+            empty={
+              !branchesQuery.data?.content?.some(
+                (branch) => branch.id !== undefined
+              )
+            }
+            noOptions={t("select.noBranches")}
             value={branchId || ALL_BRANCHES}
             onValueChange={(nextValue) =>
               setBranchId(nextValue === ALL_BRANCHES ? "" : nextValue)
@@ -300,8 +316,23 @@ export function Dashboard({ language }: { language: string }) {
         {usersQuery.isLoading || meQuery.isLoading ? (
           <p className="text-muted-foreground">{t("dashboard.loadingUsers")}</p>
         ) : usersQuery.isError ? (
-          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">
-            {getErrorMessage(usersQuery.error, t)}
+          <div className="flex flex-col items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
+            <p>{getErrorMessage(usersQuery.error, t)}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-destructive/30 bg-background/70 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              disabled={usersQuery.isFetching}
+              onClick={() => void usersQuery.refetch()}
+            >
+              <HugeiconsIcon
+                icon={RefreshIcon}
+                className={
+                  usersQuery.isFetching ? "size-4! animate-spin" : "size-4!"
+                }
+              />
+              {t("dashboard.retry")}
+            </Button>
           </div>
         ) : (
           <DataTable
@@ -439,6 +470,7 @@ function UserActions({ user }: { user: UserDTO }) {
               placeholder={t("register.phone")}
             />
             <Select
+              noOptions={t("select.noGenderOptions")}
               value={gender || GENDER_UNSPECIFIED}
               onValueChange={(nextValue) =>
                 setGender(

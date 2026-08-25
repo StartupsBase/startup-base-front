@@ -12,10 +12,39 @@ import {
   ArrowDown01Icon,
 } from "@hugeicons/core-free-icons"
 
+type SelectContextValue = {
+  empty?: boolean
+  noOptions?: React.ReactNode
+}
+
+const SelectContext = React.createContext<SelectContextValue>({})
+
 function Select({
+  empty,
+  noOptions,
+  children,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+}: React.ComponentProps<typeof SelectPrimitive.Root> & {
+  empty?: boolean
+  noOptions?: React.ReactNode
+}) {
+  return (
+    <SelectContext.Provider value={{ empty, noOptions }}>
+      <SelectPrimitive.Root data-slot="select" {...props}>
+        {children}
+      </SelectPrimitive.Root>
+    </SelectContext.Provider>
+  )
+}
+
+function hasSelectItems(children: React.ReactNode): boolean {
+  return React.Children.toArray(children).some((child) => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) {
+      return false
+    }
+
+    return child.type === SelectItem || hasSelectItems(child.props.children)
+  })
 }
 
 function SelectGroup({
@@ -78,29 +107,43 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const { empty, noOptions } = React.useContext(SelectContext)
+  const hasOptions = empty === undefined ? hasSelectItems(children) : !empty
+  const resolvedPosition =
+    !hasOptions && noOptions !== undefined ? "popper" : position
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         data-slot="select-content"
-        data-align-trigger={position === "item-aligned"}
+        data-align-trigger={resolvedPosition === "item-aligned"}
         className={cn(
           "relative z-50 max-h-(--radix-select-content-available-height) max-w-[calc(100vw-2rem)] min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl bg-popover text-popover-foreground shadow-2xl ring-1 ring-foreground/5 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          position === "popper" &&
+          resolvedPosition === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           className
         )}
-        position={position}
+        position={resolvedPosition}
         align={align}
         {...props}
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
-          data-position={position}
+          data-position={resolvedPosition}
           className={cn(
             "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
-            position === "popper" && ""
+            resolvedPosition === "popper" && ""
           )}
         >
+          {!hasOptions && noOptions ? (
+            <div
+              data-slot="select-empty"
+              role="status"
+              className="px-3 py-2.5 text-sm text-muted-foreground"
+            >
+              {noOptions}
+            </div>
+          ) : null}
           {children}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />

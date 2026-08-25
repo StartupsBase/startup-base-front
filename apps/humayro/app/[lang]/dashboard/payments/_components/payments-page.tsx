@@ -290,6 +290,7 @@ export function PaymentsPage({
               {t("payments.organization")}
             </Label>
             <Select
+              noOptions={t("select.noOrganizations")}
               value={organizationId?.toString()}
               onValueChange={(value) => {
                 setSelectedOrganizationId(Number(value))
@@ -457,6 +458,7 @@ export function PaymentsPage({
                   }}
                 />
                 <Select
+                  noOptions={t("select.noPaymentProviders")}
                   value={providerFilter ?? "ALL"}
                   onValueChange={(value) => {
                     setProviderFilter(
@@ -477,6 +479,7 @@ export function PaymentsPage({
                   </SelectContent>
                 </Select>
                 <Select
+                  noOptions={t("select.noPaymentStatuses")}
                   value={statusFilter ?? "ALL"}
                   onValueChange={(value) => {
                     setStatusFilter(

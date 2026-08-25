@@ -961,6 +961,7 @@ function BasicStep({
 
               return (
                 <Select
+                  noOptions={t("select.noCategories")}
                   value={field.value ? String(field.value) : ""}
                   onValueChange={field.onChange}
                 >
@@ -1012,6 +1013,7 @@ function BasicStep({
 
               return (
                 <Select
+                  noOptions={t("select.noBranches")}
                   value={field.value ? String(field.value) : ""}
                   onValueChange={field.onChange}
                 >
@@ -1427,6 +1429,7 @@ function VariantsStep({
               <div className="grid gap-4 sm:grid-cols-2">
                 <ProductField label={t("product.color")}>
                   <Select
+                    noOptions={t("select.noColors")}
                     value={variant.colorId}
                     onValueChange={(nextValue) =>
                       onChange(index, { colorId: nextValue })
@@ -1451,6 +1454,7 @@ function VariantsStep({
                 </ProductField>
                 <ProductField label={t("product.size")}>
                   <Select
+                    noOptions={t("select.noSizes")}
                     value={variant.sizeId}
                     onValueChange={(nextValue) =>
                       onChange(index, { sizeId: nextValue })

@@ -153,6 +153,7 @@ export function RegisterForm({ language }: { language: string }) {
           name="gender"
           render={({ field }) => (
             <Select
+              noOptions={t("select.noGenderOptions")}
               name={field.name}
               value={field.value}
               onValueChange={field.onChange}

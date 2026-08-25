@@ -525,6 +525,7 @@ function SizeForm({ size, onSaved }: { size?: SizeDTO; onSaved: () => void }) {
       </Field>
       <Field label={t("administration.sizes.type")}>
         <Select
+          noOptions={t("select.noSizeTypes")}
           value={type}
           onValueChange={(nextValue) =>
             setType(nextValue as "LETTER" | "NUMBER")
@@ -594,6 +595,7 @@ function OrganizationSelect({
 
   return (
     <Select
+      noOptions={t("select.noOrganizations")}
       value={value === "" ? undefined : String(value)}
       onValueChange={(nextValue) => onChange(Number(nextValue))}
       disabled={disabled || organizationsQuery.isLoading}

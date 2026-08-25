@@ -209,6 +209,7 @@ export function BulkCategoryForm({
                 <label className="grid gap-1.5 text-sm font-medium">
                   {t("category.sizeType")}
                   <Select
+                    noOptions={t("select.noSizeTypes")}
                     value={draft.sizeType}
                     onValueChange={(value) =>
                       updateDraft(draft.id, {
@@ -232,6 +233,12 @@ export function BulkCategoryForm({
                 <label className="grid gap-1.5 text-sm font-medium">
                   {t("category.parent")}
                   <Select
+                    empty={
+                      !categories.some(
+                        (category) => category.id !== undefined
+                      )
+                    }
+                    noOptions={t("select.noCategories")}
                     value={draft.parentId || rootCategory}
                     onValueChange={(value) =>
                       updateDraft(draft.id, {

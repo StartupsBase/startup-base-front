@@ -110,7 +110,7 @@ export function AnalyticsFiltersCard({
 
       <CardContent>
         <form
-          className="grid gap-5 lg:grid-cols-[minmax(16rem,1.35fr)_minmax(14rem,1fr)_auto] lg:items-end"
+          className="grid gap-5 lg:grid-cols-[minmax(16rem,1.35fr)_minmax(14rem,1fr)_auto] lg:items-start"
           onSubmit={(event) => {
             event.preventDefault()
             onApply()
@@ -137,7 +137,10 @@ export function AnalyticsFiltersCard({
               aria-describedby={
                 validationError ? "analytics-period-error" : undefined
               }
-              calendarProps={{ disabled: { after: new Date() } }}
+              calendarProps={{
+                captionLayout: "dropdown-years",
+                disabled: { after: new Date() },
+              }}
             />
             <div className="flex flex-wrap gap-1.5 pt-0.5">
               {[7, 30, 90].map((days) => (
@@ -161,6 +164,12 @@ export function AnalyticsFiltersCard({
                 {t("analytics.filters.organization")}
               </Label>
               <Select
+                empty={
+                  !organizations.some(
+                    (organization) => organization.id !== undefined
+                  )
+                }
+                noOptions={t("select.noOrganizations")}
                 value={filters.organizationId || ALL_ORGANIZATIONS}
                 onValueChange={(value) =>
                   onChange({
@@ -200,7 +209,7 @@ export function AnalyticsFiltersCard({
             <div className="hidden lg:block" />
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row lg:justify-end lg:pt-6">
             <Button
               type="submit"
               size="lg"

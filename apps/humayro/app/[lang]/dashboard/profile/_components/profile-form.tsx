@@ -362,6 +362,7 @@ export function ProfileForm({ language }: { language: Language }) {
                     name="gender"
                     render={({ field }) => (
                       <Select
+                        noOptions={t("select.noGenderOptions")}
                         value={field.value ?? GENDER_UNSPECIFIED}
                         onValueChange={(nextValue) =>
                           field.onChange(

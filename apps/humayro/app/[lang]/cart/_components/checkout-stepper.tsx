@@ -16,6 +16,7 @@ import {
   type FieldErrors,
   type FieldPath,
 } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import { Input } from "@/components/input"
@@ -127,6 +128,7 @@ export function CheckoutStepper({
   onBack: () => void
   onSubmit: (data: CheckoutDTO) => void
 }) {
+  const { t } = useTranslation()
   const text = useStorefrontCopy()
   const schema = useMemo(() => createCheckoutSchema(text), [text])
   const meQuery = useMe1({ query: { retry: false } })
@@ -353,6 +355,7 @@ export function CheckoutStepper({
                         name="regionId"
                         render={({ field }) => (
                           <Select
+                            noOptions={t("select.noRegions")}
                             value={field.value > 0 ? String(field.value) : ""}
                             disabled={regionsQuery.isPending}
                             onValueChange={(value) => {
@@ -418,6 +421,7 @@ export function CheckoutStepper({
                         name="districtId"
                         render={({ field }) => (
                           <Select
+                            noOptions={t("select.noDistricts")}
                             value={field.value > 0 ? String(field.value) : ""}
                             disabled={
                               selectedRegionId === 0 || districtsQuery.isPending
