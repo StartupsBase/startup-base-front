@@ -41,8 +41,16 @@ export function proxy(request: NextRequest) {
     const isDashboard =
       pathname === `/${language}/dashboard` ||
       pathname.startsWith(`/${language}/dashboard/`)
+    const isProtectedMiniAppRoute =
+      pathname === `/${language}/account` ||
+      pathname.startsWith(`/${language}/account/`) ||
+      pathname === `/${language}/admin` ||
+      pathname.startsWith(`/${language}/admin/`)
 
-    if (isDashboard && !request.cookies.get("humayro_access_token")?.value) {
+    if (
+      (isDashboard || isProtectedMiniAppRoute) &&
+      !request.cookies.get("humayro_access_token")?.value
+    ) {
       const url = request.nextUrl.clone()
       url.pathname = `/${language}/login`
       url.searchParams.set("next", pathname)

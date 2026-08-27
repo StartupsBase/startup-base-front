@@ -280,6 +280,7 @@ export function OrganizationForm({
             inputMode="numeric"
             placeholder="INN"
             {...form.register("inn")}
+            maxLength={9}
           />
         </FormField>
         <FormField

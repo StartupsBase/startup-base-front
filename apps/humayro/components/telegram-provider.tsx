@@ -12,6 +12,10 @@ import {
   type TelegramWebApp,
 } from "@/lib/telegram"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
+import {
+  getSafeNextPath,
+  localizeInternalPath,
+} from "@/lib/safe-next-path"
 import { useTheme } from "@/components/theme-provider"
 
 type TelegramStatus = "unavailable" | "authenticating" | "authenticated" | "error"
@@ -44,14 +48,7 @@ function getPostLoginDestination(pathname: string) {
   const language = pathname.split("/")[1] ?? "ru"
   const requestedPath = new URLSearchParams(window.location.search).get("next")
 
-  if (
-    requestedPath?.startsWith(`/${language}/`) &&
-    !requestedPath.startsWith("//")
-  ) {
-    return requestedPath
-  }
-
-  return `/${language}/dashboard`
+  return localizeInternalPath(language, getSafeNextPath(requestedPath))
 }
 
 function isAuthenticationPage(pathname: string) {
@@ -74,13 +71,19 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     const webApp = getTelegramWebApp()
-    const initData = webApp?.initData
 
-    if (!sdkReady || !webApp || !initData) {
+    if (!sdkReady || !webApp) {
       return
     }
 
     webApp.ready()
+    const initData = webApp.initData
+    const requestedPath = new URLSearchParams(window.location.search).get("next")
+
+    if (!initData && !requestedPath) {
+      return
+    }
+
     webApp.expand()
     setTheme(webApp.colorScheme)
 
@@ -113,11 +116,8 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
         }
 
         setValue({ webApp, isMiniApp: true, status: "authenticated", error: null })
-
-        if (isAuthenticationPage(pathname)) {
-          router.replace(getPostLoginDestination(pathname))
-          router.refresh()
-        }
+        router.replace(getPostLoginDestination(pathname))
+        router.refresh()
       })
       .catch((cause: unknown) => {
         if (!active) {
@@ -125,7 +125,15 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
         }
 
         const error = cause instanceof Error ? cause : new Error("Telegram authentication failed")
-        setValue({ webApp, isMiniApp: true, status: "error", error })
+        setValue({ webApp, isMiniApp: Boolean(initData), status: "error", error })
+
+        if (!isAuthenticationPage(pathname)) {
+          const language = pathname.split("/")[1] ?? "ru"
+          const safeNext = getSafeNextPath(requestedPath)
+          router.replace(
+            `/${language}/login?next=${encodeURIComponent(safeNext)}`
+          )
+        }
       })
 
     return () => {
