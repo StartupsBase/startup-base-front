@@ -8,6 +8,6 @@
 import type { User } from './user';
 
 export interface ChatMember {
-  status?: string;
   user?: User;
+  status?: string;
 }
