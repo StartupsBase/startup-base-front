@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import React from "react"
 import type { Preview } from "@storybook/react-vite"
 import { MINIMAL_VIEWPORTS } from "storybook/viewport"

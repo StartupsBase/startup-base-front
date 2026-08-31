@@ -105,7 +105,7 @@ export function HyperText({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setTimeout(() => {
             setIsAnimating(true)
           }, delay)
@@ -141,8 +141,8 @@ export function HyperText({
             letter === " "
               ? letter
               : index <= iterationCount.current
-                ? children[index]
-                : characterSet[getRandomInt(characterSet.length)]
+                ? (children[index] ?? letter)
+                : (characterSet[getRandomInt(characterSet.length)] ?? letter)
           )
         )
 
