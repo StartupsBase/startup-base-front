@@ -7,9 +7,9 @@
  */
 
 export interface MaybeInaccessibleMessage {
+  superGroupMessage?: boolean;
   groupMessage?: boolean;
   userMessage?: boolean;
-  superGroupMessage?: boolean;
   chatId?: number;
   messageId?: number;
   date?: number;

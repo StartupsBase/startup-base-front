@@ -63,10 +63,10 @@ export function ProductCreationProblemDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter className="mx-auto w-full max-w-sm">
-          <AlertDialogCancel onClick={onReturn}>
+          <AlertDialogCancel variant={'secondary'} size={'lg'} onClick={onReturn}>
             {t("product.creationProblemReturn")}
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onCancelCreation}>
+          <AlertDialogAction variant={'default'} size={'lg'} onClick={onCancelCreation}>
             {t("product.creationProblemExit")}
           </AlertDialogAction>
         </AlertDialogFooter>
