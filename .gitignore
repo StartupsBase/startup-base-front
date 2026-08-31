@@ -60,3 +60,5 @@ apps/humayro/lib/api/openapi.json
 .nx/polygraph
 .claude/worktrees
 .claude/settings.local.json
+
+storybook-static

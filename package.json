@@ -24,17 +24,32 @@
     "typecheck:humayro": "turbo typecheck --filter=humayro",
     "typecheck:parking-avto": "turbo typecheck --filter=parking-avto",
     "typecheck:stadion24": "turbo typecheck --filter=stadion24",
-    "typecheck:wending": "turbo typecheck --filter=wending"
+    "typecheck:wending": "turbo typecheck --filter=wending",
+    "storybook": "nx storybook @workspace/ui",
+    "storybook:build": "nx build-storybook @workspace/ui",
+    "storybook:test": "nx run @workspace/ui:storybook:test"
   },
   "devDependencies": {
+    "@nx/js": "23.0.1",
+    "@nx/storybook": "23.0.1",
+    "@nx/vite": "23.0.1",
+    "@nx/web": "23.0.1",
+    "@storybook/react": "^10.1.0",
+    "@storybook/react-vite": "^10.1.0",
+    "@swc/helpers": "~0.5.18",
+    "@vitejs/plugin-react": "^4.7.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "husky": "^9.1.7",
     "nx": "23.0.1",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "storybook": "^10.1.0",
+    "ts-node": "10.9.1",
+    "tslib": "^2.3.0",
     "turbo": "^2.9.18",
-    "typescript": "^5"
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0"
   },
   "packageManager": "pnpm@10.33.4",
   "engines": {
