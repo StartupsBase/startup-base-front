@@ -258,6 +258,15 @@
       }
     },
     "register": {
+      "continueWithContact": "Telefon raqami yoki email bilan davom eting",
+      "contactHint": "Avval qaysi birini kiritishni tanlang. Ro'yxatdan o'tish uchun telefon raqami ham, email ham kerak.",
+      "firstnamePlaceholder": "Ismingizni kiriting",
+      "lastnamePlaceholder": "Familiyangizni kiriting",
+      "emailPlaceholder": "Email manzilingizni kiriting",
+      "phonePlaceholder": "+998 90 123 45 67",
+      "genderPlaceholder": "Jinsingizni tanlang (ixtiyoriy)",
+      "passwordPlaceholder": "Kamida 6 belgili parol",
+      "confirmPasswordPlaceholder": "Parolni qayta kiriting",
       "title": "Hisob yaratish",
       "subtitle": "Humayro bilan uslubingizga mos kiyimlarni toping.",
       "firstname": "Ism",

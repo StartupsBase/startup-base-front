@@ -32,7 +32,7 @@ function PolicyContent({ block }: { block: PolicyBlock }) {
   switch (block.type) {
     case "heading":
       return (
-        <h3 className="pt-4 text-lg leading-7 font-semibold text-foreground sm:text-xl">
+        <h3 className="pt-3 text-base leading-7 font-bold! tracking-normal text-foreground sm:text-lg">
           {block.text}
         </h3>
       )
@@ -91,7 +91,7 @@ export default async function PrivacyPolicyPage({
     <main
       lang="uz"
       id="privacy-policy"
-      className="humayro-top-background scroll-mt-28 text-foreground"
+      className="humayro-top-background scroll-mt-28 font-[family-name:var(--font-manrope)] font-medium tracking-normal text-foreground antialiased"
     >
       <div className="mx-auto max-w-7xl px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-10">
         <nav
@@ -120,10 +120,10 @@ export default async function PrivacyPolicyPage({
             <p className="mb-5 text-xs font-bold tracking-[0.24em] text-primary">
               {privacyPolicy.brand}
             </p>
-            <h1 className="text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl leading-[1.15] font-bold! tracking-[-0.035em] text-balance sm:text-5xl lg:text-6xl">
               {privacyPolicy.title}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {privacyPolicy.subtitle}
             </p>
             {lang === "ru" && (
@@ -136,10 +136,12 @@ export default async function PrivacyPolicyPage({
           <dl className="mt-8 grid gap-5 rounded-2xl border border-border/70 bg-card/80 p-5 sm:grid-cols-2 sm:p-6 lg:mt-10 lg:grid-cols-4">
             {privacyPolicy.metadata.map(({ label, value }) => (
               <div key={label}>
-                <dt className="text-xs font-medium text-muted-foreground">
+                <dt className="text-[13px] leading-5 font-medium text-muted-foreground">
                   {label}
                 </dt>
-                <dd className="mt-1.5 text-sm font-semibold">{value}</dd>
+                <dd className="mt-1.5 text-sm leading-6 font-semibold">
+                  {value}
+                </dd>
               </div>
             ))}
           </dl>
@@ -152,7 +154,10 @@ export default async function PrivacyPolicyPage({
               aria-labelledby="policy-contents"
               className="rounded-2xl border border-border/70 bg-card p-5"
             >
-              <h2 id="policy-contents" className="text-lg font-semibold">
+              <h2
+                id="policy-contents"
+                className="text-base leading-6 font-bold! tracking-tight"
+              >
                 {t("privacyPolicy.contents")}
               </h2>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -169,11 +174,11 @@ export default async function PrivacyPolicyPage({
                       size="sm"
                       className="min-h-11 flex-nowrap items-start gap-3 px-2 text-muted-foreground hover:bg-primary/8 hover:text-foreground"
                     >
-                      <ItemMedia className="w-5 justify-start text-xs leading-5 font-semibold text-primary tabular-nums">
+                      <ItemMedia className="w-5 justify-start text-xs leading-6 font-semibold text-primary tabular-nums">
                         {section.number}.
                       </ItemMedia>
                       <ItemContent className="min-w-0">
-                        <ItemTitle className="line-clamp-none block w-full text-sm leading-5 font-normal">
+                        <ItemTitle className="line-clamp-none block w-full text-[13px] leading-6 font-medium">
                           {section.title}
                         </ItemTitle>
                       </ItemContent>
@@ -195,8 +200,8 @@ export default async function PrivacyPolicyPage({
                     key={paragraph}
                     className={
                       index === 0
-                        ? "text-lg leading-8 font-semibold"
-                        : "text-base leading-8 text-muted-foreground"
+                        ? "text-lg leading-relaxed font-semibold sm:text-xl"
+                        : "text-base leading-7 font-medium text-foreground/80 sm:text-[17px] sm:leading-8"
                     }
                   >
                     {paragraph}
@@ -218,7 +223,7 @@ export default async function PrivacyPolicyPage({
                   <ItemHeader className="border-b border-border/70 pb-5">
                     <h2
                       id={`${section.id}-title`}
-                      className="flex items-start gap-3 text-xl leading-8 font-semibold tracking-tight sm:gap-4 sm:text-2xl"
+                      className="flex items-start gap-3 text-xl leading-snug font-bold! tracking-[-0.02em] sm:gap-4 sm:text-2xl"
                     >
                       <span className="shrink-0 text-primary tabular-nums">
                         {section.number}.
@@ -226,7 +231,7 @@ export default async function PrivacyPolicyPage({
                       <span>{section.title}</span>
                     </h2>
                   </ItemHeader>
-                  <ItemContent className="block min-w-0 basis-full space-y-4 text-base leading-8 wrap-break-word text-muted-foreground">
+                  <ItemContent className="block min-w-0 basis-full space-y-4 text-base leading-7 font-medium wrap-break-word text-foreground/80 sm:text-[17px] sm:leading-8">
                     {section.blocks.map((block, index) => (
                       <PolicyContent key={index} block={block} />
                     ))}

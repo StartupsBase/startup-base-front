@@ -18,7 +18,8 @@
     "utils": "@workspace/ui/lib/utils",
     "ui": "@workspace/ui/components",
     "lib": "@workspace/ui/lib",
-    "hooks": "@workspace/ui/hooks"
+    "hooks": "@workspace/ui/hooks",
+    "types": "@workspace/ui/types"
   },
   "registries": {
     "@animate-ui": "https://animate-ui.com/r/{name}.json"

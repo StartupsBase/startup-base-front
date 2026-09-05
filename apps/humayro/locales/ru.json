@@ -258,6 +258,15 @@
       }
     },
     "register": {
+      "continueWithContact": "Продолжить с номером телефона или email",
+      "contactHint": "Выберите, что заполнить первым. Для регистрации нужны и номер телефона, и email.",
+      "firstnamePlaceholder": "Введите ваше имя",
+      "lastnamePlaceholder": "Введите вашу фамилию",
+      "emailPlaceholder": "Введите ваш email",
+      "phonePlaceholder": "+998 90 123 45 67",
+      "genderPlaceholder": "Выберите пол (необязательно)",
+      "passwordPlaceholder": "Пароль от 6 символов",
+      "confirmPasswordPlaceholder": "Повторите ваш пароль",
       "title": "Создать аккаунт",
       "subtitle": "Находите одежду, которая подходит вашему стилю, вместе с Humayro.",
       "firstname": "Имя",
