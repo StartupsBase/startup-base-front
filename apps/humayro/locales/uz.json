@@ -1,5 +1,14 @@
 {
   "common": {
+    "privacyPolicy": {
+      "home": "Bosh sahifa",
+      "breadcrumb": "Maxfiylik siyosati",
+      "navigation": "Sahifa yo‘li",
+      "contents": "Mundarija",
+      "contentsHint": "Kerakli bo‘limga o‘ting",
+      "backToTop": "Sahifa boshiga qaytish",
+      "languageNotice": "Siyosat matni o‘zbek tilida taqdim etilgan."
+    },
     "select": {
       "noSortingOptions": "Saralash variantlari mavjud emas",
       "noGenderOptions": "Jins variantlari mavjud emas",
@@ -249,6 +258,15 @@
       }
     },
     "register": {
+      "continueWithContact": "Telefon raqami yoki email bilan davom eting",
+      "contactHint": "Avval qaysi birini kiritishni tanlang. Ro'yxatdan o'tish uchun telefon raqami ham, email ham kerak.",
+      "firstnamePlaceholder": "Ismingizni kiriting",
+      "lastnamePlaceholder": "Familiyangizni kiriting",
+      "emailPlaceholder": "Email manzilingizni kiriting",
+      "phonePlaceholder": "+998 90 123 45 67",
+      "genderPlaceholder": "Jinsingizni tanlang (ixtiyoriy)",
+      "passwordPlaceholder": "Kamida 6 belgili parol",
+      "confirmPasswordPlaceholder": "Parolni qayta kiriting",
       "title": "Hisob yaratish",
       "subtitle": "Humayro bilan uslubingizga mos kiyimlarni toping.",
       "firstname": "Ism",
@@ -758,6 +776,12 @@
       "description": "Xaritani bosing — tanlangan manzil avtomatik tarzda forma maydoniga qo'yiladi.",
       "choose": "Xaritadan tanlash",
       "yandex": "Yandex xaritasi",
+      "loading": "Xarita yuklanmoqda…",
+      "loadError": "Yandex xaritasini yuklab bo'lmadi. Qayta urinib ko'ring yoki boshqa xaritani tanlang.",
+      "retry": "Qayta urinish",
+      "myLocation": "Mening joylashuvim",
+      "geolocating": "Joylashuv aniqlanmoqda…",
+      "geolocationError": "Joylashuvni aniqlab bo'lmadi. Geolokatsiyaga ruxsat bering yoki xaritadan nuqta tanlang.",
       "other": "Boshqa xarita",
       "clickToSelect": "Manzilni tanlash uchun xaritani bosing.",
       "selected": "Tanlangan manzil",

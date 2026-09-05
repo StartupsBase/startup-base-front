@@ -1,150 +1,253 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
+import { Button } from "@workspace/ui/components/button"
+import { YANDEX_MAPS_API_KEY } from "@/lib/constants"
 import type { MapCoordinates } from "./leaflet-location-map"
+import {
+  loadYandexMaps,
+  type YandexCoordinates,
+  type YandexMap,
+  type YandexPlacemark,
+} from "./ymaps-helper"
 
 type YandexLocationMapProps = {
   value?: MapCoordinates
   onLocationChange: (coordinates: MapCoordinates) => void
 }
 
-type YandexWindow = Window & { ymaps3?: any }
-
 const tashkent: MapCoordinates = { latitude: 41.2995, longitude: 69.2401 }
-let yandexMapsPromise: Promise<any> | null = null
 
-function loadYandexMaps(apiKey: string) {
-  const windowWithYandex = window as YandexWindow
-
-  if (windowWithYandex.ymaps3) return Promise.resolve(windowWithYandex.ymaps3)
-  if (yandexMapsPromise) return yandexMapsPromise
-
-  document
-    .querySelector<HTMLScriptElement>('script[data-yandex-maps="v3"]')
-    ?.remove()
-
-  yandexMapsPromise = new Promise<any>((resolve, reject) => {
-    const script = document.createElement("script")
-    script.src = `https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(apiKey)}&lang=ru_RU`
-    script.async = true
-    script.dataset.yandexMaps = "v3"
-    script.onload = () => {
-      const ymaps3 = (window as YandexWindow).ymaps3
-      if (ymaps3) {
-        resolve(ymaps3)
-      } else {
-        reject(new Error("Yandex Maps API did not initialize."))
-      }
-    }
-    script.onerror = () => {
-      reject(
-        new Error(
-          "Yandex rejected the API request. Check the API key and its HTTP Referer restrictions."
-        )
-      )
-    }
-    document.head.appendChild(script)
-  })
-
-  yandexMapsPromise.catch(() => {
-    yandexMapsPromise = null
-    document
-      .querySelector<HTMLScriptElement>('script[data-yandex-maps="v3"]')
-      ?.remove()
-  })
-
-  return yandexMapsPromise
+function isValidCoordinates(coords: unknown): coords is YandexCoordinates {
+  return (
+    Array.isArray(coords) &&
+    coords.length === 2 &&
+    typeof coords[0] === "number" &&
+    Number.isFinite(coords[0]) &&
+    typeof coords[1] === "number" &&
+    Number.isFinite(coords[1]) &&
+    Math.abs(coords[0]) <= 90 &&
+    Math.abs(coords[1]) <= 180
+  )
 }
 
 export function YandexLocationMap({
   value,
   onLocationChange,
 }: YandexLocationMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
+  const mapElementRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<YandexMap | null>(null)
+  const markerRef = useRef<YandexPlacemark | null>(null)
   const onLocationChangeRef = useRef(onLocationChange)
-  const [error, setError] = useState<string | null>(null)
-  const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY
+  const locationRef = useRef(value ?? tashkent)
+  const geolocationRequestRef = useRef(0)
+  const [mapState, setMapState] = useState<"loading" | "ready" | "error">(
+    "loading"
+  )
+  const [attempt, setAttempt] = useState(0)
+  const [isLocating, setIsLocating] = useState(false)
+  const [locationError, setLocationError] = useState(false)
+  const apiKey =
+    process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || YANDEX_MAPS_API_KEY
+  const latitude = value?.latitude ?? tashkent.latitude
+  const longitude = value?.longitude ?? tashkent.longitude
 
   useEffect(() => {
     onLocationChangeRef.current = onLocationChange
   }, [onLocationChange])
 
   useEffect(() => {
-    if (!apiKey || !containerRef.current) return
+    const coords: YandexCoordinates = [latitude, longitude]
+    if (!isValidCoordinates(coords)) return
+    locationRef.current = { latitude, longitude }
+    const current = markerRef.current?.geometry.getCoordinates()
+    if (current?.[0] === coords[0] && current[1] === coords[1]) return
+    markerRef.current?.geometry.setCoordinates(coords)
+    mapRef.current?.setCenter(coords)
+  }, [latitude, longitude])
 
-    let disposed = false
-    let map: any
+  useEffect(() => {
+    let cancelled = false
+    let map: YandexMap | undefined
+    let observer: ResizeObserver | undefined
+    let frame = 0
+    let removeListeners: (() => void) | undefined
+
+    function disposeMap() {
+      observer?.disconnect()
+      window.cancelAnimationFrame(frame)
+      removeListeners?.()
+      removeListeners = undefined
+      map?.destroy()
+      map = undefined
+      mapRef.current = null
+      markerRef.current = null
+    }
 
     void loadYandexMaps(apiKey)
-      .then(async (ymaps3) => {
-        await ymaps3.ready
-        if (disposed || !containerRef.current) return
-
-        const { YMap, YMapDefaultSchemeLayer, YMapListener, YMapMarker } =
-          ymaps3
-        const point = value ?? tashkent
-        map = new YMap(containerRef.current, {
-          location: { center: [point.longitude, point.latitude], zoom: 12 },
+      .then((ymaps) => {
+        if (cancelled || !mapElementRef.current) return
+        const location = locationRef.current
+        const candidate: YandexCoordinates = [
+          location.latitude,
+          location.longitude,
+        ]
+        const center: YandexCoordinates = isValidCoordinates(candidate)
+          ? candidate
+          : [tashkent.latitude, tashkent.longitude]
+        map = new ymaps.Map(mapElementRef.current, {
+          center,
+          zoom: 12,
+          controls: ["zoomControl"],
         })
-        map.addChild(new YMapDefaultSchemeLayer())
+        mapRef.current = map
+        map.behaviors.disable("scrollZoom")
+        const marker = new ymaps.Placemark(
+          center,
+          {},
+          {
+            draggable: true,
+            preset: "islands#blueDotIcon",
+          }
+        )
+        markerRef.current = marker
+        map.geoObjects.add(marker)
 
-        const markerElement = document.createElement("div")
-        markerElement.className =
-          "flex size-8 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full border-2 border-white bg-primary text-xs text-primary-foreground shadow-lg"
-        markerElement.textContent = "•"
-        const marker = new YMapMarker(
-          { coordinates: [point.longitude, point.latitude] },
-          markerElement
-        )
-        map.addChild(marker)
-        map.addChild(
-          new YMapListener({
-            layer: "any",
-            onClick: (event: { coordinates?: [number, number] }) => {
-              if (!event.coordinates) return
-              const [longitude, latitude] = event.coordinates
-              marker.update({ coordinates: [longitude, latitude] })
-              onLocationChangeRef.current({ latitude, longitude })
-            },
+        const selectLocation = (coords: unknown) => {
+          if (cancelled || !isValidCoordinates(coords)) return
+          // A late geolocation response must not overwrite a newer manual choice.
+          geolocationRequestRef.current += 1
+          setIsLocating(false)
+          setLocationError(false)
+          marker.geometry.setCoordinates(coords)
+          onLocationChangeRef.current({
+            latitude: coords[0],
+            longitude: coords[1],
           })
-        )
+        }
+        const onClick = (event: { get(name: string): unknown }) =>
+          selectLocation(event.get("coords"))
+        const onDragEnd = () => selectLocation(marker.geometry.getCoordinates())
+        map.events.add("click", onClick)
+        marker.events.add("dragend", onDragEnd)
+        removeListeners = () => {
+          map?.events.remove("click", onClick)
+          marker.events.remove("dragend", onDragEnd)
+        }
+
+        const fitToViewport = () => {
+          window.cancelAnimationFrame(frame)
+          frame = window.requestAnimationFrame(() => {
+            if (!cancelled) map?.container.fitToViewport()
+          })
+        }
+        if (typeof ResizeObserver !== "undefined") {
+          observer = new ResizeObserver(fitToViewport)
+          observer.observe(mapElementRef.current)
+        }
+        fitToViewport()
+        setMapState("ready")
       })
-      .catch((cause: unknown) => {
-        if (disposed) return
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Yandex Maps could not be loaded."
-        )
+      .catch(() => {
+        if (cancelled) return
+        disposeMap()
+        setMapState("error")
       })
 
     return () => {
-      disposed = true
-      map?.destroy?.()
+      cancelled = true
+      geolocationRequestRef.current += 1
+      disposeMap()
     }
-  }, [apiKey, value?.latitude, value?.longitude])
+  }, [apiKey, attempt])
 
-  if (!apiKey) {
-    return (
-      <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-        Yandex Maps API key is not configured.
-      </p>
-    )
-  }
-
-  if (error) {
-    return (
-      <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">
-        {error}
-      </p>
+  function locateUser() {
+    if (!navigator.geolocation) {
+      setLocationError(true)
+      return
+    }
+    const request = ++geolocationRequestRef.current
+    setIsLocating(true)
+    setLocationError(false)
+    navigator.geolocation.getCurrentPosition(
+      ({ coords: { latitude, longitude } }) => {
+        if (request !== geolocationRequestRef.current || !mapRef.current) return
+        setIsLocating(false)
+        const coords: YandexCoordinates = [latitude, longitude]
+        if (!isValidCoordinates(coords)) {
+          setLocationError(true)
+          return
+        }
+        markerRef.current?.geometry.setCoordinates(coords)
+        mapRef.current.setCenter(coords, 17)
+        onLocationChangeRef.current({ latitude, longitude })
+      },
+      () => {
+        if (request !== geolocationRequestRef.current) return
+        setIsLocating(false)
+        setLocationError(true)
+      },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 }
     )
   }
 
   return (
     <div
-      ref={containerRef}
-      className="h-80 w-full overflow-hidden rounded-xl"
-    />
+      className="relative h-80 w-full overflow-hidden rounded-xl border"
+      aria-label={t("mapPicker.title")}
+      aria-busy={mapState === "loading"}
+    >
+      <div ref={mapElementRef} className="h-full w-full" />
+      {mapState === "ready" && (
+        <div className="absolute top-3 right-3 z-10 flex max-w-[75%] flex-col items-end gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={isLocating}
+            onClick={locateUser}
+          >
+            {t(isLocating ? "mapPicker.geolocating" : "mapPicker.myLocation")}
+          </Button>
+          {locationError && (
+            <p
+              role="alert"
+              className="rounded-lg bg-background p-2 text-sm text-destructive shadow"
+            >
+              {t("mapPicker.geolocationError")}
+            </p>
+          )}
+        </div>
+      )}
+      {mapState === "loading" && (
+        <div
+          role="status"
+          className="absolute inset-0 flex items-center justify-center bg-muted text-sm text-muted-foreground"
+        >
+          {t("mapPicker.loading")}
+        </div>
+      )}
+      {mapState === "error" && (
+        <div
+          role="alert"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background p-6 text-center text-sm"
+        >
+          <p className="text-destructive">{t("mapPicker.loadError")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setMapState("loading")
+              setAttempt((current) => current + 1)
+            }}
+          >
+            {t("mapPicker.retry")}
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }
