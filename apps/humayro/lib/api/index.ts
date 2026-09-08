@@ -32,3 +32,4 @@ export * from './generated/region/region';
 export * from './generated/test-click-payment-controller/test-click-payment-controller';
 export * from './generated/admin-analytics/admin-analytics';
 export * from './generated/product-transfer/product-transfer';
+export * from './generated/payment-provider-controller/payment-provider-controller';

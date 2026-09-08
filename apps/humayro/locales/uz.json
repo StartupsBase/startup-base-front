@@ -475,6 +475,9 @@
       }
     },
     "dashboard": {
+      "telegramUsername": "Telegram foydalanuvchi nomi",
+      "rolesUpdateFailed": "Ma’lumotlar saqlandi, ammo barcha rollarni yangilab bo‘lmadi. Qayta urinib ko‘ring.",
+      "createdRolesFailed": "Foydalanuvchi yaratildi, ammo barcha rollar tayinlanmadi. Rollarni tahrirlash oynasida qayta saqlang.",
       "admin": "Humayro administratori",
       "home": "Boshqaruv",
       "navigation": "Navigatsiya",

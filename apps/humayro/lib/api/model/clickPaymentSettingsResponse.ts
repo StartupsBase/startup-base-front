@@ -13,5 +13,6 @@ export interface ClickPaymentSettingsResponse {
   clickMerchantId?: string;
   clickServiceId?: string;
   clickMerchantUserId?: string;
+  clickCheckoutUrl?: string;
   clickSecretConfigured?: boolean;
 }

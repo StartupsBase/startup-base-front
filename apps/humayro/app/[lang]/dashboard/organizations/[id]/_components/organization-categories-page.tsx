@@ -61,6 +61,7 @@ import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
+import { UserEditAction } from "../../../_components/user-edit-action"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
 import { OrganizationForm } from "../../_components/organization-form"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
@@ -488,6 +489,23 @@ export function OrganizationCategoriesPage({
         },
       },
       {
+        accessorKey: "telegramUsername",
+        meta: { label: t("dashboard.telegramUsername") },
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("dashboard.telegramUsername")}
+          />
+        ),
+        cell: ({ row }) => {
+          const username = row
+            .getValue<string | null>("telegramUsername")
+            ?.trim()
+            .replace(/^@+/, "")
+          return username ? `@${username}` : "—"
+        },
+      },
+      {
         id: "roles",
         accessorFn: (user) => user.roles?.join(", ") ?? "",
         meta: { label: t("dashboard.roles") },
@@ -496,6 +514,15 @@ export function OrganizationCategoriesPage({
         ),
         cell: ({ row }) =>
           row.getValue<string>("roles") || t("dashboard.customer"),
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <UserEditAction user={row.original} />
+          </div>
+        ),
       },
     ],
     [t]
@@ -887,6 +914,7 @@ export function OrganizationCategoriesPage({
                 </DialogHeader>
                 <UserCreateForm
                   organizationId={organizationId}
+                  showRoles
                   onComplete={() => setCreateUserOpen(false)}
                 />
               </DialogContent>

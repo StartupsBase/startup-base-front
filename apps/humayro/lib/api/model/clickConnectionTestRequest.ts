@@ -6,32 +6,36 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ClickPaymentSettingsRequest {
-  clickEnabled?: boolean;
-  clickRealMode?: boolean;
+export interface ClickConnectionTestRequest {
+  /**
+     * @minLength 1
+     * @pattern CLICK
+     */
+  provider: string;
+  enabled: boolean;
   /**
      * @minLength 0
      * @maxLength 100
      */
-  clickMerchantId?: string;
+  merchantId: string;
   /**
      * @minLength 0
      * @maxLength 100
      */
-  clickServiceId?: string;
+  serviceId: string;
   /**
      * @minLength 0
      * @maxLength 100
      */
-  clickMerchantUserId?: string;
+  merchantUserId?: string;
   /**
      * @minLength 0
      * @maxLength 500
      */
-  clickSecretKey?: string;
+  secretKey: string;
   /**
      * @minLength 0
      * @maxLength 500
      */
-  clickCheckoutUrl?: string;
+  checkoutUrl: string;
 }
