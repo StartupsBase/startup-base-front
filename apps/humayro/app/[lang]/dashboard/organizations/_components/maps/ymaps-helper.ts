@@ -15,8 +15,16 @@ export type YandexPlacemark = {
   events: EventManager
 }
 
+type YandexSearchControl = {
+  events: EventManager
+  getResult(index: number): PromiseLike<{
+    geometry: { getCoordinates(): unknown }
+  }>
+}
+
 export type YandexMap = {
   events: EventManager
+  controls: { add(control: YandexSearchControl): void }
   geoObjects: { add(marker: YandexPlacemark): void }
   behaviors: { disable(behavior: string): void }
   container: { fitToViewport(): void }
@@ -26,6 +34,20 @@ export type YandexMap = {
 
 export type YandexMapsApi = {
   ready(success: () => void, error: (cause: unknown) => void): unknown
+  control: {
+    SearchControl: new (parameters: {
+      options: {
+        provider: "yandex#map"
+        float: "left"
+        size: "auto"
+        maxWidth: number[]
+        noPlacemark: boolean
+        noCentering: boolean
+        noSuggestPanel: boolean
+        placeholderContent: string
+      }
+    }) => YandexSearchControl
+  }
   Map: new (
     element: HTMLElement,
     state: { center: YandexCoordinates; zoom: number; controls: string[] }
@@ -80,7 +102,7 @@ export function loadYandexMaps(apiKey: string): Promise<YandexMapsApi> {
       try {
         api.ready(
           () => {
-            if (!api.Map || !api.Placemark) {
+            if (!api.Map || !api.Placemark || !api.control?.SearchControl) {
               finish(new Error("Yandex Maps API 2.1 is unavailable."))
               return
             }

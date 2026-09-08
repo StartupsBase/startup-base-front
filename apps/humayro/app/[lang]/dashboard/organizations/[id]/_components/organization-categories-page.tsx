@@ -914,7 +914,7 @@ export function OrganizationCategoriesPage({
               </Dialog>
             </div>
           ) : activeTab === "branches" ? (
-            <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}>
+            <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}> 
               <DialogTrigger asChild>
                 <Button>{t("branch.new")}</Button>
               </DialogTrigger>
