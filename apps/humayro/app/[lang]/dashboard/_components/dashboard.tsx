@@ -46,6 +46,7 @@ import {
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
 import { Input } from "@workspace/ui/components/input"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
   Popover,
   PopoverContent,
@@ -188,6 +189,23 @@ export function Dashboard({ language }: { language: string }) {
           const phone = row.getValue<string>("phone")
 
           return phone ? formatPhoneNumberInternal(phone) : "—"
+        },
+      },
+      {
+        accessorKey: "telegramUsername",
+        meta: { label: t("dashboard.telegramUsername") },
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("dashboard.telegramUsername")}
+          />
+        ),
+        cell: ({ row }) => {
+          const username = row
+            .getValue<string | null>("telegramUsername")
+            ?.trim()
+            .replace(/^@+/, "")
+          return username ? `@${username}` : "—"
         },
       },
       {
@@ -468,10 +486,13 @@ function UserActions({ user }: { user: UserDTO }) {
               onChange={(event) => setLastname(event.target.value)}
               placeholder={t("register.lastname")}
             />
-            <Input
+            <PhoneInput
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder={t("register.phone")}
+              onChange={setPhone}
+              name="phone"
+              autoComplete="tel"
+              aria-label={t("register.phone")}
+              placeholder={t("register.phonePlaceholder")}
             />
             <Select
               noOptions={t("select.noGenderOptions")}
