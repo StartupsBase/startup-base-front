@@ -22,6 +22,7 @@ import { useMe1, type UserDTO } from "@/lib/api"
 import { getDashboardAccess } from "@/lib/auth"
 import { clearAuthToken } from "@/lib/auth-client"
 import { HUMAYRO_PLAY_MARKET_URL } from "@/lib/constants"
+import { useInterfacePreferences } from "@/lib/interface-preferences"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import {
   Collapsible,
@@ -62,6 +63,7 @@ export function DashboardShell({
   language: Language
 }) {
   const { t } = useTranslation()
+  const { sidebarAutoHide } = useInterfacePreferences()
   const pathname = usePathname()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -135,6 +137,7 @@ export function DashboardShell({
       >
         <CloseSidebarOnOutsideInteraction />
         <Sidebar
+          closeOnOutsideClick={sidebarAutoHide}
           collapsible="icon"
           variant="inset"
           className="[&_[data-slot=sidebar-inner]]:m-2 [&_[data-slot=sidebar-inner]]:rounded-2xl [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border/80 [&_[data-slot=sidebar-inner]]:shadow-[0_18px_50px_-36px_rgba(0,0,0,.65)]"
@@ -245,6 +248,7 @@ export function DashboardShell({
 }
 
 function CloseSidebarOnOutsideInteraction() {
+  const { sidebarAutoHide } = useInterfacePreferences()
   const { isMobile, open, setOpen } = useSidebar()
 
   useEffect(() => {
@@ -258,7 +262,7 @@ function CloseSidebarOnOutsideInteraction() {
         '[data-sidebar="sidebar"], [data-sidebar="trigger"], [data-sidebar="rail"]'
       )
 
-      if (!clickedSidebarControl) setOpen(false)
+      if (sidebarAutoHide && !clickedSidebarControl) setOpen(false)
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -272,7 +276,7 @@ function CloseSidebarOnOutsideInteraction() {
       document.removeEventListener("pointerdown", handlePointerDown)
       document.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isMobile, open, setOpen])
+  }, [isMobile, open, setOpen, sidebarAutoHide])
 
   return null
 }

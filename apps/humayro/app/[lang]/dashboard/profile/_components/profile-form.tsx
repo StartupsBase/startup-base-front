@@ -24,6 +24,7 @@ import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { clearAuthToken } from "@/lib/auth-client"
 import { ImageCropInput } from "./image-crop-input"
 import { ProfileNotifications } from "./profile-notifications"
+import { ProfileSettings } from "./profile-settings"
 import { Input } from "@/components/input"
 import type { Language } from "@/i18n/config"
 import {
@@ -59,7 +60,7 @@ const profileSchema = z.object({
 })
 
 type ProfileValues = z.infer<typeof profileSchema>
-type ProfileTab = "profile" | "notifications"
+type ProfileTab = "profile" | "notifications" | "settings"
 
 export function ProfileForm({ language }: { language: Language }) {
   const { t } = useTranslation()
@@ -174,7 +175,7 @@ export function ProfileForm({ language }: { language: Language }) {
     { label: t("profile.orders"), href: `/${language}/dashboard/orders` },
     { label: t("profile.subscriptions"), disabled: true },
     { id: "notifications" as const, label: t("profile.notifications") },
-    { label: t("profile.settings"), disabled: true },
+    { id: "settings" as const, label: t("profile.settings") },
     { label: t("profile.bonusSystem"), disabled: true },
   ]
 
@@ -206,7 +207,7 @@ export function ProfileForm({ language }: { language: Language }) {
         <div className="grid min-w-0 lg:grid-cols-[190px_minmax(0,1fr)]">
           <aside className="border-b py-5 lg:border-r lg:border-b-0 lg:pr-6">
             <nav
-              className={`scrollbar-none -mx-4 flex max-w-102.5 gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0 xl:w-full [&::-webkit-scrollbar]:hidden ${open ? "md:max-w-112.5" : "overflow-hidden md:max-w-170"}`}
+              className={`scrollbar-none -mx-4 flex max-w-102.5 gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0 xl:w-full [&::-webkit-scrollbar]:hidden ${open ? "md:max-w-112.5" : "md:max-w-170"}`}
             >
               {navItems.map((item) => {
                 const active = item.id === activeTab
@@ -459,6 +460,8 @@ export function ProfileForm({ language }: { language: Language }) {
                 </Button>
               </div>
             </form>
+          ) : activeTab === "settings" ? (
+            <ProfileSettings />
           ) : (
             <ProfileNotifications language={language} />
           )}
