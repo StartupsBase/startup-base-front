@@ -1,3 +1,4 @@
+import type { YMaps3 } from '@workspace/ui/types'
 export type TelegramColorScheme = "light" | "dark"
 
 export type TelegramWebAppUser = {
@@ -28,6 +29,7 @@ declare global {
     Telegram?: {
       WebApp?: TelegramWebApp
     }
+    ymaps?: YMaps3
   }
 }
 

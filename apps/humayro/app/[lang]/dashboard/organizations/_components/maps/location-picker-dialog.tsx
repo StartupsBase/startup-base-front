@@ -45,6 +45,7 @@ async function resolveAddress({ latitude, longitude }: MapCoordinates) {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
     )
+    if (!response.ok) return fallback
     const result = (await response.json()) as { display_name?: string }
     return result.display_name || fallback
   } catch {
@@ -82,10 +83,11 @@ export function LocationPickerDialog({
       latitude: selected.latitude,
       longitude: selected.longitude,
     })
-    setOpen(false)
+    changeOpen(false)
   }
 
   function changeOpen(nextOpen: boolean) {
+    locationRequestRef.current += 1
     if (nextOpen) {
       setSelected(
         value

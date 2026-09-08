@@ -61,6 +61,7 @@ import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
 import { UserCreateForm } from "../../../_components/user-create-form"
+import { UserEditAction } from "../../../_components/user-edit-action"
 import { LocationPickerDialog } from "../../_components/maps/location-picker-dialog"
 import { OrganizationForm } from "../../_components/organization-form"
 import { DashboardBreadcrumb } from "../../../_components/dashboard-breadcrumb"
@@ -462,6 +463,7 @@ export function OrganizationCategoriesPage({
         id: "name",
         accessorFn: (user) =>
           [user.firstname, user.lastname].filter(Boolean).join(" "),
+        meta: { label: t("dashboard.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.name")} />
         ),
@@ -469,6 +471,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "email",
+        meta: { label: t("dashboard.email") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.email")} />
         ),
@@ -476,6 +479,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "phone",
+        meta: { label: t("dashboard.phone") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.phone")} />
         ),
@@ -485,13 +489,40 @@ export function OrganizationCategoriesPage({
         },
       },
       {
+        accessorKey: "telegramUsername",
+        meta: { label: t("dashboard.telegramUsername") },
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("dashboard.telegramUsername")}
+          />
+        ),
+        cell: ({ row }) => {
+          const username = row
+            .getValue<string | null>("telegramUsername")
+            ?.trim()
+            .replace(/^@+/, "")
+          return username ? `@${username}` : "—"
+        },
+      },
+      {
         id: "roles",
         accessorFn: (user) => user.roles?.join(", ") ?? "",
+        meta: { label: t("dashboard.roles") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.roles")} />
         ),
         cell: ({ row }) =>
           row.getValue<string>("roles") || t("dashboard.customer"),
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <UserEditAction user={row.original} />
+          </div>
+        ),
       },
     ],
     [t]
@@ -500,6 +531,7 @@ export function OrganizationCategoriesPage({
     () => [
       {
         accessorKey: "name",
+        meta: { label: t("category.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("category.name")} />
         ),
@@ -527,6 +559,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "sizeType",
+        meta: { label: t("category.sizeType") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -540,6 +573,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "parentName",
+        meta: { label: t("category.parent") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("category.parent")} />
         ),
@@ -548,6 +582,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "productCount",
+        meta: { label: t("category.products") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -558,6 +593,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "sortOrder",
+        meta: { label: t("category.sortOrder") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -569,6 +605,7 @@ export function OrganizationCategoriesPage({
       {
         id: "status",
         accessorFn: (category) => String(category.active ?? true),
+        meta: { label: t("category.status") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("category.status")} />
         ),
@@ -600,6 +637,7 @@ export function OrganizationCategoriesPage({
     () => [
       {
         accessorKey: "name",
+        meta: { label: t("branch.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("branch.name")} />
         ),
@@ -607,6 +645,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "phone",
+        meta: { label: t("branch.phone") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("branch.phone")} />
         ),
@@ -617,6 +656,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "address",
+        meta: { label: t("branch.address") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("branch.address")} />
         ),
@@ -625,6 +665,7 @@ export function OrganizationCategoriesPage({
       {
         id: "status",
         accessorFn: (branch) => String(branch.active ?? true),
+        meta: { label: t("branch.status") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("branch.status")} />
         ),
@@ -659,6 +700,7 @@ export function OrganizationCategoriesPage({
     () => [
       {
         accessorKey: "name",
+        meta: { label: t("product.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.name")} />
         ),
@@ -679,6 +721,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "categoryName",
+        meta: { label: t("product.category") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -689,6 +732,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "branchName",
+        meta: { label: t("product.branch") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.branch")} />
         ),
@@ -696,6 +740,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "basePrice",
+        meta: { label: t("product.basePrice") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -707,6 +752,7 @@ export function OrganizationCategoriesPage({
       },
       {
         accessorKey: "amount",
+        meta: { label: t("product.stock") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.stock")} />
         ),
@@ -715,6 +761,7 @@ export function OrganizationCategoriesPage({
       {
         id: "status",
         accessorFn: (product) => String(product.active ?? true),
+        meta: { label: t("product.status") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("product.status")} />
         ),
@@ -867,6 +914,7 @@ export function OrganizationCategoriesPage({
                 </DialogHeader>
                 <UserCreateForm
                   organizationId={organizationId}
+                  showRoles
                   onComplete={() => setCreateUserOpen(false)}
                 />
               </DialogContent>
@@ -914,7 +962,7 @@ export function OrganizationCategoriesPage({
               </Dialog>
             </div>
           ) : activeTab === "branches" ? (
-            <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}>
+            <Dialog open={createBranchOpen} onOpenChange={setCreateBranchOpen}> 
               <DialogTrigger asChild>
                 <Button>{t("branch.new")}</Button>
               </DialogTrigger>

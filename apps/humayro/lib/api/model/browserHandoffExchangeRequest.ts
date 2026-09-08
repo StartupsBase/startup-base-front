@@ -5,9 +5,11 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
-import type { User } from './user';
 
-export interface ChatMember {
-  user?: User;
-  status?: string;
+export interface BrowserHandoffExchangeRequest {
+  /**
+     * @minLength 1
+     * @pattern [A-Za-z0-9_-]{43}
+     */
+  code: string;
 }

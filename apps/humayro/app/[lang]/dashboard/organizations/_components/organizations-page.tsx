@@ -86,6 +86,7 @@ export function OrganizationsPage({ language }: { language: string }) {
     () => [
       {
         accessorKey: "name",
+        meta: { label: t("organization.name") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -125,6 +126,7 @@ export function OrganizationsPage({ language }: { language: string }) {
           ]
             .filter(Boolean)
             .join(" "),
+        meta: { label: t("organization.contact") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -146,6 +148,7 @@ export function OrganizationsPage({ language }: { language: string }) {
       },
       {
         accessorKey: "inn",
+        meta: { label: "INN" },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="INN" />
         ),
@@ -154,6 +157,7 @@ export function OrganizationsPage({ language }: { language: string }) {
       {
         id: "status",
         accessorFn: (organization) => String(organization.active ?? true),
+        meta: { label: t("organization.status") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}

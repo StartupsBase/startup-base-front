@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ViewVerticalIcon } from "@radix-ui/react-icons"
 import {
   flexRender,
   getCoreRowModel,
@@ -10,6 +11,7 @@ import {
   type Column,
   type ColumnDef,
   type ColumnFiltersState,
+  type RowData,
   type RowSelectionState,
   type SortingState,
   type Table,
@@ -20,6 +22,11 @@ import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { Input } from "@workspace/ui/components/input"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -29,6 +36,15 @@ import {
 import { cn } from "@workspace/ui/lib/utils"
 
 const ALL_FILTER_VALUES = "__all_filter_values__"
+
+declare module "@tanstack/react-table" {
+  // These type parameters must match TanStack's ColumnMeta declaration.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    /** Plain-text label for the visibility control when the header is a component. */
+    label?: string
+  }
+}
 
 type DataTableFilter = {
   columnId: string
@@ -276,34 +292,55 @@ function DataTableViewOptions<TData>({
   table: Table<TData>
   labels: DataTableLabels
 }) {
+  const id = React.useId()
+  const columns = table.getAllLeafColumns().filter((column) => column.getCanHide())
+
   return (
-    <details className="relative">
-      <summary className="h-9 cursor-pointer list-none rounded-4xl border border-input bg-input/30 px-3 py-2 text-sm hover:bg-muted [&::-webkit-details-marker]:hidden">
-        {labels.columns}
-      </summary>
-      <div className="absolute right-0 z-10 mt-2 w-48 rounded-2xl border border-border bg-popover p-2 shadow-xl">
-        {table
-          .getAllColumns()
-          .filter((column) => column.getCanHide())
-          .map((column) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" className="gap-2">
+          <ViewVerticalIcon aria-hidden="true" />
+          {labels.columns}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        aria-labelledby={`${id}-title`}
+        className="w-64 max-w-[calc(100vw-2rem)] gap-1 overflow-hidden border border-border p-1.5"
+      >
+        <div className="mb-1 flex items-center justify-between gap-3 border-b border-border px-3 py-2.5">
+          <h2 id={`${id}-title`} className="text-sm font-medium">
+            {labels.columns}
+          </h2>
+          <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs tabular-nums text-muted-foreground">
+            {columns.filter((column) => column.getIsVisible()).length}/
+            {columns.length}
+          </span>
+        </div>
+        <div className="max-h-72 space-y-0.5 overflow-y-auto">
+          {columns.map((column) => (
             <label
               key={column.id}
-              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-muted"
+              className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/70 has-[:focus-visible]:bg-muted"
             >
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={column.getIsVisible()}
-                onChange={(event) =>
-                  column.toggleVisibility(event.target.checked)
+                onCheckedChange={(checked) =>
+                  column.toggleVisibility(checked === true)
                 }
               />
-              {typeof column.columnDef.header === "string"
-                ? column.columnDef.header
-                : column.id}
+              <span className="min-w-0 break-words">
+                {column.columnDef.meta?.label ??
+                  (typeof column.columnDef.header === "string"
+                    ? column.columnDef.header
+                    : column.id)}
+              </span>
             </label>
           ))}
-      </div>
-    </details>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 

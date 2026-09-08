@@ -25,6 +25,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BrowserHandoffCreateRequest,
+  BrowserHandoffCreateResponse,
+  BrowserHandoffExchangeRequest,
   ForgotPasswordParams,
   ForgotPasswordResponseDTO,
   GoogleCallbackParams,
@@ -404,6 +407,122 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getForgotPasswordMutationOptions(options), queryClient);
+    }
+    export const createBrowserHandoff = (
+    browserHandoffCreateRequest: BodyType<BrowserHandoffCreateRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<BrowserHandoffCreateResponse>(
+      {url: `/api/auth/browser-handoff`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: browserHandoffCreateRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCreateBrowserHandoffMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffCreateRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffCreateRequest>}, TContext> => {
+
+const mutationKey = ['createBrowserHandoff'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBrowserHandoff>>, {data: BodyType<BrowserHandoffCreateRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBrowserHandoff(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBrowserHandoffMutationResult = NonNullable<Awaited<ReturnType<typeof createBrowserHandoff>>>
+    export type CreateBrowserHandoffMutationBody = BodyType<BrowserHandoffCreateRequest>
+    export type CreateBrowserHandoffMutationError = ErrorType<unknown>
+
+    export const useCreateBrowserHandoff = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffCreateRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createBrowserHandoff>>,
+        TError,
+        {data: BodyType<BrowserHandoffCreateRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateBrowserHandoffMutationOptions(options), queryClient);
+    }
+    export const exchangeBrowserHandoff = (
+    browserHandoffExchangeRequest: BodyType<BrowserHandoffExchangeRequest>,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<JwtDTO>(
+      {url: `/api/auth/browser-handoff/exchange`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: browserHandoffExchangeRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getExchangeBrowserHandoffMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffExchangeRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof exchangeBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffExchangeRequest>}, TContext> => {
+
+const mutationKey = ['exchangeBrowserHandoff'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof exchangeBrowserHandoff>>, {data: BodyType<BrowserHandoffExchangeRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  exchangeBrowserHandoff(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExchangeBrowserHandoffMutationResult = NonNullable<Awaited<ReturnType<typeof exchangeBrowserHandoff>>>
+    export type ExchangeBrowserHandoffMutationBody = BodyType<BrowserHandoffExchangeRequest>
+    export type ExchangeBrowserHandoffMutationError = ErrorType<unknown>
+
+    export const useExchangeBrowserHandoff = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeBrowserHandoff>>, TError,{data: BodyType<BrowserHandoffExchangeRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof exchangeBrowserHandoff>>,
+        TError,
+        {data: BodyType<BrowserHandoffExchangeRequest>},
+        TContext
+      > => {
+      return useMutation(getExchangeBrowserHandoffMutationOptions(options), queryClient);
     }
     export const me1 = (
 

@@ -46,6 +46,7 @@ import {
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
 import { Input } from "@workspace/ui/components/input"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
   Popover,
   PopoverContent,
@@ -149,6 +150,7 @@ export function Dashboard({ language }: { language: string }) {
         id: "name",
         accessorFn: (user) =>
           [user.firstname, user.lastname].filter(Boolean).join(" "),
+        meta: { label: t("dashboard.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.name")} />
         ),
@@ -171,6 +173,7 @@ export function Dashboard({ language }: { language: string }) {
       },
       {
         accessorKey: "email",
+        meta: { label: t("dashboard.email") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.email")} />
         ),
@@ -178,6 +181,7 @@ export function Dashboard({ language }: { language: string }) {
       },
       {
         accessorKey: "phone",
+        meta: { label: t("dashboard.phone") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.phone")} />
         ),
@@ -188,8 +192,26 @@ export function Dashboard({ language }: { language: string }) {
         },
       },
       {
+        accessorKey: "telegramUsername",
+        meta: { label: t("dashboard.telegramUsername") },
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("dashboard.telegramUsername")}
+          />
+        ),
+        cell: ({ row }) => {
+          const username = row
+            .getValue<string | null>("telegramUsername")
+            ?.trim()
+            .replace(/^@+/, "")
+          return username ? `@${username}` : "—"
+        },
+      },
+      {
         id: "roles",
         accessorFn: (user) => user.roles?.join(" ") ?? "",
+        meta: { label: t("dashboard.roles") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.roles")} />
         ),
@@ -464,10 +486,13 @@ function UserActions({ user }: { user: UserDTO }) {
               onChange={(event) => setLastname(event.target.value)}
               placeholder={t("register.lastname")}
             />
-            <Input
+            <PhoneInput
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder={t("register.phone")}
+              onChange={setPhone}
+              name="phone"
+              autoComplete="tel"
+              aria-label={t("register.phone")}
+              placeholder={t("register.phonePlaceholder")}
             />
             <Select
               noOptions={t("select.noGenderOptions")}

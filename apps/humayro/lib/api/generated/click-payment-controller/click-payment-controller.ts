@@ -5,16 +5,15 @@
  * Humayro e-commerce API
  * OpenAPI spec version: 1.0
  */
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
   UseMutationResult
 } from '@tanstack/react-query';
-import {
-  useMutation
-} from '@tanstack/react-query';
-
 
 import type {
   ClickCallbackResponse,
@@ -22,8 +21,8 @@ import type {
   MultiValueMapStringString
 } from '../../model';
 
-import type { BodyType, ErrorType } from '../../mutator';
 import { customInstance } from '../../mutator';
+import type { ErrorType , BodyType } from '../../mutator';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
