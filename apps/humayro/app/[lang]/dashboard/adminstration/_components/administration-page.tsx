@@ -144,6 +144,7 @@ function ColorsPanel() {
     () => [
       {
         accessorKey: "name",
+        meta: { label: t("administration.name") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -154,6 +155,7 @@ function ColorsPanel() {
       },
       {
         accessorKey: "hexCode",
+        meta: { label: t("administration.colors.hex") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -175,6 +177,7 @@ function ColorsPanel() {
       },
       {
         accessorKey: "organizationName",
+        meta: { label: t("administration.organization") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -354,6 +357,7 @@ function SizesPanel() {
     () => [
       {
         accessorKey: "value",
+        meta: { label: t("administration.sizes.value") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -364,6 +368,7 @@ function SizesPanel() {
       },
       {
         accessorKey: "type",
+        meta: { label: t("administration.sizes.type") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -377,6 +382,7 @@ function SizesPanel() {
       },
       {
         accessorKey: "sortOrder",
+        meta: { label: t("administration.sizes.sortOrder") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
@@ -387,6 +393,7 @@ function SizesPanel() {
       },
       {
         accessorKey: "organizationName",
+        meta: { label: t("administration.organization") },
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}

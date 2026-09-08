@@ -43,13 +43,15 @@ export function YandexLocationMap({
   const markerRef = useRef<YandexPlacemark | null>(null)
   const onLocationChangeRef = useRef(onLocationChange)
   const locationRef = useRef(value ?? tashkent)
-  const geolocationRequestRef = useRef(0)
+  const locationRequestRef = useRef(0)
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">(
     "loading"
   )
   const [attempt, setAttempt] = useState(0)
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState(false)
+  const [searchError, setSearchError] = useState(false)
+  const searchPlaceholder = t("mapPicker.searchPlaceholder")
   const apiKey =
     process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || YANDEX_MAPS_API_KEY
   const latitude = value?.latitude ?? tashkent.latitude
@@ -116,12 +118,29 @@ export function YandexLocationMap({
         markerRef.current = marker
         map.geoObjects.add(marker)
 
+        const searchControl = new ymaps.control.SearchControl({
+          options: {
+            provider: "yandex#map",
+            float: "left",
+            size: "auto",
+            maxWidth: [30, 72, 280],
+            noPlacemark: true,
+            noCentering: true,
+            // Autocomplete requires a separate Yandex Suggest API key.
+            noSuggestPanel: true,
+            placeholderContent: searchPlaceholder,
+          },
+        })
+        map.controls.add(searchControl)
+
         const selectLocation = (coords: unknown) => {
           if (cancelled || !isValidCoordinates(coords)) return
-          // A late geolocation response must not overwrite a newer manual choice.
-          geolocationRequestRef.current += 1
+          // Late search/geolocation responses must not overwrite a newer choice.
+          locationRequestRef.current += 1
           setIsLocating(false)
           setLocationError(false)
+          setSearchError(false)
+          locationRef.current = { latitude: coords[0], longitude: coords[1] }
           marker.geometry.setCoordinates(coords)
           onLocationChangeRef.current({
             latitude: coords[0],
@@ -131,11 +150,49 @@ export function YandexLocationMap({
         const onClick = (event: { get(name: string): unknown }) =>
           selectLocation(event.get("coords"))
         const onDragEnd = () => selectLocation(marker.geometry.getCoordinates())
+        const resetSearch = () => {
+          locationRequestRef.current += 1
+          setIsLocating(false)
+          setLocationError(false)
+          setSearchError(false)
+        }
+        const onSearchError = () => setSearchError(true)
+        const onSearchResult = async (event: { get(name: string): unknown }) => {
+          const index = event.get("index")
+          if (typeof index !== "number" || !Number.isInteger(index) || index < 0) {
+            return
+          }
+          resetSearch()
+          const request = locationRequestRef.current
+          try {
+            const result = await searchControl.getResult(index)
+            if (cancelled || request !== locationRequestRef.current) return
+            const coords = result.geometry.getCoordinates()
+            if (!isValidCoordinates(coords)) {
+              setSearchError(true)
+              return
+            }
+            selectLocation(coords)
+            map?.setCenter(coords, 17)
+          } catch {
+            if (!cancelled && request === locationRequestRef.current) {
+              setSearchError(true)
+            }
+          }
+        }
         map.events.add("click", onClick)
         marker.events.add("dragend", onDragEnd)
+        searchControl.events.add("resultselect", onSearchResult)
+        searchControl.events.add("submit", resetSearch)
+        searchControl.events.add("clear", resetSearch)
+        searchControl.events.add("error", onSearchError)
         removeListeners = () => {
           map?.events.remove("click", onClick)
           marker.events.remove("dragend", onDragEnd)
+          searchControl.events.remove("resultselect", onSearchResult)
+          searchControl.events.remove("submit", resetSearch)
+          searchControl.events.remove("clear", resetSearch)
+          searchControl.events.remove("error", onSearchError)
         }
 
         const fitToViewport = () => {
@@ -159,34 +216,36 @@ export function YandexLocationMap({
 
     return () => {
       cancelled = true
-      geolocationRequestRef.current += 1
+      locationRequestRef.current += 1
       disposeMap()
     }
-  }, [apiKey, attempt])
+  }, [apiKey, attempt, searchPlaceholder])
 
   function locateUser() {
     if (!navigator.geolocation) {
       setLocationError(true)
       return
     }
-    const request = ++geolocationRequestRef.current
+    const request = ++locationRequestRef.current
     setIsLocating(true)
     setLocationError(false)
+    setSearchError(false)
     navigator.geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
-        if (request !== geolocationRequestRef.current || !mapRef.current) return
+        if (request !== locationRequestRef.current || !mapRef.current) return
         setIsLocating(false)
         const coords: YandexCoordinates = [latitude, longitude]
         if (!isValidCoordinates(coords)) {
           setLocationError(true)
           return
         }
+        locationRef.current = { latitude, longitude }
         markerRef.current?.geometry.setCoordinates(coords)
         mapRef.current.setCenter(coords, 17)
         onLocationChangeRef.current({ latitude, longitude })
       },
       () => {
-        if (request !== geolocationRequestRef.current) return
+        if (request !== locationRequestRef.current) return
         setIsLocating(false)
         setLocationError(true)
       },
@@ -202,7 +261,7 @@ export function YandexLocationMap({
     >
       <div ref={mapElementRef} className="h-full w-full" />
       {mapState === "ready" && (
-        <div className="absolute top-3 right-3 z-10 flex max-w-[75%] flex-col items-end gap-2">
+        <div className="absolute right-3 bottom-8 z-10 flex max-w-[75%] flex-col items-end gap-2">
           <Button
             type="button"
             size="sm"
@@ -218,6 +277,14 @@ export function YandexLocationMap({
               className="rounded-lg bg-background p-2 text-sm text-destructive shadow"
             >
               {t("mapPicker.geolocationError")}
+            </p>
+          )}
+          {searchError && (
+            <p
+              role="alert"
+              className="rounded-lg bg-background p-2 text-sm text-destructive shadow"
+            >
+              {t("mapPicker.searchError")}
             </p>
           )}
         </div>
