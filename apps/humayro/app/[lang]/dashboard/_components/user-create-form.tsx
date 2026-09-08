@@ -1,24 +1,24 @@
 "use client"
 
-import { useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { z } from "zod"
 
+import { PasswordInput } from "@/components/forms/password-input"
 import { useCreate } from "@/lib/api"
+import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
   getGetAll11QueryKey,
   useGrantRole,
 } from "@/lib/api/generated/admin-user/admin-user"
-import { ORGANIZATION_USER_ROLES, UserRoleFields } from "./user-role-fields"
 import { getGetAllQueryKey } from "@/lib/api/generated/user-controller/user-controller"
-import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
-import { PhoneInput } from "@workspace/ui/components/phone-input"
-import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
+import { PhoneInput } from "@workspace/ui/components/phone-input"
 import {
   Select,
   SelectContent,
@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
-import { PasswordInput } from "@/components/forms/password-input"
+import { ORGANIZATION_USER_ROLES, UserRoleFields } from "./user-role-fields"
 
 const NO_ORGANIZATION = "__no_organization__"
 
@@ -71,8 +71,11 @@ export function UserCreateForm({
       gender: "MALE",
       organizationId,
     },
+    mode: 'onChange',
   })
-  const password = useWatch({ control: form.control, name: "password" }) ?? ""
+
+  const password = useWatch({ control: form.control, name: "password" }) ?? "";
+
   async function submit(values: Values) {
     try {
       const user = await createUser.mutateAsync({
@@ -107,7 +110,7 @@ export function UserCreateForm({
     }
   }
   return (
-    <form className="grid gap-3" onSubmit={form.handleSubmit(submit)}>
+    <form className="grid gap-3" onSubmit={form.handleSubmit(submit)} autoComplete="off">
       <fieldset className="grid gap-3" disabled={form.formState.isSubmitting}>
         <div className="grid gap-3 sm:grid-cols-2">
           <Input placeholder="First name" {...form.register("firstname")} />

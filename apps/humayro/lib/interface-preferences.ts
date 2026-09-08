@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useSyncExternalStore } from "react"
+import { isGoogleFontName } from "@/lib/google-fonts"
 
 export type ThemePreference = "light" | "dark" | "system"
 export const FONT_SIZES = {
@@ -11,9 +12,24 @@ export const FONT_SIZES = {
 export type FontSize = keyof typeof FONT_SIZES
 export const FONT_SIZE_OPTIONS = Object.keys(FONT_SIZES) as FontSize[]
 
+export const FONT_FAMILIES = {
+  PLATFORM: null,
+  SYSTEM: "system-ui, sans-serif",
+  MACOS:
+    '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
+  GOOGLE: null,
+} as const
+export type FontFamily = keyof typeof FONT_FAMILIES
+
+export function isFontFamily(value: unknown): value is FontFamily {
+  return typeof value === "string" && Object.hasOwn(FONT_FAMILIES, value)
+}
+
 type InterfacePreferences = {
   theme: ThemePreference
   fontSize: FontSize
+  fontFamily: FontFamily
+  googleFont: string
   sidebarAutoHide: boolean
   primaryColor: string | null
 }
@@ -23,6 +39,8 @@ const CHANGE_EVENT = "humayro-interface-preferences-change"
 const defaults: InterfacePreferences = {
   theme: "system",
   fontSize: "MEDIUM",
+  fontFamily: "PLATFORM",
+  googleFont: "Inter",
   sidebarAutoHide: true,
   primaryColor: null,
 }
@@ -61,6 +79,12 @@ function parsePreferences(snapshot: string | null): InterfacePreferences {
         value.fontSize === "SMALL" || value.fontSize === "LARGE"
           ? value.fontSize
           : "MEDIUM",
+      fontFamily: isFontFamily(value.fontFamily)
+        ? value.fontFamily
+        : "PLATFORM",
+      googleFont: isGoogleFontName(value.googleFont)
+        ? value.googleFont
+        : "Inter",
       sidebarAutoHide:
         typeof value.sidebarAutoHide === "boolean"
           ? value.sidebarAutoHide

@@ -136,6 +136,26 @@
       "back": "Bosh sahifaga qaytish"
     },
     "profilePreferences": {
+      "searchFonts": "Shrift nomini qidiring…",
+      "fontSuggestions": "Tavsiya etilgan shriftlar",
+      "noFontSuggestions": "Mos shrift topilmadi. Nomini qo‘lda kiritib, import qilishingiz mumkin.",
+      "fontFamily": "Shrift turi",
+      "fontFamilyHint": "Standart: M PLUS Rounded 1c va sarlavhalar uchun Manrope.",
+      "fontFamilies": {
+        "SYSTEM": "Tizim shrifti",
+        "PLATFORM": "Platforma shrifti (standart)",
+        "MACOS": "macOS shrifti"
+      },
+      "fontPreview": "Shrift namunasi",
+      "macFontHint": "Apple qurilmalarida macOS tizim shrifti, boshqa qurilmalarda mavjud muqobil shrift ishlatiladi.",
+      "importGoogleFont": "Google Fonts’dan shrift import qilish",
+      "googleFontHint": "Google Fonts’dagi shrift nomini kiriting. Shrift to‘g‘ridan-to‘g‘ri brauzerda yuklanadi; tanlov faqat shu brauzerda saqlanadi.",
+      "importFont": "Import qilish",
+      "fontLoading": "Shrift yuklanmoqda…",
+      "fontImportFailed": "Shriftni import qilib bo‘lmadi. Nomini va internet ulanishini tekshiring. Joriy shrift saqlandi.",
+      "invalidFontName": "Shrift nomida lotin harflari, raqamlar, bo‘sh joy va chiziqchadan foydalaning (80 belgigacha).",
+      "fontLoadFailed": "Shrift yuklanmadi. Hozircha tizim shrifti ishlatiladi. Qayta urinib ko‘ring.",
+      "browseGoogleFonts": "Google Fonts shriftlarini ko‘rish",
       "fontSize": "Matn o‘lchami",
       "fontSizeHint": "Platformadagi matn o‘lchamini tanlang. Standart o‘lcham — o‘rtacha.",
       "fontSizes": {

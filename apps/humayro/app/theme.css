@@ -9,11 +9,11 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1440px;
   --breakpoint-3xl: 1620px;
-  --font-commerce: var(--font-manrope);
+  --font-commerce: var(--font-interface, var(--font-manrope));
 }
 
 :where(h1, h2, h3, .font-commerce) {
-  font-family: var(--font-manrope), var(--font-sans), sans-serif;
+  font-family: var(--font-interface, var(--font-manrope)), var(--font-sans), sans-serif;
   font-weight: 650;
 }
 

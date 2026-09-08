@@ -175,7 +175,7 @@ export function ProfileForm({ language }: { language: Language }) {
     { label: t("profile.orders"), href: `/${language}/dashboard/orders` },
     { label: t("profile.subscriptions"), disabled: true },
     { id: "notifications" as const, label: t("profile.notifications") },
-    { id: "settings" as const, label: t("profile.settings") },
+    { id: "settings" as const, label: t("profile.settings"), disabled: false },
     { label: t("profile.bonusSystem"), disabled: true },
   ]
 
@@ -213,9 +213,9 @@ export function ProfileForm({ language }: { language: Language }) {
                 const active = item.id === activeTab
                 const classes = `relative shrink-0 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                   active
-                    ? "bg-primary/8 text-primary before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-primary"
+                    ? "bg-primary/8 text-primary before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-primary cursor-pointer"
                     : item.href
-                      ? "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
                       : item.disabled
                         ? "cursor-not-allowed text-muted-foreground/60"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"

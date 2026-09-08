@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import { loadGoogleFont } from "@/lib/google-fonts"
 
 import {
+  FONT_FAMILIES,
   FONT_SIZES,
   getPrimaryForeground,
   setInterfacePreferences,
@@ -61,6 +63,25 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     document.documentElement.style.fontSize = FONT_SIZES[preferences.fontSize]
   }, [preferences.fontSize])
+
+  React.useEffect(() => {
+    const family =
+      preferences.fontFamily === "GOOGLE"
+        ? `"${preferences.googleFont}", system-ui, sans-serif`
+        : FONT_FAMILIES[preferences.fontFamily]
+    if (preferences.fontFamily === "GOOGLE") {
+      // Loading failures are shown in settings; the system font remains usable.
+      void loadGoogleFont(preferences.googleFont).catch(() => {})
+    }
+    for (const property of [
+      "--font-sans",
+      "--font-heading",
+      "--font-interface",
+    ]) {
+      if (family) document.documentElement.style.setProperty(property, family)
+      else document.documentElement.style.removeProperty(property)
+    }
+  }, [preferences.fontFamily, preferences.googleFont])
 
   React.useEffect(() => {
     const root = document.documentElement
