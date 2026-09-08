@@ -1,15 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useId, useState } from "react"
+import { Input } from "@/components/input"
 import { useTranslation } from "react-i18next"
 import catalog from "@/lib/google-font-catalog.json"
 import { GOOGLE_FONT_PRESETS } from "@/lib/google-fonts"
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@workspace/ui/components/command"
 
 export function GoogleFontAutocomplete({
   value,
@@ -24,6 +19,8 @@ export function GoogleFontAutocomplete({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const listId = useId()
   const query = value.trim().toLowerCase()
   const matches = query
     ? catalog.families
@@ -44,39 +41,63 @@ export function GoogleFontAutocomplete({
       ]
   const expanded = open && !disabled
 
+  function choose(name: string) {
+    onChange(name)
+    setOpen(false)
+  }
+
   return (
-    <Command
-      shouldFilter={false}
-      loop
-      label={t("profilePreferences.fontSuggestions")}
-      className="relative h-auto min-w-0 flex-1 overflow-visible rounded-xl border bg-background"
+    <div
+      className="relative min-w-0 flex-1"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
       }}
     >
-      <CommandInput
+      <Input
         id="google-font-name"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={expanded}
+        aria-controls={expanded ? listId : undefined}
+        aria-activedescendant={
+          expanded && matches[activeIndex]
+            ? `${listId}-${activeIndex}`
+            : undefined
+        }
         value={value}
-        onValueChange={(nextValue) => {
-          onChange(nextValue)
+        onChange={(event) => {
+          onChange(event.target.value)
+          setActiveIndex(0)
           setOpen(true)
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true)
+          setActiveIndex(0)
+        }}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing) return
           if (event.key === "Escape") {
             event.preventDefault()
             event.stopPropagation()
             setOpen(false)
-          } else if (
-            event.key === "Enter" &&
-            (!expanded || matches.length === 0)
-          ) {
-            event.preventDefault()
-            event.stopPropagation()
-            event.currentTarget.form?.requestSubmit()
+          } else if (event.key === "Enter") {
+            if (expanded && matches[activeIndex]) {
+              event.preventDefault()
+              choose(matches[activeIndex])
+            }
           } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault()
+            const next = !expanded
+              ? 0
+              : (activeIndex +
+                  (event.key === "ArrowDown" ? 1 : -1) +
+                  matches.length) %
+                Math.max(matches.length, 1)
+            setActiveIndex(next)
             setOpen(true)
+            document
+              .getElementById(`${listId}-${next}`)
+              ?.scrollIntoView({ block: "nearest" })
           }
         }}
         placeholder={t("profilePreferences.searchFonts")}
@@ -85,28 +106,30 @@ export function GoogleFontAutocomplete({
         aria-label={t("profilePreferences.importGoogleFont")}
         aria-describedby="google-font-hint"
         aria-invalid={invalid}
-        aria-expanded={expanded}
         autoComplete="off"
         spellCheck={false}
       />
       {expanded ? (
-        <CommandList
-          className="absolute top-full right-0 left-0 z-50 mt-1 max-h-64 rounded-xl border bg-popover p-1 shadow-lg"
+        <div
+          id={listId}
+          role="listbox"
           aria-label={t("profilePreferences.fontSuggestions")}
+          className="absolute top-full right-0 left-0 z-50 mt-1 max-h-64 overflow-y-auto rounded-xl border bg-popover p-1 shadow-lg"
           onMouseDown={(event) => event.preventDefault()}
         >
           {matches.length ? (
-            matches.map((name) => (
-              <CommandItem
+            matches.map((name, index) => (
+              <div
                 key={name}
-                value={name}
-                onSelect={() => {
-                  onChange(name)
-                  setOpen(false)
-                }}
+                id={`${listId}-${index}`}
+                role="option"
+                aria-selected={index === activeIndex}
+                className={`cursor-pointer rounded-lg px-3 py-2 text-sm ${index === activeIndex ? "bg-accent text-accent-foreground" : "text-popover-foreground"}`}
+                onMouseMove={() => setActiveIndex(index)}
+                onClick={() => choose(name)}
               >
                 {name}
-              </CommandItem>
+              </div>
             ))
           ) : (
             <p
@@ -116,8 +139,8 @@ export function GoogleFontAutocomplete({
               {t("profilePreferences.noFontSuggestions")}
             </p>
           )}
-        </CommandList>
+        </div>
       ) : null}
-    </Command>
+    </div>
   )
 }

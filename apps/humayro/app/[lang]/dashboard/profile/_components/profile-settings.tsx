@@ -202,7 +202,7 @@ export function ProfileSettings() {
               className="rounded-xl border bg-muted/30 px-4 py-3 text-base"
               aria-label={t("profilePreferences.fontPreview")}
             >
-              Aa Bb Cc · O‘ G‘ · Аа Бб Вв · 0123456789
+              Aa Bb Cc · O‘ G‘ · Аа Бб Вв · 827106152
             </p>
             {fontFamily === "MACOS" ? (
               <p className="text-xs text-muted-foreground">
