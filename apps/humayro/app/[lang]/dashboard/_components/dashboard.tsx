@@ -149,6 +149,7 @@ export function Dashboard({ language }: { language: string }) {
         id: "name",
         accessorFn: (user) =>
           [user.firstname, user.lastname].filter(Boolean).join(" "),
+        meta: { label: t("dashboard.name") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.name")} />
         ),
@@ -171,6 +172,7 @@ export function Dashboard({ language }: { language: string }) {
       },
       {
         accessorKey: "email",
+        meta: { label: t("dashboard.email") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.email")} />
         ),
@@ -178,6 +180,7 @@ export function Dashboard({ language }: { language: string }) {
       },
       {
         accessorKey: "phone",
+        meta: { label: t("dashboard.phone") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.phone")} />
         ),
@@ -190,6 +193,7 @@ export function Dashboard({ language }: { language: string }) {
       {
         id: "roles",
         accessorFn: (user) => user.roles?.join(" ") ?? "",
+        meta: { label: t("dashboard.roles") },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("dashboard.roles")} />
         ),
