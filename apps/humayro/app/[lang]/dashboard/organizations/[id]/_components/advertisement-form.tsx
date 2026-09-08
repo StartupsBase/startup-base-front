@@ -9,13 +9,22 @@ import type {
 import { useUploadVideo } from "@/lib/api/generated/attachment-controller/attachment-controller"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { VideoPlayer } from "@workspace/ui/components/video-player"
 import {
-  fromAdvertisementDateInput,
-  MAX_ADVERTISEMENT_VIDEO_SIZE,
-  safeAdvertisementUrl,
-  toAdvertisementDateInput,
-} from "./advertisement-helpers"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
+import { Label } from "@workspace/ui/components/label"
+import { Switch } from "@workspace/ui/components/switch"
+import { Badge } from "@workspace/ui/components/badge"
+import { Alert, AlertDescription } from "@workspace/ui/components/alert"
+import { Separator } from "@workspace/ui/components/separator"
+import { AdvertisementVideoUpload } from "./advertisement-video-upload"
+import { AdvertisementSchedule } from "./advertisement-schedule"
+import { VideoPlayer } from "@workspace/ui/components/video-player"
+import { safeAdvertisementUrl } from "./advertisement-helpers"
 
 export function AdvertisementForm({
   organizationId,
@@ -41,11 +50,15 @@ export function AdvertisementForm({
   const [uploadedUrl, setUploadedUrl] = useState(advertisement?.videoUrl)
   const [title, setTitle] = useState(advertisement?.title ?? "")
   const [active, setActive] = useState(advertisement?.active ?? true)
+  const [startsAt, setStartsAt] = useState(advertisement?.startsAt)
+  const [endsAt, setEndsAt] = useState(advertisement?.endsAt)
   const [error, setError] = useState<string>()
   const busy = pending || upload.isPending
 
   useEffect(() => {
-    return () => { if (localPreview) URL.revokeObjectURL(localPreview) }
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview)
+    }
   }, [localPreview])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -54,12 +67,6 @@ export function AdvertisementForm({
     setError(undefined)
     const values = new FormData(event.currentTarget)
     const redirectUrl = String(values.get("redirectUrl") ?? "").trim()
-    const startsAt = fromAdvertisementDateInput(
-      String(values.get("startsAt") ?? "")
-    )
-    const endsAt = fromAdvertisementDateInput(
-      String(values.get("endsAt") ?? "")
-    )
     const sortOrder = Number(values.get("sortOrder"))
     if (redirectUrl && !safeAdvertisementUrl(redirectUrl)) {
       setError(t("advertisement.invalidUrl"))
@@ -115,195 +122,192 @@ export function AdvertisementForm({
 
   const preview = localPreview ?? uploadedUrl
   return (
-    <form onSubmit={submit} className="space-y-5">
-      <fieldset
-        disabled={busy}
-        className="grid min-w-0 gap-6 md:grid-cols-[0.9fr_1.1fr]"
-      >
-        <div className="min-w-0 space-y-4">
-          <div className="rounded-2xl border bg-muted/30 p-3">
-            {preview ? (
-              <VideoPlayer
-                src={preview}
-                title={title || t("advertisement.untitled")}
+    <form onSubmit={submit} className="space-y-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <fieldset disabled={busy} className="min-w-0 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("advertisement.mediaHeading")}</CardTitle>
+              <CardDescription>
+                {t("advertisement.mediaDescription")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdvertisementVideoUpload
+                file={file}
+                hasVideo={attachmentId !== undefined}
+                disabled={busy}
+                onSelect={(selected) => {
+                  setFile(selected)
+                  setLocalPreview(URL.createObjectURL(selected))
+                  setError(undefined)
+                }}
+                onError={setError}
               />
-            ) : (
-              <div className="flex aspect-video items-center justify-center rounded-xl border border-dashed px-6 text-center text-sm text-muted-foreground">
-                {t("advertisement.previewHint")}
-              </div>
-            )}
-            <p className="mt-3 text-sm font-medium">
-              {title || t("advertisement.untitled")}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("advertisement.preview")}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor={`${id}-video`} className="text-sm font-medium">
-              {t("advertisement.video")}
-            </label>
-            <Input
-              id={`${id}-video`}
-              type="file"
-              accept="video/*"
-              aria-describedby={`${id}-video-hint`}
-              onChange={(event) => {
-                const selected = event.target.files?.[0]
-                if (!selected) return
-                if (
-                  !selected.type.startsWith("video/") ||
-                  selected.size > MAX_ADVERTISEMENT_VIDEO_SIZE
-                ) {
-                  setError(t("advertisement.invalidVideo"))
-                  event.target.value = ""
-                  return
-                }
-                setFile(selected)
-                setLocalPreview(URL.createObjectURL(selected))
-                setError(undefined)
-              }}
-            />
-            <p
-              id={`${id}-video-hint`}
-              className="text-xs leading-5 text-muted-foreground"
-            >
-              {t("advertisement.videoHint")}
-            </p>
-          </div>
-        </div>
-        <div className="min-w-0 space-y-4">
-          <div className="space-y-2">
-            <label htmlFor={`${id}-title`} className="text-sm font-medium">
-              {t("advertisement.title")}
-            </label>
-            <Input
-              id={`${id}-title`}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              maxLength={150}
-              placeholder={t("advertisement.titlePlaceholder")}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor={`${id}-url`} className="text-sm font-medium">
-              {t("advertisement.redirectUrl")}
-            </label>
-            <Input
-              id={`${id}-url`}
-              name="redirectUrl"
-              type="url"
-              maxLength={1000}
-              defaultValue={advertisement?.redirectUrl ?? ""}
-              placeholder="https://t.me/your_brand"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t("advertisement.linkHint")}
-            </p>
-          </div>
-          <div className="space-y-4 rounded-xl border p-4">
-            <div>
-              <p className="text-sm font-medium">
-                {t("advertisement.schedule")}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t("advertisement.timezone")}
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="min-w-0 space-y-2">
-                <label htmlFor={`${id}-start`} className="text-sm">
-                  {t("advertisement.startsAt")}
-                </label>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("advertisement.detailsHeading")}</CardTitle>
+              <CardDescription>
+                {t("advertisement.detailsDescription")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-title`}>
+                  {t("advertisement.title")}
+                </Label>
                 <Input
-                  id={`${id}-start`}
-                  name="startsAt"
-                  type="datetime-local"
-                  step="1"
-                  defaultValue={toAdvertisementDateInput(
-                    advertisement?.startsAt
-                  )}
-                  className="min-w-0"
+                  id={`${id}-title`}
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  maxLength={150}
+                  placeholder={t("advertisement.titlePlaceholder")}
+                />
+                <p className="text-right text-xs text-muted-foreground tabular-nums">
+                  {title.length}/150
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-url`}>
+                  {t("advertisement.redirectUrl")}
+                </Label>
+                <Input
+                  id={`${id}-url`}
+                  name="redirectUrl"
+                  type="url"
+                  maxLength={1000}
+                  defaultValue={advertisement?.redirectUrl ?? ""}
+                  placeholder="https://t.me/your_brand"
+                />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("advertisement.linkHint")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("advertisement.schedule")}</CardTitle>
+              <CardDescription>{t("advertisement.timezone")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <AdvertisementSchedule
+                startsAt={startsAt}
+                endsAt={endsAt}
+                onStartChange={setStartsAt}
+                onEndChange={setEndsAt}
+                disabled={busy}
+              />
+              <p className="text-xs leading-5 text-muted-foreground">
+                {t("advertisement.scheduleHint")}
+              </p>
+            </CardContent>
+          </Card>
+        </fieldset>
+        <aside className="min-w-0 space-y-6 xl:sticky xl:top-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("advertisement.preview")}</CardTitle>
+              <CardDescription>
+                {t("advertisement.previewDescription")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {preview ? (
+                <VideoPlayer
+                  src={preview}
+                  title={title || t("advertisement.untitled")}
+                />
+              ) : (
+                <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-xl bg-muted px-6 text-center text-sm text-muted-foreground">
+                  {t("advertisement.previewHint")}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Badge variant={active ? "default" : "secondary"}>
+                  {t(active ? "advertisement.enabled" : "advertisement.hidden")}
+                </Badge>
+                <p className="font-medium break-words">
+                  {title || t("advertisement.untitled")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("advertisement.publishing")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center justify-between gap-4">
+                <Label htmlFor={`${id}-active`}>
+                  {t("advertisement.active")}
+                </Label>
+                <Switch
+                  id={`${id}-active`}
+                  checked={active}
+                  onCheckedChange={setActive}
+                  disabled={busy}
                 />
               </div>
-              <div className="min-w-0 space-y-2">
-                <label htmlFor={`${id}-end`} className="text-sm">
-                  {t("advertisement.endsAt")}
-                </label>
-                <Input
-                  id={`${id}-end`}
-                  name="endsAt"
-                  type="datetime-local"
-                  step="1"
-                  defaultValue={toAdvertisementDateInput(advertisement?.endsAt)}
-                  className="min-w-0"
-                />
-              </div>
-            </div>
-            <p className="text-xs leading-5 text-muted-foreground">
-              {t("advertisement.scheduleHint")}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor={`${id}-order`} className="text-sm font-medium">
-              {t("advertisement.sortOrder")}
-            </label>
-            <Input
-              id={`${id}-order`}
-              name="sortOrder"
-              type="number"
-              min={0}
-              max={2147483647}
-              step={1}
-              required
-              defaultValue={advertisement?.sortOrder ?? 0}
-            />
-            <p className="text-xs text-muted-foreground">
-              {t("advertisement.orderHint")}
-            </p>
-          </div>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(event) => setActive(event.target.checked)}
-              className="mt-1 size-4 accent-primary"
-            />
-            <span>
-              <span className="block text-sm font-medium">
-                {t("advertisement.active")}
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+              <p className="text-xs leading-5 text-muted-foreground">
                 {t("advertisement.activeHint")}
-              </span>
-            </span>
-          </label>
+              </p>
+              <Separator />
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-order`}>
+                  {t("advertisement.sortOrder")}
+                </Label>
+                <Input
+                  id={`${id}-order`}
+                  name="sortOrder"
+                  type="number"
+                  min={0}
+                  max={2147483647}
+                  step={1}
+                  required
+                  disabled={busy}
+                  defaultValue={advertisement?.sortOrder ?? 0}
+                />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("advertisement.orderHint")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
+      <div className="sticky bottom-0 z-20 space-y-3 border-t bg-background/95 py-4 backdrop-blur-sm">
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p role="status" className="text-xs text-muted-foreground">
+            {t(busy ? "advertisement.savingHint" : "advertisement.saveHint")}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={onCancel}
+            >
+              {t("advertisement.cancel")}
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {t(
+                upload.isPending
+                  ? "advertisement.uploading"
+                  : pending
+                    ? "advertisement.saving"
+                    : "advertisement.save"
+              )}
+            </Button>
+          </div>
         </div>
-      </fieldset>
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive"
-        >
-          {error}
-        </p>
-      ) : null}
-      <div className="flex justify-end gap-2 border-t pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy}
-          onClick={onCancel}
-        >
-          {t("advertisement.cancel")}
-        </Button>
-        <Button type="submit" disabled={busy}>
-          {upload.isPending
-            ? t("advertisement.uploading")
-            : pending
-              ? t("advertisement.saving")
-              : t("advertisement.save")}
-        </Button>
       </div>
     </form>
   )

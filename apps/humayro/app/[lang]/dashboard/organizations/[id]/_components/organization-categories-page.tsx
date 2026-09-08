@@ -88,9 +88,12 @@ export function OrganizationCategoriesPage({
       ) : (
         <>
           <OrganizationOverview organization={organizationQuery.data} />
-          <Tabs defaultValue="users" className="mt-6">
+          <Tabs defaultValue="brand" className="mt-4">
             <div className="overflow-x-auto">
-              <TabsList className="w-max">
+              <TabsList variant="line" className="w-max justify-start">
+                <TabsTrigger value="brand">
+                  {t("advertisement.tab")}
+                </TabsTrigger>
                 {(["users", "categories", "branches", "products"] as const).map(
                   (tab) => (
                     <TabsTrigger key={tab} value={tab}>
@@ -98,9 +101,6 @@ export function OrganizationCategoriesPage({
                     </TabsTrigger>
                   )
                 )}
-                <TabsTrigger value="brand">
-                  {t("advertisement.tab")}
-                </TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="users" className="py-6">

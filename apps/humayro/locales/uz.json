@@ -87,11 +87,7 @@
       "description": "Humayro bilan tanishamiz, uslubingizga mos kiyimlarni saralaymiz va obrazni uzoq qidirmasdan yig‘ishni ko‘rsatamiz.",
       "bookingTitle": "Konsultatsiyaga yoziling",
       "bookingDescription": "Uchta qisqa qadam — va stilistimiz uchrashuvni tasdiqlash uchun siz bilan bog‘lanadi.",
-      "stepTitles": [
-        "Maqsad",
-        "Vaqt",
-        "Kontakt"
-      ],
+      "stepTitles": ["Maqsad", "Vaqt", "Kontakt"],
       "goalTitle": "Nimadan boshlaymiz?",
       "goalDescription": "Asosiy maqsadni tanlang — bu stilistga suhbatga tayyorlanishda yordam beradi.",
       "scheduleTitle": "Qulay vaqtni tanlang",
@@ -109,12 +105,7 @@
       ],
       "day": "Qulay kun",
       "time": "Qulay vaqt",
-      "times": [
-        "10:00",
-        "13:00",
-        "16:00",
-        "19:00"
-      ],
+      "times": ["10:00", "13:00", "16:00", "19:00"],
       "next": "Davom etish",
       "previous": "Orqaga",
       "submit": "Arizani yuborish",
@@ -132,18 +123,9 @@
       "successDescription": "Rahmat! Konsultatsiya ma’lumotlari saqlandi. Arizalar xizmati ulangach, stilist tanlangan vaqtni tasdiqlashi mumkin bo‘ladi.",
       "successHome": "Bosh sahifaga qaytish",
       "benefits": [
-        [
-          "15 daqiqa",
-          "onlayn tanishuv"
-        ],
-        [
-          "Bepul",
-          "majburiyatsiz"
-        ],
-        [
-          "1 ga 1",
-          "konsultant bilan"
-        ]
+        ["15 daqiqa", "onlayn tanishuv"],
+        ["Bepul", "majburiyatsiz"],
+        ["1 ga 1", "konsultant bilan"]
       ],
       "stepsTitle": "15 daqiqada nimalarga ega bo‘lasiz",
       "steps": [
@@ -1328,7 +1310,29 @@
       "pagination": "Reklama sahifalari",
       "previous": "Oldingi",
       "next": "Keyingi",
-      "page": "{{current}} / {{total}}"
+      "page": "{{current}} / {{total}}",
+      "organizationWorkspace": "Tashkilotingizni boshqarish maydoni",
+      "organizationDetails": "Tashkilot ma’lumotlari",
+      "libraryDescription": "Brendingiz videolari, mijozlar uchun havolalar va namoyish jadvalini boshqaring.",
+      "editor": "Reklama tahrirlash maydoni",
+      "dropVideo": "Videoni shu yerga tashlang",
+      "uploadHint": "Yoki qurilmangizdan tanlang · video, 5 MB gacha",
+      "chooseVideo": "Video tanlash",
+      "replaceVideo": "Videoni almashtirish",
+      "currentVideo": "Joriy reklama videosi",
+      "keptVideo": "Yangi fayl tanlanmasa, ushbu video saqlanadi",
+      "mediaHeading": "Reklama videosi",
+      "mediaDescription": "Kolleksiya yoki taklifingizni namoyish etuvchi qisqa video yuklang.",
+      "detailsHeading": "Reklama ma’lumotlari",
+      "detailsDescription": "Reklamaga tushunarli nom va mijozlar uchun havola qo‘shing.",
+      "previewDescription": "Tanlangan video va reklama nomini tekshiring.",
+      "publishing": "Nashr sozlamalari",
+      "enabled": "Yoqilgan",
+      "saveHint": "O‘zgarishlar saqlangandan keyin qo‘llanadi.",
+      "savingHint": "Saqlash yakunlanguncha sahifada qoling.",
+      "done": "Tayyor",
+      "time": "Vaqt",
+      "clearDate": "Tozalash"
     }
   }
 }
