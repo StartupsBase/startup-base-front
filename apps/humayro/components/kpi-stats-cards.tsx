@@ -54,7 +54,7 @@ const KpiStatsCards = () => {
   const { t } = useTranslation()
 
   return (
-    <div className="mx-auto mt-5 grid w-full max-w-6xl grid-cols-2 gap-3 px-4 pt-5 pb-23 sm:px-6 md:grid-cols-3 md:px-10 lg:grid-cols-5">
+    <div className="mx-auto mt-5 grid w-full max-w-7xl grid-cols-2 gap-3 px-4 pt-5 pb-23 sm:px-6 md:grid-cols-3 md:px-10 lg:grid-cols-5">
       {kpiCardsOptions.map((card) => (
         <div
           key={card.id}

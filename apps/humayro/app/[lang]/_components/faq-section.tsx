@@ -89,7 +89,7 @@ export default function FaqSection({ lang }: FaqSectionProps) {
 
   return (
     <section className="px-4 py-16 sm:px-6 sm:py-24 md:px-10">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <header className="max-w-xl">
           <p className="text-xs font-semibold tracking-[0.18em] text-[#16836b] capitalize dark:text-[#79cfba]">
             {copy.eyebrow}

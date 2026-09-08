@@ -803,7 +803,7 @@ export function OrganizationCategoriesPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <main className="p-6 container mx-auto">
       <DashboardBreadcrumb
         language={language}
         items={[
@@ -1720,7 +1720,7 @@ function ProductDetailsPreview({
 
   return (
     <div className="h-[calc(94vh-82px)] overflow-y-auto bg-background p-6 lg:p-10">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,.95fr)]">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,.95fr)]">
         <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)]">
           <div className="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
             {images.slice(0, 6).map((url) => (

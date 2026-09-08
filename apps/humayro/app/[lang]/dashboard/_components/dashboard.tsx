@@ -228,7 +228,7 @@ export function Dashboard({ language }: { language: string }) {
   )
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="p-6 container mx-auto">
       <header className="flex flex-col items-stretch gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium text-primary">
