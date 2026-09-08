@@ -496,7 +496,7 @@ function AddressDirectoryLayout({
   const baseHref = `/${language}/dashboard/addresses`
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:py-10">
+    <div className="p-6 container mx-auto md:py-10">
       <DashboardBreadcrumb
         language={language}
         items={[

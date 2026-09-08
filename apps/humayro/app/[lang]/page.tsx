@@ -54,7 +54,7 @@ export default async function Page({ params }: { params: Promise<unknown> }) {
           __html: JSON.stringify(onlineStoreJsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-14 sm:px-6 sm:pt-4 sm:pb-18 md:px-10 lg:pt-6">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-2 pb-14 sm:px-6 sm:pt-4 sm:pb-18 md:px-10 lg:pt-6">
         <section className="flex flex-col items-center justify-center py-12 text-center sm:min-h-[calc(100svh-9rem)] sm:py-16 lg:min-h-[calc(100svh-7rem)] lg:py-20">
           <DiaTextReveal
             text={t("home.eyebrow")}

@@ -58,7 +58,7 @@ function isAuthenticationPage(pathname: string) {
 export function TelegramProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { setTheme } = useTheme()
+  const { setHostTheme } = useTheme()
   const setSession = useAuthStore((state) => state.setSession)
   const authenticatedInitData = React.useRef<string | null>(null)
   const [sdkReady, setSdkReady] = React.useState(false)
@@ -85,7 +85,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     }
 
     webApp.expand()
-    setTheme(webApp.colorScheme)
+    setHostTheme(webApp.colorScheme)
 
     if (authenticatedInitData.current === initData) {
       setValue({ webApp, isMiniApp: true, status: "authenticated", error: null })
@@ -139,7 +139,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     return () => {
       active = false
     }
-  }, [pathname, router, sdkReady, setSession, setTheme])
+  }, [pathname, router, sdkReady, setSession, setHostTheme])
 
   return (
     <TelegramContext.Provider value={value}>
