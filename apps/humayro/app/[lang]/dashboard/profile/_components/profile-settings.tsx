@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { useTheme } from "@/components/theme-provider"
 import { getCurrentDevice } from "@/lib/current-device"
 import {
+  FONT_SIZE_OPTIONS,
   setInterfacePreferences,
   useInterfacePreferences,
 } from "@/lib/interface-preferences"
@@ -24,7 +25,7 @@ const getServerDevice = () => null
 export function ProfileSettings() {
   const { t } = useTranslation()
   const { themePreference, setTheme } = useTheme()
-  const { sidebarAutoHide, primaryColor } = useInterfacePreferences()
+  const { sidebarAutoHide, primaryColor, fontSize } = useInterfacePreferences()
   const device = useSyncExternalStore(
     subscribeToDevice,
     getCurrentDevice,
@@ -62,6 +63,32 @@ export function ProfileSettings() {
                 />
                 <span className="flex min-h-12 items-center justify-center rounded-xl border px-2 py-3 text-center text-sm font-medium transition peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
                   {t(`profilePreferences.${mode}`)}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        </SettingsRow>
+
+        <SettingsRow
+          title={t("profilePreferences.fontSize")}
+          description={t("profilePreferences.fontSizeHint")}
+        >
+          <fieldset className="grid grid-cols-3 gap-2">
+            <legend className="sr-only">
+              {t("profilePreferences.fontSize")}
+            </legend>
+            {FONT_SIZE_OPTIONS.map((size) => (
+              <label key={size} className="relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="platform-font-size"
+                  value={size}
+                  checked={fontSize === size}
+                  onChange={() => setInterfacePreferences({ fontSize: size })}
+                  className="peer sr-only"
+                />
+                <span className="flex min-h-12 items-center justify-center rounded-xl border px-2 py-3 text-center text-sm font-medium transition peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                  {t(`profilePreferences.fontSizes.${size}`)}
                 </span>
               </label>
             ))}

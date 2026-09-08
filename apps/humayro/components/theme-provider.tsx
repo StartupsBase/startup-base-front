@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import {
+  FONT_SIZES,
   getPrimaryForeground,
   setInterfacePreferences,
   useInterfacePreferences,
@@ -56,6 +57,10 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     preferences.theme === "system"
       ? (hostTheme ?? (systemDark ? "dark" : "light"))
       : preferences.theme
+
+  React.useEffect(() => {
+    document.documentElement.style.fontSize = FONT_SIZES[preferences.fontSize]
+  }, [preferences.fontSize])
 
   React.useEffect(() => {
     const root = document.documentElement

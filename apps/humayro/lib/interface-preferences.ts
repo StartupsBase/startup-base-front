@@ -3,8 +3,17 @@
 import { useMemo, useSyncExternalStore } from "react"
 
 export type ThemePreference = "light" | "dark" | "system"
+export const FONT_SIZES = {
+  SMALL: "87.5%",
+  MEDIUM: "100%",
+  LARGE: "112.5%",
+} as const
+export type FontSize = keyof typeof FONT_SIZES
+export const FONT_SIZE_OPTIONS = Object.keys(FONT_SIZES) as FontSize[]
+
 type InterfacePreferences = {
   theme: ThemePreference
+  fontSize: FontSize
   sidebarAutoHide: boolean
   primaryColor: string | null
 }
@@ -13,6 +22,7 @@ const STORAGE_KEY = "humayro-interface-preferences"
 const CHANGE_EVENT = "humayro-interface-preferences-change"
 const defaults: InterfacePreferences = {
   theme: "system",
+  fontSize: "MEDIUM",
   sidebarAutoHide: true,
   primaryColor: null,
 }
@@ -47,6 +57,10 @@ function parsePreferences(snapshot: string | null): InterfacePreferences {
         value.theme === "light" || value.theme === "dark"
           ? value.theme
           : "system",
+      fontSize:
+        value.fontSize === "SMALL" || value.fontSize === "LARGE"
+          ? value.fontSize
+          : "MEDIUM",
       sidebarAutoHide:
         typeof value.sidebarAutoHide === "boolean"
           ? value.sidebarAutoHide

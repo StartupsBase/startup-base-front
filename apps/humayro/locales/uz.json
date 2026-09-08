@@ -136,6 +136,13 @@
       "back": "Bosh sahifaga qaytish"
     },
     "profilePreferences": {
+      "fontSize": "Matn o‘lchami",
+      "fontSizeHint": "Platformadagi matn o‘lchamini tanlang. Standart o‘lcham — o‘rtacha.",
+      "fontSizes": {
+        "SMALL": "Kichik",
+        "MEDIUM": "O‘rtacha",
+        "LARGE": "Katta"
+      },
       "description": "Sozlamalar avtomatik saqlanadi va faqat shu brauzerda amal qiladi.",
       "theme": "Platforma mavzusi",
       "themeHint": "Yorug‘, qorong‘i yoki qurilmangiz mavzusini tanlang.",
