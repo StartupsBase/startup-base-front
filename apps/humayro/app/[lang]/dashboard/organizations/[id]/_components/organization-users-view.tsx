@@ -1,13 +1,16 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { type UserDTO } from "@/lib/api"
 import { useGetAll11 } from "@/lib/api/generated/admin-user/admin-user"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
-import { UserCreateForm } from "../../../_components/user-create-form"
-import { UserEditAction } from "../../../_components/user-edit-action"
+import { Minus } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { Button } from "@workspace/ui/components/button"
+import {
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
+} from "@workspace/ui/components/data-table"
 import {
   Dialog,
   DialogContent,
@@ -16,11 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
-import {
-  DataTable,
-  DataTableColumnHeader,
-  type ColumnDef,
-} from "@workspace/ui/components/data-table"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { redirectToTelegram } from "../../../_components/dashboard"
+import { UserCreateForm } from "../../../_components/user-create-form"
+import { UserEditAction } from "../../../_components/user-edit-action"
+import { OrganizationUserPreviewAction } from "./preview-organization-user"
 
 export function OrganizationUsersView({
   organizationId,
@@ -28,6 +32,7 @@ export function OrganizationUsersView({
   organizationId: number
 }) {
   const { t } = useTranslation()
+
   const usersQuery = useGetAll11(
     { organizationId },
     { query: { retry: false } }
@@ -85,7 +90,13 @@ export function OrganizationUsersView({
             .getValue<string | null>("telegramUsername")
             ?.trim()
             .replace(/^@+/, "")
-          return username ? `@${username}` : "—"
+          return username ? (
+            <Button variant="link" onClick={() => redirectToTelegram(username)}>
+              {`@${username}`}
+            </Button>
+          ) : (
+            <HugeiconsIcon icon={Minus} />
+          )
         },
       },
       {
@@ -102,7 +113,8 @@ export function OrganizationUsersView({
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => (
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-1">
+            <OrganizationUserPreviewAction user={row.original} />
             <UserEditAction user={row.original} />
           </div>
         ),

@@ -33,3 +33,4 @@ export * from './generated/test-click-payment-controller/test-click-payment-cont
 export * from './generated/admin-analytics/admin-analytics';
 export * from './generated/product-transfer/product-transfer';
 export * from './generated/payment-provider-controller/payment-provider-controller';
+export * from './generated/public-stats/public-stats';

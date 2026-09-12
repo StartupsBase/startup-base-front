@@ -78,7 +78,8 @@
         "fromLastMonth": "по сравнению с прошлым месяцем",
         "branchesCount": "Количество филиалов",
         "organizationsCount": "Количество организаций",
-        "regionsCount": "Количество регионов"
+        "regionsCount": "Количество регионов", 
+        "projectStarted": "Платформа работает с {{date}}"
       }
     },
     "bookDemo": {
@@ -537,6 +538,24 @@
       }
     },
     "dashboard": {
+      "userPreview": {
+        "view": "Посмотреть профиль",
+        "title": "Профиль пользователя",
+        "description": "Контакты, личные данные и организация пользователя.",
+        "unnamed": "Пользователь без имени",
+        "notProvided": "Не указано",
+        "noRoles": "Роли не назначены",
+        "contact": "Контакты",
+        "telegram": "Telegram",
+        "dateOfBirth": "Дата рождения",
+        "organization": "Организация",
+        "branch": "Филиал",
+        "location": "Местоположение",
+        "latitude": "Широта",
+        "longitude": "Долгота",
+        "openMap": "Открыть карту",
+        "close": "Закрыть"
+      },
       "telegramUsername": "Имя пользователя Telegram",
       "rolesUpdateFailed": "Данные сохранены, но не все роли обновлены. Повторите попытку.",
       "createdRolesFailed": "Пользователь создан, но не все роли назначены. Сохраните роли повторно в окне редактирования.",

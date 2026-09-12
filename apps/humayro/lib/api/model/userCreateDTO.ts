@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { UserCreateDTOGender } from './userCreateDTOGender';
+import type { UserCreateDTORolesItem } from './userCreateDTORolesItem';
 
 export interface UserCreateDTO {
   /** @minLength 1 */
@@ -25,7 +26,10 @@ export interface UserCreateDTO {
      */
   phone: string;
   age?: number;
+  dateOfBirth?: string;
   gender?: UserCreateDTOGender;
+  telegramUsername?: string;
+  roles?: UserCreateDTORolesItem[];
   organizationId?: number;
   branchId?: number;
 }

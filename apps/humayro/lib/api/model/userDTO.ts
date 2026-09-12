@@ -15,6 +15,7 @@ export interface UserDTO {
   email?: string;
   phone?: string;
   age?: number;
+  dateOfBirth?: string;
   gender?: UserDTOGender;
   photo?: AttachmentDTO;
   organizationId?: number;

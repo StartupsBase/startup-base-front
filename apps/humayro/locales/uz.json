@@ -78,7 +78,8 @@
         "fromLastMonth": "o'tgan oydan",
         "branchesCount": "Filiallar soni",
         "organizationsCount": "Tashkilotlar soni",
-        "regionsCount": "Viloyatlar soni"
+        "regionsCount": "Viloyatlar soni",
+        "projectStarted": "Platforma {{date}} dan beri ishlab kelmoqda"
       }
     },
     "bookDemo": {
@@ -537,6 +538,24 @@
       }
     },
     "dashboard": {
+      "userPreview": {
+        "view": "Profilni ko'rish",
+        "title": "Foydalanuvchi profili",
+        "description": "Foydalanuvchining aloqa, shaxsiy va tashkilot ma'lumotlari.",
+        "unnamed": "Ismi ko'rsatilmagan foydalanuvchi",
+        "notProvided": "Ko'rsatilmagan",
+        "noRoles": "Rollar belgilanmagan",
+        "contact": "Aloqa ma'lumotlari",
+        "telegram": "Telegram",
+        "dateOfBirth": "Tug'ilgan sana",
+        "organization": "Tashkilot",
+        "branch": "Filial",
+        "location": "Joylashuv",
+        "latitude": "Kenglik",
+        "longitude": "Uzunlik",
+        "openMap": "Xaritani ochish",
+        "close": "Yopish"
+      },
       "telegramUsername": "Telegram foydalanuvchi nomi",
       "rolesUpdateFailed": "Ma’lumotlar saqlandi, ammo barcha rollarni yangilab bo‘lmadi. Qayta urinib ko‘ring.",
       "createdRolesFailed": "Foydalanuvchi yaratildi, ammo barcha rollar tayinlanmadi. Rollarni tahrirlash oynasida qayta saqlang.",

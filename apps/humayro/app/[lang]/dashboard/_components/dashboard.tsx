@@ -1,9 +1,10 @@
 "use client"
 
 import {
+  Minus,
   PencilEdit02Icon,
   RefreshIcon,
-  Trash,
+  Trash
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -12,7 +13,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { UserCreateForm } from "./user-create-form"
+import { useInfiniteBranches } from "@/hooks/use-infinite-directory-query"
 import {
   useDelete,
   useMe1,
@@ -20,12 +21,11 @@ import {
   useUploadPhoto,
   type UserDTO,
 } from "@/lib/api"
+import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
 import {
   getGetAllQueryKey,
   useGetAll,
 } from "@/lib/api/generated/user-controller/user-controller"
-import { useGetAll7 as useOrganizations } from "@/lib/api/generated/admin-organization/admin-organization"
-import { useInfiniteBranches } from "@/hooks/use-infinite-directory-query"
 import { clearAuthToken } from "@/lib/auth-client"
 import { formatPhoneNumberInternal } from "@/lib/format-phone-number"
 import { useAuthStore } from "@/lib/stores/use-auth-store"
@@ -59,6 +59,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import { UserCreateForm } from "./user-create-form"
 const ALL_ORGANIZATIONS = "__all_organizations__"
 const ALL_BRANCHES = "__all_branches__"
 const GENDER_UNSPECIFIED = "__gender_unspecified__"
@@ -73,6 +74,11 @@ function getErrorMessage(error: unknown, t: (key: string) => string) {
   }
 
   return t("dashboard.loadFailed")
+}
+
+export function redirectToTelegram(username: string): void {
+  const url = `https://t.me/${username.replace(/^@+/, "")}`
+  window.open(url, "_blank");
 }
 
 function useDebouncedValue(value: string, delay: number) {
@@ -143,7 +149,9 @@ export function Dashboard({ language }: { language: string }) {
   const users = usersQuery.data?.content ?? []
   const userName = [meQuery.data?.firstname, meQuery.data?.lastname]
     .filter(Boolean)
-    .join(" ")
+    .join(" ");
+
+
   const columns = useMemo<ColumnDef<UserDTO>[]>(
     () => [
       {
@@ -205,7 +213,12 @@ export function Dashboard({ language }: { language: string }) {
             .getValue<string | null>("telegramUsername")
             ?.trim()
             .replace(/^@+/, "")
-          return username ? `@${username}` : "—"
+          return username ? <Button
+            variant='link'
+            onClick={() => redirectToTelegram(username)}
+          >
+            {`@${username}`}
+          </Button> : <HugeiconsIcon icon={Minus} />
         },
       },
       {
