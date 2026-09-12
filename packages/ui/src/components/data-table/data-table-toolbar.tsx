@@ -48,7 +48,7 @@ export function DataTableToolbar<TData>({
           <Input
             aria-label={search.placeholder ?? labels.search}
             placeholder={search.placeholder ?? labels.search}
-            className="w-full pr-9"
+            className="h-11 w-full pr-9 md:h-9"
             value={searchValue}
             onChange={(event) => onChange(SEARCH_FILTER_ID, event.target.value)}
           />
@@ -72,6 +72,7 @@ export function DataTableToolbar<TData>({
           filters={filters}
           activeFilters={activeFilters}
           onChange={onChange}
+          onReset={onReset}
           labels={labels}
           manualFiltering={manualFiltering}
         />

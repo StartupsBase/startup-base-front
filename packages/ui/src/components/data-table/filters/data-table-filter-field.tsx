@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { DataTableDateFilter } from "./data-table-date-filter"
 import type { Column } from "@tanstack/react-table"
 import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
@@ -18,6 +19,7 @@ export function DataTableFilterField<TData>({
   onChange,
   labels,
   manualFiltering,
+  mobile = false,
 }: {
   filter: ResolvedFilter<TData>
   state?: DataTableFilterState
@@ -25,6 +27,7 @@ export function DataTableFilterField<TData>({
   onChange: (value: unknown) => void
   labels: DataTableLabels
   manualFiltering: boolean
+  mobile?: boolean
 }) {
   const [query, setQuery] = React.useState("")
   const id = React.useId()
@@ -32,8 +35,12 @@ export function DataTableFilterField<TData>({
   const counts = React.useMemo(() => {
     const result = new Map<string, number>()
     facets?.forEach((count, value: unknown) => {
-      const key = String(value)
-      result.set(key, (result.get(key) ?? 0) + count)
+      const keys = new Set(
+        (Array.isArray(value) ? value : [value])
+          .filter((item: unknown) => item != null)
+          .map(String)
+      )
+      keys.forEach((key) => result.set(key, (result.get(key) ?? 0) + count))
     })
     return result
   }, [facets])
@@ -54,6 +61,7 @@ export function DataTableFilterField<TData>({
         <div className="space-y-2">
           {filter.searchable && (
             <Input
+              className="h-11 md:h-9"
               aria-label={labels.searchOptions}
               placeholder={filter.placeholder ?? labels.searchOptions}
               value={query}
@@ -85,7 +93,7 @@ export function DataTableFilterField<TData>({
                 return filter.type === "multi-select" ? (
                   <label
                     key={option.value}
-                    className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+                    className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring md:min-h-10"
                   >
                     <Checkbox
                       checked={checked}
@@ -105,7 +113,7 @@ export function DataTableFilterField<TData>({
                     type="button"
                     variant={checked ? "secondary" : "ghost"}
                     aria-pressed={checked}
-                    className="h-auto min-h-10 w-full justify-start rounded-lg px-2 py-2 text-left whitespace-normal"
+                    className="h-auto min-h-11 w-full justify-start rounded-lg px-2 py-2 text-left whitespace-normal md:min-h-10"
                     onClick={() => onChange(checked ? undefined : option.value)}
                   >
                     {content}
@@ -130,7 +138,7 @@ export function DataTableFilterField<TData>({
               type="button"
               variant={state?.value === value ? "secondary" : "ghost"}
               aria-pressed={state?.value === value}
-              className="justify-start"
+              className="min-h-11 justify-start md:min-h-9"
               onClick={() =>
                 onChange(state?.value === value ? undefined : value)
               }
@@ -147,8 +155,18 @@ export function DataTableFilterField<TData>({
           ))}
         </div>
       )
-    case "text":
     case "date":
+    case "date-range":
+      return (
+        <DataTableDateFilter
+          filter={filter}
+          state={state}
+          onChange={onChange}
+          labels={labels}
+          mobile={mobile}
+        />
+      )
+    case "text":
       return (
         <div className="space-y-2">
           <label htmlFor={id} className="text-xs text-muted-foreground">
@@ -156,23 +174,17 @@ export function DataTableFilterField<TData>({
           </label>
           <Input
             id={id}
-            type={filter.type === "date" ? "date" : "text"}
+            type="text"
+            className="h-11 md:h-9"
             placeholder={filter.placeholder}
             value={typeof state?.value === "string" ? state.value : ""}
             onChange={(event) => onChange(event.target.value)}
           />
         </div>
       )
-    case "date-range":
     case "number-range": {
-      const range =
-        state?.type === "date-range" || state?.type === "number-range"
-          ? state.value
-          : [null, null]
-      const bounds =
-        filter.type === "date-range"
-          ? [labels.from, labels.to]
-          : [labels.min, labels.max]
+      const range = state?.type === "number-range" ? state.value : [null, null]
+      const bounds = [labels.min, labels.max]
       return (
         <div className="grid min-w-0 grid-cols-2 gap-3">
           {bounds.map((label, index) => (
@@ -185,8 +197,8 @@ export function DataTableFilterField<TData>({
               </label>
               <Input
                 id={`${id}-${index}`}
-                className="min-w-0"
-                type={filter.type === "date-range" ? "date" : "number"}
+                className="h-11 min-w-0 md:h-9"
+                type="number"
                 step={
                   filter.type === "number-range"
                     ? (filter.step ?? "any")
@@ -194,7 +206,7 @@ export function DataTableFilterField<TData>({
                 }
                 value={range[index] ?? ""}
                 onChange={(event) => {
-                  const next = [...range]
+                  const next: (string | number | null)[] = [...range]
                   next[index] = event.target.value || null
                   onChange(next)
                 }}

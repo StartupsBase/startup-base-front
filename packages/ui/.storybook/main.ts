@@ -22,6 +22,19 @@ const config: StorybookConfig = {
   viteFinal: async (config) =>
     mergeConfig(config, {
       plugins: [react(), nxViteTsPaths()],
+      // Prebundle table dependencies before browser tests mount React. Late
+      // optimization reloads otherwise interrupt stories on a fresh cache.
+      optimizeDeps: {
+        include: [
+          "@tanstack/react-table",
+          "@hugeicons/react",
+          "@hugeicons/core-free-icons",
+          "@radix-ui/react-icons",
+          "cmdk",
+          "react-day-picker",
+          "date-fns/locale",
+        ],
+      },
     }),
 }
 

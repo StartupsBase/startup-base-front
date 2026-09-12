@@ -27,7 +27,7 @@ export function DataTableViewOptions<TData>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="gap-2">
+        <Button type="button" variant="outline" className="h-11 gap-2 md:h-9">
           <ViewVerticalIcon aria-hidden="true" />
           {labels.columns}
         </Button>
