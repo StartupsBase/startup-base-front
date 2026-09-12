@@ -172,6 +172,7 @@ function DateRangePicker(props: DateRangePickerProps) {
       />
 
       <PopoverContent
+        aria-label={ariaLabel ?? placeholder}
         align={align}
         sideOffset={8}
         className={cn(

@@ -1,4 +1,5 @@
 import type { ComponentType } from "react"
+import type { Locale } from "react-day-picker"
 import type {
   ColumnDef,
   RowData,
@@ -42,7 +43,7 @@ export type DataTableFilterConfig<TData = unknown> = FilterBase<TData> &
         searchable?: boolean
       }
     | { type: "boolean"; trueLabel?: string; falseLabel?: string }
-    | { type: "date" | "date-range" }
+    | { type: "date" | "date-range"; locale?: Partial<Locale> }
     | { type: "number-range"; step?: number }
   )
 export type DataTableFilterType = DataTableFilterConfig["type"]
@@ -109,6 +110,14 @@ export type DataTableLabels = {
   removeValue: (title: string, value: string) => string
   selectAllRows: string
   selectRow: string
+  chooseDate: string
+  chooseDateRange: string
+  today: string
+  clearDate: string
+  dateRangeHint: string
+  done: string
+  showResults: (count: number) => string
+  filtersDescription: string
 }
 export const defaultDataTableLabels: DataTableLabels = {
   resetFilters: "Reset filters",
@@ -137,6 +146,15 @@ export const defaultDataTableLabels: DataTableLabels = {
   removeValue: (title, value) => `Remove ${title}: ${value}`,
   selectAllRows: "Select all rows",
   selectRow: "Select row",
+  chooseDate: "Pick a date",
+  chooseDateRange: "Pick a date range",
+  today: "Today",
+  clearDate: "Clear date",
+  dateRangeHint: "Choose a start date, then an end date.",
+  done: "Done",
+  showResults: (count) => `Show ${count} results`,
+  filtersDescription:
+    "Refine your results. Changes are applied as you select filters.",
 }
 
 export type DataTableProps<TData, TValue = unknown> = {

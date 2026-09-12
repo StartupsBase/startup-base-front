@@ -102,7 +102,12 @@ export function DataTable<TData, TValue = unknown>({
     React.useState<readonly DataTableFilterState[]>(defaultFilterState)
   const searchId = search?.columnId
   const activeFilters = React.useMemo(
-    () => normalizeFilterState(filters, filterState ?? internalFilters, searchId ? { columnId: searchId } : undefined),
+    () =>
+      normalizeFilterState(
+        filters,
+        filterState ?? internalFilters,
+        searchId ? { columnId: searchId } : undefined
+      ),
     [filters, filterState, internalFilters, searchId]
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -131,9 +136,13 @@ export function DataTable<TData, TValue = unknown>({
         ]
       : configured
   }, [columns, filters, enableRowSelection, selectAllRows, selectRow])
-  const columnFilters = React.useMemo(() => activeFilters
-    .filter((entry) => entry.id !== SEARCH_FILTER_ID)
-    .map((entry) => ({ id: entry.columnId, value: entry.value })), [activeFilters])
+  const columnFilters = React.useMemo(
+    () =>
+      activeFilters
+        .filter((entry) => entry.id !== SEARCH_FILTER_ID)
+        .map((entry) => ({ id: entry.columnId, value: entry.value })),
+    [activeFilters]
+  )
   const searchValue = activeFilters.find(
     (entry) => entry.id === SEARCH_FILTER_ID
   )?.value

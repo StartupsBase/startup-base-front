@@ -141,6 +141,7 @@ function DatePicker(props: DatePickerProps) {
       />
 
       <PopoverContent
+        aria-label={ariaLabel ?? placeholder}
         align={align}
         sideOffset={8}
         className={cn(

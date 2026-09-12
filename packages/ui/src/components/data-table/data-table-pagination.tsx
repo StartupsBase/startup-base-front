@@ -38,7 +38,7 @@ export function DataTablePagination<TData>({
             <SelectTrigger
               size="sm"
               aria-label={labels.rowsPerPage}
-              className="w-16 shrink-0 rounded-lg"
+              className="w-16 shrink-0 rounded-lg text-foreground"
             >
               <SelectValue />
             </SelectTrigger>
@@ -61,7 +61,7 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             size="sm"
-            className="min-w-0"
+            className="min-w-0 text-foreground"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -70,7 +70,7 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             size="sm"
-            className="min-w-0"
+            className="min-w-0 text-foreground"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
