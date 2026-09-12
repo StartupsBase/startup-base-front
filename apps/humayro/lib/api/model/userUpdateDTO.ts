@@ -6,13 +6,17 @@
  * OpenAPI spec version: 1.0
  */
 import type { UserUpdateDTOGender } from './userUpdateDTOGender';
+import type { UserUpdateDTORolesItem } from './userUpdateDTORolesItem';
 
 export interface UserUpdateDTO {
   firstname?: string;
   lastname?: string;
   phone?: string;
   age?: number;
+  dateOfBirth?: string;
   gender?: UserUpdateDTOGender;
+  telegramUsername?: string;
+  roles?: UserUpdateDTORolesItem[];
   organizationId?: number;
   branchId?: number;
 }
